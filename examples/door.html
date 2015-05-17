@@ -1,0 +1,93 @@
+<html>
+	<body style="margin:0px">
+		<canvas style="width:100%;height:100%;background:black" id = "gl"></canvas>
+	</body>
+	<script src = "../Tessellator.js"></script>
+	<script>
+		var tess = new Tessellator(document.getElementById("gl"));
+		var model = tess.createMatrix();
+		
+		model.clear();
+		model.setView(new Tessellator.PerspectiveView());
+		
+		model.enable(Tessellator.LIGHTING);
+		model.setColor("white");
+		model.setPointLight(0, 0, 0);
+		
+		model.translate(0, 0, -6);
+		model.rotateDeg(45, 1, 1, 0);
+		
+		model.fillRect(-1, -1, 0.4, 2);
+		model.fillRect(0.4, -1, 0.4, 2);
+		model.fillRect(-0.6, -1, 1.2, 0.2);
+		
+		model.setColor("green");
+		model.push();
+			model.setColor("green")
+			model.translate(-0.6, 0.8, 0);
+			doorRotate = model.rotate(0, 0, 1, 0);
+			model.fillRect(0, 0, 1, 1.8);
+			model.fillRect(0, 0, 1, -1.8);
+			
+			model.setColor("blue")
+			model.translate(0.85, -1, 0);
+			doorHandleRotate = model.rotate(0, 0, 0, 1);
+			model.fillPrism(0, 0, 0.05, 0.05);
+			model.fillPrism(0, 0, 0.1, 0.1);
+			model.fillPrism(0, 0, -0.05, 0.05);
+			model.fillPrism(0, 0, -0.1, 0.1);
+		model.pop();
+		
+		tess.renderModel(model.update());
+		
+		var animatePos;
+		
+		document.onkeydown = function (){
+			animatePos = -1;
+			
+			if (window.open){
+				animate(animateToOpen);
+				
+				window.open = false;
+			}else{
+				animate(animateToClose);
+				
+				window.open = true;
+			}
+		}
+		
+		function animateToOpen (pos){
+			if (pos < 0){
+				//linear interpolation and shit
+				doorHandleRotate.degree = (pos + 1) * Math.PI / 2;
+				doorRotate.degree = 0;
+			}else{
+				//parabolas and shit
+				doorRotate.degree = -(pos * pos) * Math.PI / 2;
+			}
+		}
+		
+		function animateToClose (pos){
+			doorHandleRotate.degree = 0;
+			//parabolas and shit
+			doorRotate.degree = (1 - (((pos + 1) / 2) * ((pos + 1) / 2))) * -Math.PI / 2;
+		}
+		
+		var animateFunc;
+		
+		function animate (func){
+			if (func){
+				animateFunc = func;
+			}
+			
+			animateFunc(animatePos);
+			tess.renderModel(model);
+			
+			if (animatePos <= 1){
+				animatePos += 0.05;
+				
+				setTimeout(animate, 10);
+			}
+		}
+	</script>
+</html>
