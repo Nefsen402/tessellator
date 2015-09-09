@@ -192,7 +192,7 @@
         }
     }
     
-    Tessellator.VERSION = "4b beta";
+    Tessellator.VERSION = "4c beta";
     
     if (window.module){
         window.module.exports = Tessellator;
@@ -1582,6 +1582,8 @@
                 var arg = arguments[i];
                 
                 if (isNaN(arg)){
+                    if (arg.tween) arg.tween.update();
+                    
                     array.set(arg, pos);
                     pos += arg.length;
                 }else{
@@ -1610,6 +1612,8 @@
         Tessellator.vec4.prototype.constructor = Tessellator.vec4;
         
         Tessellator.vec4.prototype.clear = function (){
+            if (this.tween) this.tween.cancel();
+            
             this[0] = 0;
             this[1] = 0;
             this[3] = 0;
@@ -1621,9 +1625,7 @@
         }
         
         Tessellator.vec4.prototype.copy = function (vec4){
-            if (vec4.tween){
-                vec4.tween.update();
-            }
+            if (vec4.tween) vec4.tween.update();
             
             this.set(vec4)
             
@@ -1631,22 +1633,26 @@
         }
         
         Tessellator.vec4.prototype.exp = function(vec){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec.tween){
-                vec.tween.update();
+            if (vec.length){
+                this[0] = Math.pow(this[0], vec[0]);
+                this[1] = Math.pow(this[1], vec[1]);
+                this[2] = Math.pow(this[2], vec[2]);
+                this[3] = Math.pow(this[3], vec[3]);
+            }else{
+                this[0] = Math.pow(this[0], vec);
+                this[1] = Math.pow(this[1], vec);
+                this[2] = Math.pow(this[2], vec);
+                this[3] = Math.pow(this[3], vec);
             }
-            
-            this[0] = Math.pow(this[0], vec[0]);
-            this[1] = Math.pow(this[1], vec[1]);
-            this[2] = Math.pow(this[2], vec[2]);
-            this[3] = Math.pow(this[3], vec[3]);
             
             return this;
         }
         
         Tessellator.vec4.prototype.sqrt = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.sqrt(this[0]);
             this[1] = Math.sqrt(this[1]);
@@ -1657,7 +1663,7 @@
         }
         
         Tessellator.vec4.prototype.inversesqrt = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = 1 / Math.sqrt(this[0]);
             this[1] = 1 / Math.sqrt(this[1]);
@@ -1668,7 +1674,7 @@
         }
         
         Tessellator.vec4.prototype.abs = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.abs(this[0]);
             this[1] = Math.abs(this[1]);
@@ -1679,40 +1685,37 @@
         }
         
         Tessellator.vec4.prototype.sign = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
-            this[0] = this[0] < 0 ? 1 : (this[0] > 0 ? -1 : this[0]);
-            this[1] = this[1] < 0 ? 1 : (this[1] > 0 ? -1 : this[1]);
-            this[2] = this[2] < 0 ? 1 : (this[2] > 0 ? -1 : this[2]);
-            this[3] = this[3] < 0 ? 1 : (this[3] > 0 ? -1 : this[3]);
+            this[0] = this[0] > 0 ? 1 : (this[0] < 0 ? -1 : this[0]);
+            this[1] = this[1] > 0 ? 1 : (this[1] < 0 ? -1 : this[1]);
+            this[2] = this[2] > 0 ? 1 : (this[2] < 0 ? -1 : this[2]);
+            this[3] = this[3] > 0 ? 1 : (this[3] < 0 ? -1 : this[3]);
             
             return this;
         }
         
         Tessellator.vec4.prototype.step = function (edge){
             if (this.tween) this.tween.update();
+            edge = Tessellator.float.forValue(edge);
             
-            if (edge.tween){
-                edge.tween.update();
-            }
-            
-            if (edge.length === 4){
+            if (edge.length){
                 this[0] = this[0] < edge[0] ? 0 : 1;
                 this[1] = this[1] < edge[1] ? 0 : 1;
                 this[2] = this[2] < edge[2] ? 0 : 1;
                 this[3] = this[3] < edge[3] ? 0 : 1;
             }else{
-                this[0] = this[0] < edge[0] ? 0 : 1;
-                this[1] = this[1] < edge[0] ? 0 : 1;
-                this[2] = this[2] < edge[0] ? 0 : 1;
-                this[3] = this[3] < edge[0] ? 0 : 1;
+                this[0] = this[0] < edge ? 0 : 1;
+                this[1] = this[1] < edge ? 0 : 1;
+                this[2] = this[2] < edge ? 0 : 1;
+                this[3] = this[3] < edge ? 0 : 1;
             }
             
             return this;
         }
         
         Tessellator.vec4.prototype.floor = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.floor(this[0]);
             this[1] = Math.floor(this[1]);
@@ -1723,7 +1726,7 @@
         }
         
         Tessellator.vec4.prototype.ceil = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.ceil(this[0]);
             this[1] = Math.ceil(this[1]);
@@ -1734,48 +1737,42 @@
         }
         
         Tessellator.vec4.prototype.mod = function (vec){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec.tween){
-                vec.tween.update();
-            }
-            
-            if (vec.length === 4){
+            if (vec.length){
                 this[0] = this[0] % vec[0];
                 this[1] = this[1] % vec[1];
                 this[2] = this[2] % vec[2];
                 this[3] = this[3] % vec[3];
             }else{
-                this[0] = this[0] % vec[0];
-                this[1] = this[1] % vec[0];
-                this[2] = this[2] % vec[0];
-                this[3] = this[3] % vec[0];
+                this[0] = this[0] % vec;
+                this[1] = this[1] % vec;
+                this[2] = this[2] % vec;
+                this[3] = this[3] % vec;
             }
             
             return this;
         }
         
         Tessellator.vec4.prototype.clamp = function (min, max){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
+            min = Tessellator.float.forValue(min);
+            max = Tessellator.float.forValue(max);
             
-            if (min.tween){
-                min.tween.update();
-            }
-            
-            if (max.tween){
-                max.tween.update();
-            }
+            if (!min.length) min = Tessellator.vec4(min);
+            if (!max.length) max = Tessellator.vec4(max);
             
             this[0] = this[0] < min[0] ? min[0] : (this[0] > max[0] ? max[0] : this[0]);
-            this[1] = this[1] < min[1] ? min[0] : (this[1] > max[0] ? max[0] : this[1]);
-            this[2] = this[2] < min[2] ? min[0] : (this[2] > max[0] ? max[0] : this[2]);
-            this[3] = this[3] < min[3] ? min[0] : (this[3] > max[0] ? max[0] : this[3]);
+            this[1] = this[1] < min[1] ? min[1] : (this[1] > max[0] ? max[1] : this[1]);
+            this[2] = this[2] < min[2] ? min[2] : (this[2] > max[0] ? max[2] : this[2]);
+            this[3] = this[3] < min[3] ? min[3] : (this[3] > max[0] ? max[3] : this[3]);
             
             return this;
         }
         
         Tessellator.vec4.prototype.fract = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = this[0] - Math.floor(this[0]);
             this[1] = this[1] - Math.floor(this[1]);
@@ -1785,52 +1782,41 @@
             return this;
         }
         
-        Tessellator.vec4.prototype.mix = function (vec4, l){
+        Tessellator.vec4.prototype.mix = function (vec, l){
             if (this.tween) this.tween.update();
+            l = Tessellator.float.forValue(l);
             
-            if (vec4.tween){
-                vec4.tween.update();
-            }
-            
-            if (l.tween){
-                l.tween.update();
-            }
-            
-            if (l.length === 4){
+            if (l.length){
                 this[0] = this[0] + l[0] * (vec4[0] - this[0]);
                 this[1] = this[1] + l[1] * (vec4[1] - this[1]);
                 this[2] = this[2] + l[2] * (vec4[2] - this[2]);
                 this[3] = this[3] + l[3] * (vec4[3] - this[3]);
             }else{
-                this[0] = this[0] + l[0] * (vec4[0] - this[0]);
-                this[1] = this[1] + l[0] * (vec4[1] - this[1]);
-                this[2] = this[2] + l[0] * (vec4[2] - this[2]);
-                this[3] = this[3] + l[0] * (vec4[3] - this[3]);
+                this[0] = this[0] + l * (vec4[0] - this[0]);
+                this[1] = this[1] + l * (vec4[1] - this[1]);
+                this[2] = this[2] + l * (vec4[2] - this[2]);
+                this[3] = this[3] + l * (vec4[3] - this[3]);
             }
             
             return this;
         }
         
         Tessellator.vec4.prototype.add = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             if (arguments.length === 1){
-                var vec = arguments[0]
+                var vec = Tessellator.float.forValue(arguments[0]);
                 
-                if (vec.tween){
-                    vec.tween.update();
-                }
-                
-                if (vec.length === 4){
+                if (vec.length){
                     this[0] += vec[0];
                     this[1] += vec[1];
                     this[2] += vec[2];
                     this[3] += vec[3];
                 }else{
-                    this[0] += vec[0];
-                    this[1] += vec[0];
-                    this[2] += vec[0];
-                    this[3] += vec[0];
+                    this[0] += vec;
+                    this[1] += vec;
+                    this[2] += vec;
+                    this[3] += vec;
                 }
             }else{
                 this[0] += arguments[0];
@@ -1843,25 +1829,21 @@
         }
         
         Tessellator.vec4.prototype.subtract = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             if (arguments.length === 1){
-                var vec = arguments[0]
+                var vec = Tessellator.float.forValue(arguments[0]);
                 
-                if (vec.tween){
-                    vec.tween.update();
-                }
-                
-                if (vec.length === 4){
+                if (vec.length){
                     this[0] -= vec[0];
                     this[1] -= vec[1];
                     this[2] -= vec[2];
                     this[3] -= vec[3];
                 }else{
-                    this[0] -= vec[0];
-                    this[1] -= vec[0];
-                    this[2] -= vec[0];
-                    this[3] -= vec[0];
+                    this[0] -= vec;
+                    this[1] -= vec;
+                    this[2] -= vec;
+                    this[3] -= vec;
                 }
             }else{
                 this[0] -= arguments[0];
@@ -1874,25 +1856,21 @@
         }
         
         Tessellator.vec4.prototype.multiply = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             if (arguments.length === 1){
-                var vec = arguments[0];
+                var vec = Tessellator.float.forValue(arguments[0]);
                 
-                if (vec.tween){
-                    vec.tween.update();
-                }
-                
-                if (vec.length === 4){
+                if (vec.length){
                     this[0] *= vec[0];
                     this[1] *= vec[1];
                     this[2] *= vec[2];
                     this[3] *= vec[3];
                 }else{
-                    this[0] *= vec[0];
-                    this[1] *= vec[0];
-                    this[2] *= vec[0];
-                    this[3] *= vec[0];
+                    this[0] *= vec;
+                    this[1] *= vec;
+                    this[2] *= vec;
+                    this[3] *= vec;
                 }
             }else{
                 this[0] *= arguments[0];
@@ -1908,22 +1886,18 @@
             if (this.tween) this.tween.update();
             
             if (arguments.length === 1){
-                var vec = arguments[0]
+                var vec = Tessellator.float.forValue(arguments[0]);
                 
-                if (vec.tween){
-                    vec.tween.update();
-                }
-                
-                if (vec.length === 4){
+                if (vec.length){
                     this[0] /= vec[0];
                     this[1] /= vec[1];
                     this[2] /= vec[2];
                     this[3] /= vec[3];
                 }else{
-                    this[0] /= vec[0];
-                    this[1] /= vec[0];
-                    this[2] /= vec[0];
-                    this[3] /= vec[0];
+                    this[0] /= vec;
+                    this[1] /= vec;
+                    this[2] /= vec;
+                    this[3] /= vec;
                 }
             }else{
                 this[0] /= arguments[0];
@@ -1935,38 +1909,20 @@
             return this;
         }
         
-        Tessellator.vec4.prototype.scale = function (x){
-            if (this.tween) this.tween.update();
-            
-            if (x.tween){
-                x.tween.update();
-            }
-            
-            this[0] *= x[0];
-            this[1] *= x[0];
-            this[2] *= x[0];
-            this[3] *= x[0];
-            
-            return this;
-        }
-        
         Tessellator.vec4.prototype.min = function (vec){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec.tween){
-                vec.tween.update();
-            }
-            
-            if (vec.length === 4){
+            if (vec.length){
                 this[0] = Math.min(this[0], vec[0]);
                 this[1] = Math.min(this[1], vec[1]);
                 this[2] = Math.min(this[2], vec[2]);
                 this[3] = Math.min(this[3], vec[3]);
             }else{
-                this[0] = Math.min(this[0], vec[0]);
-                this[1] = Math.min(this[1], vec[0]);
-                this[2] = Math.min(this[2], vec[0]);
-                this[3] = Math.min(this[3], vec[0]);
+                this[0] = Math.min(this[0], vec);
+                this[1] = Math.min(this[1], vec);
+                this[2] = Math.min(this[2], vec);
+                this[3] = Math.min(this[3], vec);
             }
             
             return this;
@@ -1974,54 +1930,57 @@
         
         Tessellator.vec4.prototype.max = function (vec){
             if (this.tween) this.tween.update();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec.tween){
-                vec.tween.update();
-            }
-            
-            if (vec.length === 4){
+            if (vec.length){
                 this[0] = Math.max(this[0], vec[0]);
                 this[1] = Math.max(this[1], vec[1]);
                 this[2] = Math.max(this[2], vec[2]);
                 this[3] = Math.max(this[3], vec[3]);
             }else{
-                this[0] = Math.max(this[0], vec[0]);
-                this[1] = Math.max(this[1], vec[0]);
-                this[2] = Math.max(this[2], vec[0]);
-                this[3] = Math.max(this[3], vec[0]);
+                this[0] = Math.max(this[0], vec);
+                this[1] = Math.max(this[1], vec);
+                this[2] = Math.max(this[2], vec);
+                this[3] = Math.max(this[3], vec);
             }
             
             return this;
         }
         
-        Tessellator.vec4.prototype.squaredDistance = function (vec4){
+        Tessellator.vec4.prototype.squaredDistance = function (vec){
             if (this.tween) this.tween.update();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec4.tween){
-                vec4.tween.update();
+            var x, y, z, w;
+            
+            if (vec.length){
+                x = vec[0] - this[0];
+                y = vec[1] - this[1];
+                z = vec[2] - this[2];
+                w = vec[3] - this[3];
+            }else{
+                x = vec - this[0];
+                y = vec - this[1];
+                z = vec - this[2];
+                w = vec - this[3];
             }
-            
-            var
-                x = vec4[0] - this[0],
-                y = vec4[1] - this[1],
-                z = vec4[2] - this[2],
-                w = vec4[3] - this[3];
             
             return Tessellator.float(x * x + y * y + z * z + w * w);
         }
         
         Tessellator.vec4.prototype.distance = function (vec4){
-            return Tessellator.float(Math.sqrt(this.squaredDistance(vec4)));
+            return this.squaredDistance(vec4).sqrt();
         }
         
-        Tessellator.vec4.prototype.dot = function (vec4){
+        Tessellator.vec4.prototype.dot = function (vec){
             if (this.tween) this.tween.update();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec4.tween){
-                vec4.tween.update();
+            if (vec.length){
+                return Tessellator.float(this[0] * vec[0] + this[1] * vec[1] + this[2] * vec[2] + this[3] * vec[3]);
+            }else{
+                return Tessellator.float(this[0] * vec + this[1] * vec + this[2] * vec + this[3] * vec);
             }
-            
-            return Tessellator.float(this[0] * vec4[0] + this[1] * vec4[1] + this[2] * vec4[2] + this[3] * vec4[3]);
         }
         
         Tessellator.vec4.prototype.squaredLength = function (){
@@ -2033,7 +1992,7 @@
         }
         
         Tessellator.vec4.prototype.normalize = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             var d = this.len();
             this[0] /= d[0];
@@ -2045,7 +2004,7 @@
         }
         
         Tessellator.vec4.prototype.invert = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = 1 / this[0];
             this[1] = 1 / this[1];
@@ -2056,7 +2015,7 @@
         }
         
         Tessellator.vec4.prototype.negate = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = -this[0];
             this[1] = -this[1];
@@ -2067,18 +2026,26 @@
         }
         
         Tessellator.vec4.prototype.random = function (scale){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             if (scale === undefined){
-                scale = Tessellator.float(1);
-            }else if (scale.tween){
-                scale.tween.update();
+                scale = 1;
+            }else{
+                scale = Tessellator.float.forValue(scale);
             }
             
-            this[0] = Math.random() * scale[0];
-            this[1] = Math.random() * scale[0];
-            this[2] = Math.random() * scale[0];
-            this[3] = Math.random() * scale[0];
+            if (scale.length){
+                this[0] = Math.random() * scale[0];
+                this[1] = Math.random() * scale[1];
+                this[2] = Math.random() * scale[2];
+                this[3] = Math.random() * scale[3];
+
+            }else{
+                this[0] = Math.random() * scale;
+                this[1] = Math.random() * scale;
+                this[2] = Math.random() * scale;
+                this[3] = Math.random() * scale;
+            }
             
             return this;
         }
@@ -2124,6 +2091,8 @@
                 var arg = arguments[i];
                 
                 if (isNaN(arg)){
+                    if (arg.tween) arg.tween.update();
+                    
                     array.set(arg, pos);
                     pos += arg.length;
                 }else{
@@ -2151,6 +2120,8 @@
         Tessellator.vec3.prototype.constructor = Tessellator.vec3;
         
         Tessellator.vec3.prototype.clear = function (){
+            if (this.tween) this.tween.cancel();
+            
             this[0] = 0;
             this[1] = 0;
             this[3] = 0;
@@ -2161,9 +2132,8 @@
         }
         
         Tessellator.vec3.prototype.copy = function (vec3){
-            if (vec3.tween){
-                vec3.tween.update();
-            }
+            if (this.tween) this.tween.cancel();
+            if (vec3.tween) vec3.tween.update();
             
             this.set(vec3);
             
@@ -2171,19 +2141,24 @@
         }
         
         Tessellator.vec3.prototype.exp = function(vec){
-            if (vec.tween){
-                vec.tween.update();
-            }
+            if (this.tween) this.tween.cancel();
+            vec = Tessellator.float.forValue(vec);
             
-            this[0] = Math.pow(this[0], vec[0]);
-            this[1] = Math.pow(this[1], vec[1]);
-            this[2] = Math.pow(this[2], vec[2]);
+            if (vec.length){
+                this[0] = Math.pow(this[0], vec[0]);
+                this[1] = Math.pow(this[1], vec[1]);
+                this[2] = Math.pow(this[2], vec[2]);
+            }else{
+                this[0] = Math.pow(this[0], vec);
+                this[1] = Math.pow(this[1], vec);
+                this[2] = Math.pow(this[2], vec);
+            }
             
             return this;
         }
         
         Tessellator.vec3.prototype.sqrt = function(){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.sqrt(this[0]);
             this[1] = Math.sqrt(this[1]);
@@ -2193,7 +2168,7 @@
         }
         
         Tessellator.vec3.prototype.inversesqrt = function(){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = 1 / Math.sqrt(this[0]);
             this[1] = 1 / Math.sqrt(this[1]);
@@ -2203,7 +2178,7 @@
         }
         
         Tessellator.vec3.prototype.abs = function(){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.abs(this[0]);
             this[1] = Math.abs(this[1]);
@@ -2213,37 +2188,34 @@
         }
         
         Tessellator.vec3.prototype.sign = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
-            this[0] = this[0] < 0 ? 1 : (this[0] > 0 ? -1 : this[0]);
-            this[1] = this[1] < 0 ? 1 : (this[1] > 0 ? -1 : this[1]);
-            this[2] = this[2] < 0 ? 1 : (this[2] > 0 ? -1 : this[2]);
+            this[0] = this[0] > 0 ? 1 : (this[0] < 0 ? -1 : this[0]);
+            this[1] = this[1] > 0 ? 1 : (this[1] < 0 ? -1 : this[1]);
+            this[2] = this[2] > 0 ? 1 : (this[2] < 0 ? -1 : this[2]);
             
             return this;
         }
         
         Tessellator.vec3.prototype.step = function (edge){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
+            edge = Tessellator.float.forValue(edge);
             
-            if (edge.tween){
-                edge.tween.update();
-            }
-            
-            if (edge.length === 3){
+            if (edge.length){
                 this[0] = this[0] < edge[0] ? 0 : 1;
                 this[1] = this[1] < edge[1] ? 0 : 1;
                 this[2] = this[2] < edge[2] ? 0 : 1;
             }else{
-                this[0] = this[0] < edge[0] ? 0 : 1;
-                this[1] = this[1] < edge[0] ? 0 : 1;
-                this[2] = this[2] < edge[0] ? 0 : 1;
+                this[0] = this[0] < edge ? 0 : 1;
+                this[1] = this[1] < edge ? 0 : 1;
+                this[2] = this[2] < edge ? 0 : 1;
             }
             
             return this;
         }
         
         Tessellator.vec3.prototype.floor = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.floor(this[0]);
             this[1] = Math.floor(this[1]);
@@ -2253,7 +2225,7 @@
         }
         
         Tessellator.vec3.prototype.round = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.round(this[0]);
             this[1] = Math.round(this[1]);
@@ -2263,7 +2235,7 @@
         }
         
         Tessellator.vec3.prototype.ceil = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.ceil(this[0]);
             this[1] = Math.ceil(this[1]);
@@ -2273,45 +2245,39 @@
         }
         
         Tessellator.vec3.prototype.mod = function (vec){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec.tween){
-                vec.tween.update();
-            }
-            
-            if (vec.length === 3){
+            if (vec.length){
                 this[0] = this[0] % vec[0];
                 this[1] = this[1] % vec[1];
                 this[2] = this[2] % vec[2];
             }else{
-                this[0] = this[0] % vec[0];
-                this[1] = this[1] % vec[0];
-                this[2] = this[2] % vec[0];
+                this[0] = this[0] % vec;
+                this[1] = this[1] % vec;
+                this[2] = this[2] % vec;
             }
             
             return this;
         }
         
         Tessellator.vec3.prototype.clamp = function (min, max){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
+            min = Tessellator.float.forValue(min);
+            max = Tessellator.float.forValue(max);
             
-            if (min.tween){
-                min.tween.update();
-            }
-            
-            if (max.tween){
-                max.tween.update();
-            }
+            if (!min.length) min = Tessellator.vec3(min);
+            if (!max.length) max = Tessellator.vec3(max);
             
             this[0] = this[0] < min[0] ? min[0] : (this[0] > max[0] ? max[0] : this[0]);
-            this[1] = this[1] < min[1] ? min[0] : (this[1] > max[0] ? max[0] : this[1]);
-            this[2] = this[2] < min[2] ? min[0] : (this[2] > max[0] ? max[0] : this[2]);
+            this[1] = this[1] < min[1] ? min[1] : (this[1] > max[1] ? max[1] : this[1]);
+            this[2] = this[2] < min[2] ? min[2] : (this[2] > max[2] ? max[2] : this[2]);
             
             return this;
         }
         
         Tessellator.vec3.prototype.fract = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = this[0] - Math.floor(this[0]);
             this[1] = this[1] - Math.floor(this[1]);
@@ -2321,43 +2287,38 @@
         }
         
         Tessellator.vec3.prototype.mix = function (vec3, l){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
+            if (vec3.tween) vec3.tween.update();
             
-            if (vec3.tween){
-                vec3.tween.update();
-            }
+            l = Tessellator.float.forValue(l);
             
-            if (l.length === 3){
+            if (l.length){
                 this[0] = this[0] + l[0] * (vec3[0] - this[0]);
                 this[1] = this[1] + l[1] * (vec3[1] - this[1]);
                 this[2] = this[2] + l[2] * (vec3[2] - this[2]);
             }else{
-                this[0] = this[0] + l[0] * (vec3[0] - this[0]);
-                this[1] = this[1] + l[0] * (vec3[1] - this[1]);
-                this[2] = this[2] + l[0] * (vec3[2] - this[2]);
+                this[0] = this[0] + l * (vec3[0] - this[0]);
+                this[1] = this[1] + l * (vec3[1] - this[1]);
+                this[2] = this[2] + l * (vec3[2] - this[2]);
             }
             
             return this;
         }
         
         Tessellator.vec3.prototype.add = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             if (arguments.length === 1){
-                var vec = arguments[0]
+                var vec = Tessellator.float.forValue(arguments[0])
                 
-                if (vec.tween){
-                    vec.tween.update();
-                }
-                
-                if (vec.length === 3){
+                if (vec.length){
                     this[0] += vec[0];
                     this[1] += vec[1];
                     this[2] += vec[2];
                 }else{
-                    this[0] += vec[0]
-                    this[1] += vec[0]
-                    this[2] += vec[0]
+                    this[0] += vec;
+                    this[1] += vec;
+                    this[2] += vec;
                 }
             }else{
                 this[0] += arguments[0];
@@ -2369,23 +2330,19 @@
         }
         
         Tessellator.vec3.prototype.subtract = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             if (arguments.length === 1){
-                var vec = arguments[0]
+                var vec = Tessellator.float.forValue(arguments[0])
                 
-                if (vec.tween){
-                    vec.tween.update();
-                }
-                
-                if (vec.length === 3){
+                if (vec.length){
                     this[0] -= vec[0];
                     this[1] -= vec[1];
                     this[2] -= vec[2];
                 }else{
-                    this[0] -= vec[0];
-                    this[1] -= vec[0];
-                    this[2] -= vec[0];
+                    this[0] -= vec;
+                    this[1] -= vec;
+                    this[2] -= vec;
                 }
             }else{
                 this[0] -= arguments[0];
@@ -2397,14 +2354,10 @@
         }
         
         Tessellator.vec3.prototype.multiply = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             if (arguments.length === 1){
-                var vec = arguments[0]
-                
-                if (vec.tween){
-                    vec.tween.update();
-                }
+                var vec = Tessellator.float.forValue(arguments[0])
                 
                 if (vec.length === 3){
                     this[0] *= vec[0];
@@ -2430,9 +2383,9 @@
                     this[1] = vec[1] * x + vec[4] * y + vec[7] * z;
                     this[2] = vec[2] * x + vec[5] * y + vec[8] * z;
                 }else{
-                    this[0] *= vec[0];
-                    this[1] *= vec[0];
-                    this[2] *= vec[0];
+                    this[0] *= vec;
+                    this[1] *= vec;
+                    this[2] *= vec;
                 }
             }else{
                 this[0] *= arguments[0];
@@ -2447,20 +2400,16 @@
             if (this.tween) this.tween.update();
             
             if (arguments.length === 1){
-                var vec = arguments[0]
+                var vec = Tessellator.float.forValue(arguments[0])
                 
-                if (vec.tween){
-                    vec.tween.update();
-                }
-                
-                if (vec.length === 3){
+                if (vec.length){
                     this[0] /= vec[0];
                     this[1] /= vec[1];
                     this[2] /= vec[2];
                 }else{
-                    this[0] /= vec[0];
-                    this[1] /= vec[0];
-                    this[2] /= vec[0];
+                    this[0] /= vec;
+                    this[1] /= vec;
+                    this[2] /= vec;
                 }
             }else{
                 this[0] /= arguments[0];
@@ -2471,41 +2420,55 @@
             return this;
         }
         
-        Tessellator.vec3.prototype.min = function (vec3){
-            if (this.tween) this.tween.update();
+        Tessellator.vec3.prototype.min = function (vec){
+            if (this.tween) this.tween.cancel();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec3.tween){
-                vec3.tween.update();
+            if (vec.length){
+                this[0] = Math.min(this[0], vec[0]);
+                this[1] = Math.min(this[1], vec[1]);
+                this[2] = Math.min(this[2], vec[2]);
+            }else{
+                this[0] = Math.min(this[0], vec);
+                this[1] = Math.min(this[1], vec);
+                this[2] = Math.min(this[2], vec);
             }
-            
-            this[0] = Math.min(this[0], vec3[0]);
-            this[1] = Math.min(this[1], vec3[1]);
-            this[2] = Math.min(this[2], vec3[2]);
             
             return this;
         }
         
-        Tessellator.vec3.prototype.max = function (vec3){
-            if (this.tween) this.tween.update();
+        Tessellator.vec3.prototype.max = function (vec){
+            if (this.tween) this.tween.cancel();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec3.tween){
-                vec3.tween.update();
+            if (vec.length){
+                this[0] = Math.max(this[0], vec[0]);
+                this[1] = Math.max(this[1], vec[1]);
+                this[2] = Math.max(this[2], vec[2]);
+            }else{
+                this[0] = Math.max(this[0], vec);
+                this[1] = Math.max(this[1], vec);
+                this[2] = Math.max(this[2], vec);
             }
-            
-            this[0] = Math.max(this[0], vec3[0]);
-            this[1] = Math.max(this[1], vec3[1]);
-            this[2] = Math.max(this[2], vec3[2]);
             
             return this;
         }
         
-        Tessellator.vec3.prototype.squaredDistance = function (vec3){
+        Tessellator.vec3.prototype.squaredDistance = function (vec){
             if (this.tween) this.tween.update();
+            vec = Tessellator.float.forValue(vec);
             
-            var
-                x = vec3[0] - this[0],
-                y = vec3[1] - this[1],
-                z = vec3[2] - this[2];
+            var x, y, z;
+            
+            if (vec.length){
+                x = vec[0] - this[0];
+                y = vec[1] - this[1];
+                z = vec[2] - this[2];
+            }else{
+                x = vec - this[0];
+                y = vec - this[1];
+                z = vec - this[2];
+            }
             
             return Tessellator.float(x * x + y * y + z * z);
         }
@@ -2514,10 +2477,15 @@
             return this.squaredDistance(vec3).sqrt();
         }
         
-        Tessellator.vec3.prototype.dot = function (vec3){
+        Tessellator.vec3.prototype.dot = function (vec){
             if (this.tween) this.tween.update();
+            vec = Tessellator.float.forValue(vec);
             
-            return Tessellator.float(this[0] * vec3[0] + this[1] * vec3[1] + this[2] * vec3[2]);
+            if (vec.length){
+                return Tessellator.float(this[0] * vec[0] + this[1] * vec[1] + this[2] * vec[2]);
+            }else{
+                return Tessellator.float(this[0] * vec + this[1] * vec + this[2] * vec);
+            }
         }
         
         Tessellator.vec3.prototype.squaredLength = function (){
@@ -2525,25 +2493,22 @@
         }
         
         Tessellator.vec3.prototype.len = function (){
-            return Math.sqrt(this.squaredLength());
+            return this.squaredLength().sqrt();
         }
         
         Tessellator.vec3.prototype.normalize = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             var d = this.len();
-            
-            if (d > 0.0001){
-                this[0] /= d;
-                this[1] /= d;
-                this[2] /= d;
-            }
+            this[0] /= d[0];
+            this[1] /= d[0];
+            this[2] /= d[0];
             
             return this;
         }
         
         Tessellator.vec3.prototype.invert = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = 1 / this[0];
             this[1] = 1 / this[1];
@@ -2553,7 +2518,7 @@
         }
         
         Tessellator.vec3.prototype.negate = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = -this[0];
             this[1] = -this[1];
@@ -2564,46 +2529,40 @@
         
         Tessellator.vec3.prototype.random = function (scale){
             if (scale === undefined){
-                scale = Tessellator.float(1);
-            }else if (scale.tween){
-                scale.tween.update();
+                scale = 1;
+            }else {
+                scale = Tessellator.float.forValue(scale);
             }
             
-            this[0] = Math.random() * scale[0];
-            this[1] = Math.random() * scale[0];
-            this[2] = Math.random() * scale[0];
+            if (scale.length){
+                this[0] = Math.random() * scale[0];
+                this[1] = Math.random() * scale[1];
+                this[2] = Math.random() * scale[2];
+            }else{
+                this[0] = Math.random() * scale;
+                this[1] = Math.random() * scale;
+                this[2] = Math.random() * scale;
+            }
             
             return this;
         }
         
-        Tessellator.vec3.prototype.x = function (x){
+        Tessellator.vec3.prototype.x = function (){
             if (this.tween) this.tween.update();
             
-            if (x){
-                return this[0] = x;
-            }else{
-                return this[0];
-            }
+            return this[0];
         }
         
-        Tessellator.vec3.prototype.y = function (y){
+        Tessellator.vec3.prototype.y = function (){
             if (this.tween) this.tween.update();
             
-            if (y){
-                return this[1] = y;
-            }else{
-                return this[1];
-            }
+            return this[1];
         }
         
-        Tessellator.vec3.prototype.z = function (z){
+        Tessellator.vec3.prototype.z = function (){
             if (this.tween) this.tween.update();
             
-            if (z){
-                return this[2] = z;
-            }else{
-                return this[2];
-            }
+            return this[2];
         }
         
         Tessellator.vec3.prototype.createTween = function (){
@@ -2623,6 +2582,8 @@
                 var arg = arguments[i];
                 
                 if (isNaN(arg)){
+                    if (arg.tween) arg.tween.update();
+                    
                     array.set(arg, pos);
                     pos += arg.length;
                 }else{
@@ -2649,6 +2610,8 @@
         Tessellator.vec2.prototype.constructor = Tessellator.vec2;
         
         Tessellator.vec2.prototype.clear = function (){
+            if (this.tween) this.tween.cancel();
+            
             this[0] = 0;
             this[1] = 0;
         }
@@ -2658,9 +2621,7 @@
         }
         
         Tessellator.vec2.prototype.copy = function (vec2){
-            if (vec2.tween){
-                vec2.tween.update();
-            }
+            if (vec2.tween) vec2.tween.update();
             
             this.set(vec2);
             
@@ -2668,7 +2629,8 @@
         }
         
         Tessellator.vec2.prototype.exp = function(vec){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
+            if (vec.tween) vec.tween.update();
             
             this[0] = Math.pow(this[0], vec[0]);
             this[1] = Math.pow(this[1], vec[1]);
@@ -2677,7 +2639,7 @@
         }
         
         Tessellator.vec2.prototype.sqrt = function(){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.sqrt(this[0]);
             this[1] = Math.sqrt(this[1]);
@@ -2686,7 +2648,7 @@
         }
         
         Tessellator.vec2.prototype.inversesqrt = function(){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = 1 / Math.sqrt(this[0]);
             this[1] = 1 / Math.sqrt(this[1]);
@@ -2695,7 +2657,7 @@
         }
         
         Tessellator.vec2.prototype.abs = function(){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.abs(this[0]);
             this[1] = Math.abs(this[1]);
@@ -2704,34 +2666,31 @@
         }
         
         Tessellator.vec2.prototype.sign = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
-            this[0] = this[0] < 0 ? 1 : (this[0] > 0 ? -1 : this[0]);
-            this[1] = this[1] < 0 ? 1 : (this[1] > 0 ? -1 : this[1]);
+            this[0] = this[0] > 0 ? 1 : (this[0] < 0 ? -1 : this[0]);
+            this[1] = this[1] > 0 ? 1 : (this[1] < 0 ? -1 : this[1]);
             
             return this;
         }
         
         Tessellator.vec2.prototype.step = function (edge){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
+            edge = Tessellator.float.forValue(edge);
             
-            if (edge.tween){
-                edge.tween.update();
-            }
-            
-            if (edge.length === 2){
+            if (edge.length){
                 this[0] = this[0] < edge[0] ? 0 : 1;
                 this[1] = this[1] < edge[1] ? 0 : 1;
             }else{
-                this[0] = this[0] < edge[0] ? 0 : 1;
-                this[1] = this[1] < edge[0] ? 0 : 1;
+                this[0] = this[0] < edge ? 0 : 1;
+                this[1] = this[1] < edge ? 0 : 1;
             }
             
             return this;
         }
         
         Tessellator.vec2.prototype.floor = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.floor(this[0]);
             this[1] = Math.floor(this[1]);
@@ -2740,7 +2699,7 @@
         }
         
         Tessellator.vec2.prototype.ceil = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.ceil(this[0]);
             this[1] = Math.ceil(this[1]);
@@ -2748,34 +2707,37 @@
             return this;
         }
         
-        Tessellator.vec2.prototype.mod = function (vec2){
-            if (this.tween) this.tween.update();
+        Tessellator.vec2.prototype.mod = function (vec){
+            if (this.tween) this.tween.cancel();
+            vec = Tessellator.float.forValue(vec);
             
-            this[0] = this[0] % vec2[0];
-            this[1] = this[1] % vec2[1];
+            if (vec.length){
+                this[0] = this[0] % vec[0];
+                this[1] = this[1] % vec[1];
+            }else{
+                this[0] = this[0] % vec;
+                this[1] = this[1] % vec;
+            }
             
             return this;
         }
         
         Tessellator.vec2.prototype.clamp = function (min, max){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
+            min = Tessellator.float.forValue(min);
+            max = Tessellator.float.forValue(max);
             
-            if (min.tween){
-                min.tween.update();
-            }
-            
-            if (max.tween){
-                max.tween.update();
-            }
+            if (!min.length) min = Tessellator.vec2(min);
+            if (!max.length) max = Tessellator.vec2(max);
             
             this[0] = this[0] < min[0] ? min[0] : (this[0] > max[0] ? max[0] : this[0]);
-            this[1] = this[1] < min[1] ? min[0] : (this[1] > max[0] ? max[0] : this[1]);
+            this[1] = this[1] < min[1] ? min[1] : (this[1] > max[1] ? max[1] : this[1]);
             
             return this;
         }
         
         Tessellator.vec2.prototype.fract = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = this[0] - Math.floor(this[0]);
             this[1] = this[1] - Math.floor(this[1]);
@@ -2785,16 +2747,10 @@
         
         Tessellator.vec2.prototype.mix = function (vec2, l){
             if (this.tween) this.tween.update();
+            if (vec2.tween) vec2.tween.update();
+            l = Tessellator.float.forValue(l);
             
-            if (vec2.tween){
-                vec2.tween.update();
-            }
-            
-            if (l.tween){
-                l.tween.update();
-            }
-            
-            if (l.length === 2){
+            if (l.length){
                 this[0] = this[0] + l[0] * (vec2[0] - this[0]);
                 this[1] = this[1] + l[1] * (vec2[1] - this[1]);
             }else{
@@ -2806,16 +2762,12 @@
         }
         
         Tessellator.vec2.prototype.add = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             if (arguments.length === 1){
-                var vec = arguments[0]
+                var vec = Tessellator.float.forValue(arguments[0]);
                 
-                if (vec.tween){
-                    vec.tween.update();
-                }
-                
-                if (vec.length === 2){
+                if (vec.length){
                     this[0] += vec[0];
                     this[1] += vec[1];
                 }else{
@@ -2831,16 +2783,12 @@
         }
         
         Tessellator.vec2.prototype.subtract = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             if (arguments.length === 1){
-                var vec = arguments[0]
+                var vec = Tessellator.float.forValue(arguments[0]);
                 
-                if (vec.tween){
-                    vec.tween.update();
-                }
-                
-                if (vec.length === 2){
+                if (vec.length){
                     this[0] -= vec[0];
                     this[1] -= vec[1];
                 }else{
@@ -2856,16 +2804,12 @@
         }
         
         Tessellator.vec2.prototype.multiply = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             if (arguments.length === 1){
-                var vec = arguments[0]
+                var vec = Tessellator.float.forValue(arguments[0]);
                 
-                if (vec.tween){
-                    vec.tween.update();
-                }
-                
-                if (vec.length === 2){
+                if (vec.length){
                     this[0] *= vec[0];
                     this[1] *= vec[1];
                 }else{
@@ -2881,16 +2825,12 @@
         }
         
         Tessellator.vec2.prototype.divide = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             if (arguments.length === 1){
-                var vec = arguments[0]
+                var vec = Tessellator.float.forValue(arguments[0]);
                 
-                if (vec.tween){
-                    vec.tween.update();
-                }
-                
-                if (vec.length === 2){
+                if (vec.length){
                     this[0] /= vec[0];
                     this[1] /= vec[1];
                 }else{
@@ -2905,58 +2845,66 @@
             return this;
         }
         
-        Tessellator.vec2.prototype.min = function (vec2){
-            if (this.tween) this.tween.update();
+        Tessellator.vec2.prototype.min = function (vec){
+            if (this.tween) this.tween.cancel();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec2.tween){
-                vec2.tween.update();
+            if (vec.length){
+                this[0] = Math.min(this[0], vec[0]);
+                this[1] = Math.min(this[1], vec[1]);
+            }else{
+                this[0] = Math.min(this[0], vec);
+                this[1] = Math.min(this[1], vec);
             }
-            
-            this[0] = Math.min(this[0], vec2[0]);
-            this[1] = Math.min(this[1], vec2[1]);
             
             return this;
         }
         
         Tessellator.vec2.prototype.max = function (vec2){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec2.tween){
-                vec2.tween.update();
+            if (vec.length){
+                this[0] = Math.max(this[0], vec[0]);
+                this[1] = Math.max(this[1], vec[1]);
+            }else{
+                this[0] = Math.max(this[0], vec);
+                this[1] = Math.max(this[1], vec);
             }
-            
-            this[0] = Math.max(this[0], vec2[0]);
-            this[1] = Math.max(this[1], vec2[1]);
             
             return this;
         }
         
-        Tessellator.vec2.prototype.squaredDistance = function (vec2){
+        Tessellator.vec2.prototype.squaredDistance = function (vec){
             if (this.tween) this.tween.update();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec2.tween){
-                vec2.tween.update();
+            var x, y;
+            
+            if (vec.length){
+                x = vec[0] - this[0];
+                y = vec[1] - this[1];
+            }else{
+                x = vec - this[0];
+                y = vec - this[1];
             }
-            
-            var
-                x = vec2[0] - this[0],
-                y = vec2[1] - this[1];
             
             return Tessellator.float(x * x + y * y);
         }
         
-        Tessellator.vec2.prototype.distance = function (vec2){
-            return Math.sqrt(this.squaredDistance(vec2));
+        Tessellator.vec2.prototype.distance = function (vec){
+            return this.squaredDistance(vec).sqrt();
         }
         
-        Tessellator.vec2.prototype.dot = function (vec2){
+        Tessellator.vec2.prototype.dot = function (vec){
             if (this.tween) this.tween.update();
+            vec = Tessellator.float.forValue(vec);
             
-            if (vec2.tween){
-                vec2.tween.update();
+            if (vec.length){
+                return Tessellator.float(this[0] * vec[0] + this[1] * vec[1]);
+            }else{
+                return Tessellator.float(this[0] * vec + this[1] * vec);
             }
-            
-            return Tessellator.float(this[0] * vec2[0] + this[1] * vec2[1]);
         }
         
         Tessellator.vec2.prototype.squaredLength = function (){
@@ -2968,6 +2916,8 @@
         }
         
         Tessellator.vec2.prototype.normalize = function (){
+            if (this.tween) this.tween.cancel();
+            
             var d = this.len();
             this[0] /= d[0];
             this[1] /= d[0];
@@ -2976,7 +2926,7 @@
         }
         
         Tessellator.vec2.prototype.invert = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = 1 / this[0];
             this[1] = 1 / this[1];
@@ -2985,7 +2935,7 @@
         }
         
         Tessellator.vec2.prototype.negate = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = -this[0];
             this[1] = -this[1];
@@ -2993,28 +2943,20 @@
             return this;
         }
         
-        Tessellator.vec2.prototype.lerp = function (vec2, l){
-            if (this.tween) this.tween.update();
-            
-            if (vec2.tween){
-                vec2.tween.update();
-            }
-            
-            this[0] = this[0] + l[0] * (vec2[0] - this[0]);
-            this[1] = this[1] + l[0] * (vec2[1] - this[1]);
-            
-            return this;
-        }
-        
         Tessellator.vec2.prototype.random = function (scale){
             if (scale === undefined){
-                scale = Tessellator.float(1);
-            }else if (scale.tween){
-                scale.tween.update();
+                scale = 1;
+            }else {
+                scale = Tessellator.float.forValue(scale);
             }
             
-            this[0] = Math.random() * scale[0];
-            this[1] = Math.random() * scale[0];
+            if (scale.length){
+                this[0] = Math.random() * scale[0];
+                this[1] = Math.random() * scale[1];
+            }else{
+                this[0] = Math.random() * scale;
+                this[1] = Math.random() * scale;
+            }
             
             return this;
         }
@@ -3052,14 +2994,18 @@
             if (arguments.length === 0){
                 array[0] = 0;
             }else if (arguments.length === 1){
-                if (arguments[0].length){
-                    if (arguments[0].length === 1){
-                        array[0] = arguments[0][0];
+                var arg = arguments[0];
+                
+                if (arg.length){
+                    if (arg.length === 1){
+                        if (arg.tween) arg.tween.update();
+                        
+                        array[0] = arg[0];
                     }else{
                         throw "too much information";
                     }
                 }else{
-                    array[0] = arguments[0];
+                    array[0] = arg;
                 }
             }else{
                 throw "too much information";
@@ -3070,10 +3016,28 @@
             return array;
         }
         
+        Tessellator.float.forValue = function (value){
+            if (value.length){
+                if (value.tween){
+                    value.tween.update();
+                }
+                
+                if (value.length === 1){
+                    return value[0];
+                }else{
+                    return value;
+                }
+            }else{
+                return value;
+            }
+        }
+        
         Tessellator.float.prototype = Object.create(Float32Array.prototype);
         Tessellator.float.prototype.constructor = Tessellator.float;
         
         Tessellator.float.prototype.clear = function (){
+            if (this.tween) this.tween.cancel();
+            
             this[0] = 0;
             
             return this;
@@ -3084,54 +3048,206 @@
         }
         
         Tessellator.float.prototype.copy = function (float){
-            if (this.tween) this.tween.update();
-            if (float.tween) float.tween.update();
+            if (this.tween) this.tween.cancel();
             
-            this[0] = float[0];
+            this[0] = Tessellator.float.forValue(float);
         }
         
         Tessellator.float.prototype.multiply = function (float){
-            if (this.tween) this.tween.update();
-            if (float.tween) float.tween.update();
+            if (this.tween) this.tween.cancel();
             
-            this[0] *= float[0];
+            this[0] *= Tessellator.float.forValue(float);
             
             return this;
         }
         
         Tessellator.float.prototype.add = function (float){
-            if (this.tween) this.tween.update();
-            if (float.tween) float.tween.update();
+            if (this.tween) this.tween.cancel();
             
-            this[0] += float[0];
+            this[0] += Tessellator.float.forValue(float);
             
             return this;
         }
         
         Tessellator.float.prototype.subtract = function (float) {
-            if (this.tween) this.tween.update();
-            if (float.tween) float.tween.update();
+            if (this.tween) this.tween.cancel();
             
-            this[0] -= float[0];
+            this[0] -= Tessellator.float.forValue(float);
             
             return this;
         }
         
         Tessellator.float.prototype.divide = function (float) {
-            if (this.tween) this.tween.update();
-            if (float.tween) float.tween.update();
+            if (this.tween) this.tween.cancel();
             
-            this[0] /= float[0];
+            this[0] /= Tessellator.float.forValue(float[0]);
             
             return this;
         }
         
         Tessellator.float.prototype.sqrt = function (){
-            if (this.tween) this.tween.update();
+            if (this.tween) this.tween.cancel();
             
             this[0] = Math.sqrt(this[0]);
             
             return this;
+        }
+        
+        Tessellator.float.prototype.square = function (){
+            if (this.tween) this.tween.cancel();
+            
+            this[0] *= this[0];
+            
+            return this;
+        }
+        
+        Tessellator.float.prototype.cube = function (){
+            if (this.tween) this.tween.cancel();
+            
+            this[0] *= this[0] * this[0];
+            
+            return this;
+        }
+        
+        Tessellator.float.prototype.min = function (min){
+            if (this.tween) this.tween.cancel();
+            min = Tessellator.float.forValue(min);
+            
+            this[0] = Math.min(min, this[0]);
+            
+            return this;
+        }
+        
+        Tessellator.float.prototype.max = function (min){
+            if (this.tween) this.tween.cancel();
+            max = Tessellator.float.forValue(max);
+            
+            this[0] = Math.max(max, this[0]);
+            
+            return this;
+        }
+        
+        Tessellator.float.prototype.fract = function (){
+            if (this.tween) this.tween.cancel();
+            
+            this[0] = this[0] - Math.floor(this[0]);
+            
+            return this;
+        }
+        
+        Tessellator.float.prototype.negate = function (){
+            if (this.tween) this.tween.cancel();
+            
+            this[0] = -this[0];
+            
+            return this;
+        }
+        
+        Tessellator.float.prototype.invert = function (){
+            if (this.tween) this.tween.cancel();
+            
+            this[0] = 1 / this[0];
+            
+            return this;
+        }
+        
+        Tessellator.float.prototype.inversesqrt = function (){
+            if (this.tween) this.tween.cancel();
+            
+            this[0] = 1 / Math.sqrt(this[0]);
+            
+            return this;
+        }
+        
+        Tessellator.float.prototype.round = function (){
+            if (this.tween) this.tween.cancel();
+            
+            this[0] = Math.round(this[0]);
+            
+            return this;
+        }
+        
+        Tessellator.float.prototype.ceil = function (){
+            if (this.tween) this.tween.cancel();
+            
+            this[0] = Math.ceil(this[0]);
+            
+            return this;
+        }
+        
+        Tessellator.float.abs = function (){
+            if (this.tween) this.tween.cancel();
+            
+            this[0] = Math.abs(this[0]);
+            
+            return this;
+        }
+        
+        Tessellator.float.mix = function (float, l){
+            if (this.tween) this.tween.cancel();
+            
+            float = Tessellator.float.forValue(float);
+            l = Tessellator.float.forValue(l);
+            
+            this[0] = this[0] * (1 - l) + float * l;
+            
+            return this;
+        }
+        
+        Tessellator.float.sign = function (){
+            if (this.tween) this.tween.cancel();
+            
+            this[0] = this[0] < 0 ? -1 : (this[0] > 0 ? 1 : this[0]);
+            
+            return this;
+        }
+        
+        Tessellator.float.step = function (edge){
+            if (this.tween) this.tween.cancel();
+            edge = Tessellator.float.forValue(edge);
+            
+            this[0] = this[0] < edge ? 0 : 1;
+            
+            return this;
+        }
+        
+        Tessellator.float.mod = function (float){
+            if (this.tween) this.tween.cancel();
+            float = Tessellator.float.forValue(float);
+            
+            this[0] = this[0] % float;
+            
+            return this;
+        }
+        
+        Tessellator.float.clamp = function (min, max){
+            if (this.tween) this.tween.cancel();
+            min = Tessellator.float.forValue(min);
+            max = Tessellator.float.forValue(max);
+            
+            this[0] = this[0] < min ? min : (this[0] > max ? max : this[0]);
+            
+            return this;
+        }
+        
+        Tessellator.float.prototype.random = function (scale){
+            if (this.tween) this.tween.update();
+            
+            if (scale === undefined){
+                scale = 1;
+            }else{
+                scale = Tessellator.float.forValue(scale);
+            }
+            
+            this[0] = Math.random() * scale;
+            
+            return this;
+        }
+        
+        Tessellator.float.prototype.x = function (){
+            if (this.tween) this.tween.update();
+            
+            return this[0];
         }
         
         Tessellator.float.prototype.createTween = function (){
@@ -3153,6 +3269,16 @@
             this.updated = false;
         }
         
+        Tessellator.Tween.prototype.cancel = function (){
+            if (!this.updating){
+                this.update();
+                
+                this.directives = [];
+                
+                this.loopDirectives = false;
+            }
+        }
+        
         Tessellator.Tween.prototype.add = function (e){
             this.directives.push(e);
             
@@ -3169,11 +3295,13 @@
         }
         
         Tessellator.Tween.prototype.update = function (){
-            if (this.ovec){
+            if (!this.updating && this.time != this.updated && this.ovec){
+                this.updating = true;
+                
                 var time = Date.now();
                 
                 while (this.directives.length){
-                    this.updated = true;
+                    this.updated = time;
                     
                     var st = this.directives[0](this, time - this.directiveStartTime);
                     
@@ -3192,13 +3320,15 @@
                         break;
                     }
                 }
+                
+                this.updating = false;
             }
         }
         
         Tessellator.Tween.prototype.dir = function (vec, time){
-            time = time || 0;
+            time = Tessellator.float.forValue(time || 0);
             
-            if (time === 0){
+            if (time <= 0){
                 this.add(function (tween, t){
                     for (var i = 0; i < tween.vec.length; i++){
                         tween.vec[i] = tween.ovec[i] + t * vec[i];
@@ -3220,20 +3350,16 @@
         }
         
         Tessellator.Tween.prototype.to = function (pos, rate){
-            rate = rate || 0;
-            
-            if (!isNaN(rate)){
-                rate = Tessellator.float(rate);
-            }
+            rate = Tessellator.float.forValue(rate || 0);
             
             this.add(function (tween, t){
                 var vec = pos.clone().subtract(tween.ovec).divide(rate);
                 
                 for (var i = 0; i < tween.vec.length; i++){
-                    tween.vec[i] = tween.ovec[i] + Math.min(t, rate[0]) * vec[i];
+                    tween.vec[i] = tween.ovec[i] + Math.min(t, rate) * vec[i];
                 }
                 
-                return t - rate[0];
+                return t - rate;
             });
             
             return this;
@@ -3253,6 +3379,58 @@
             this.add(function (tween, t){
                 return t - time;
             });
+            
+            return this;
+        }
+        
+        Tessellator.Tween.prototype.sin = function (amp, frq, time){
+            time = Tessellator.float.forValue(time || 0);
+            
+            if (time <= 0){
+                this.add(function (tween, t){
+                    for (var i = 0; i < tween.vec.length; i++){
+                        tween.vec[i] = tween.ovec[i] + Math.sin(t / 1000 * frq * Math.PI * 2) * amp[i];
+                    }
+                    
+                    return -1;
+                });
+            }else{
+                this.add(function (tween, t){
+                    for (var i = 0; i < tween.vec.length; i++){
+                        tween.vec[i] = tween.ovec[i] + Math.sin(Math.min(t, time) / 1000 * frq * Math.PI * 2) * amp[i];
+                    }
+                    
+                    return t - time;
+                });
+            }
+            
+            return this;
+        }
+        
+        Tessellator.Tween.prototype.rad = function (start, cycles, rsin, rcos, time){
+            time = Tessellator.float.forValue(time || 0);
+            
+            if (time <= 0){
+                this.add(function (tween, t){
+                    for (var i = 0; i < tween.vec.length; i++){
+                        tween.vec[i] = tween.ovec[i] + 
+                            Math.sin(t / 1000 * cycles * Math.PI * 2 + start * Math.PI * 2) * rsin[i] +
+                            Math.cos(t / 1000 * cycles * Math.PI * 2 + start * Math.PI * 2) * rcos[i];
+                    }
+                    
+                    return -1;
+                });
+            }else{
+                this.add(function (tween, t){
+                    for (var i = 0; i < tween.vec.length; i++){
+                        tween.vec[i] = tween.ovec[i] + 
+                            Math.sin(Math.min(t / time, 1) * cycles * Math.PI * 2 + start * Math.PI * 2) * rsin[i] +
+                            Math.cos(Math.min(t / time, 1) * cycles * Math.PI * 2 + start * Math.PI * 2) * rcos[i];
+                    }
+                    
+                    return t - time;
+                });
+            }
             
             return this;
         }
@@ -8463,10 +8641,10 @@
 
 
             Tessellator.AmbientLight.prototype.init = function (interpreter){
-                var color = interpreter.get("color");
-                this.r = color.r * color.a;
-                this.g = color.g * color.a;
-                this.b = color.b * color.a;
+                var color = interpreter.get("color").clone().divide(Tessellator.float(255));
+                this.r = color[0] * color[3];
+                this.g = color[1] * color[3];
+                this.b = color[2] * color[3];
             }
             
             Tessellator.AmbientLight.prototype.postInit = Tessellator.EMPTY_FUNC;
@@ -8567,10 +8745,10 @@
 
 
             Tessellator.PointLight.prototype.init = function (interpreter){
-                var color = interpreter.get("color");
-                this.r = color.r * color.a;
-                this.g = color.g * color.a;
-                this.b = color.b * color.a;
+                var color = interpreter.get("color").clone().divide(Tessellator.float(255));
+                this.r = color[0] * color[3];
+                this.g = color[1] * color[3];
+                this.b = color[2] * color[3];
             }
             
             Tessellator.PointLight.prototype.postInit = Tessellator.EMPTY_FUNC;
@@ -8680,10 +8858,10 @@
 
 
             Tessellator.SpotLight.prototype.init = function (interpreter){
-                var color = interpreter.get("color");
-                this.r = color.r * color.a;
-                this.g = color.g * color.a;
-                this.b = color.b * color.a;
+                var color = interpreter.get("color").clone().divide(Tessellator.float(255));
+                this.r = color[0] * color[3];
+                this.g = color[1] * color[3];
+                this.b = color[2] * color[3];
             }
             
             Tessellator.SpotLight.prototype.postInit = Tessellator.EMPTY_FUNC;
@@ -8733,10 +8911,10 @@
 
 
             Tessellator.DirectionalLight.prototype.init = function (interpreter){
-                var color = interpreter.get("color");
-                this.r = color.r * color.a;
-                this.g = color.g * color.a;
-                this.b = color.b * color.a;
+                var color = interpreter.get("color").clone().divide(Tessellator.float(255));
+                this.r = color[0] * color[3];
+                this.g = color[1] * color[3];
+                this.b = color[2] * color[3];
             }
             
             Tessellator.DirectionalLight.prototype.postInit = Tessellator.EMPTY_FUNC;
@@ -9134,7 +9312,7 @@
         
         var self = this;
         
-        return function (name, divisor){
+        var func = function (name, divisor){
             divisor = divisor === undefined ? 1 : divisor
             
             var o = self.attribs[name];
@@ -9142,6 +9320,12 @@
             o.divisor = divisor;
             self.instances = o.buffer.getLength() / o.dataSize.value * divisor;
         }
+        
+        for (var i = 0; i < arguments.length; i++){
+            func(arguments[i]);
+        }
+        
+        return func;
     }
     
     Tessellator.Object.prototype.render = function (shader){
