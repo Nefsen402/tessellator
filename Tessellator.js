@@ -195,7 +195,7 @@
         }
     }
     
-    Tessellator.VERSION = "5a beta";
+    Tessellator.VERSION = "5b beta";
     
     if (window.module){
         window.module.exports = Tessellator;
@@ -1391,9 +1391,9 @@
         }
         
         Tessellator.mat4.prototype.copy = function (copy){
-            if (copy.constructor === Tessellator.mat4){
+            if (copy.length === 16){
                 this.set(copy);
-            }else if (copy.constructor === Tessellator.mat3){
+            }else if (copy.length === 9){
                 this[ 0] = copy[0];
                 this[ 1] = copy[1];
                 this[ 2] = copy[2];
@@ -1413,7 +1413,7 @@
                 this[13] = 0;
                 this[14] = 0;
                 this[15] = 1;
-            }else if (copy.constructor === Tessellator.mat2){
+            }else if (copy.length === 4){
                 this[ 0] = copy[0];
                 this[ 1] = copy[1];
                 this[ 2] = 0;
@@ -1967,7 +1967,7 @@
         Tessellator.mat3.prototype.copy = function (copy){
             if (copy.constructor === Tessellator.mat3){
                 this.set(copy);
-            }else if (copy.constructor === Tessellator.mat4){
+            }else if (copy.length === 16){
                 this[0] = copy[ 0];
                 this[1] = copy[ 1];
                 this[2] = copy[ 2];
@@ -1979,7 +1979,7 @@
                 this[6] = copy[ 8];
                 this[7] = copy[ 9];
                 this[8] = copy[10];
-            }else if (copy.constructor === Tessellator.mat2){
+            }else if (copy.length === 4){
                 this[0] = copy[0];
                 this[1] = copy[1];
                 this[2] = 0;
@@ -3027,6 +3027,27 @@
             return this;
         }
         
+        Tessellator.vec3.prototype.rotate = function (matrix){
+            if (this.tween) this.tween.cancel();
+            
+            var
+                x = this[0],
+                y = this[1],
+                z = this[2];
+            
+            if (matrix.length === 16){
+                this[0] = matrix[ 0] * x + matrix[ 4] * y + matrix[ 8] * z;
+                this[1] = matrix[ 1] * x + matrix[ 5] * y + matrix[ 9] * z;
+                this[2] = matrix[ 2] * x + matrix[ 6] * y + matrix[10] * z;
+            }else if (matrix.length === 9){
+                this[0] = matrix[0] * x + matrix[3] * y + matrix[6] * z;
+                this[1] = matrix[1] * x + matrix[4] * y + matrix[7] * z;
+                this[2] = matrix[2] * x + matrix[5] * y + matrix[8] * z;
+            }
+            
+            return this;
+        }
+        
         Tessellator.vec3.prototype.step = function (edge){
             if (this.tween) this.tween.cancel();
             edge = Tessellator.float.forValue(edge);
@@ -3193,7 +3214,7 @@
                     this[0] *= vec[0];
                     this[1] *= vec[1];
                     this[2] *= vec[2];
-                }else if (vec.length === 4){
+                }else if (vec.length === 16){
                     var
                         x = this[0],
                         y = this[1],
@@ -4115,6 +4136,10 @@
             this.updated = false;
         }
         
+        Tessellator.Tween.prototype.getVec = function (){
+            return this.vec;
+        }
+        
         Tessellator.Tween.prototype.cancel = function (){
             if (!this.updating){
                 this.update();
@@ -4174,6 +4199,10 @@
         Tessellator.Tween.prototype.dir = function (vec, time){
             time = Tessellator.float.forValue(time || 0);
             
+            if (!isNaN(vec)){
+                vec = Tessellator.float(vec);
+            }
+            
             if (time <= 0){
                 this.add(function (tween, t){
                     for (var i = 0; i < tween.vec.length; i++){
@@ -4198,6 +4227,10 @@
         Tessellator.Tween.prototype.to = function (pos, rate){
             rate = Tessellator.float.forValue(rate || 0);
             
+            if (!isNaN(pos)){
+                pos = Tessellator.float(pos);
+            }
+            
             this.add(function (tween, t){
                 var vec = pos.clone().subtract(tween.ovec).divide(rate);
                 
@@ -4212,6 +4245,10 @@
         }
         
         Tessellator.Tween.prototype.set = function (pos){
+            if (!isNaN(pos)){
+                pos = Tessellator.float(pos);
+            }
+            
             this.add(function (tween){
                 tween.vec.set(pos);
                 
@@ -4232,10 +4269,18 @@
         Tessellator.Tween.prototype.sin = function (amp, frq, time){
             time = Tessellator.float.forValue(time || 0);
             
+            if (!isNaN(amp)){
+                amp = Tessellator.float(amp);
+            }
+            
+            if (!isNaN(frq)){
+                frq = Tessellator.float(frq);
+            }
+            
             if (time <= 0){
                 this.add(function (tween, t){
                     for (var i = 0; i < tween.vec.length; i++){
-                        tween.vec[i] = tween.ovec[i] + Math.sin(t / 1000 * frq * Math.PI * 2) * amp[i];
+                        tween.vec[i] = tween.ovec[i] + Math.sin(t / 1000 * frq[0] * Math.PI * 2) * amp[i];
                     }
                     
                     return -1;
@@ -4243,7 +4288,7 @@
             }else{
                 this.add(function (tween, t){
                     for (var i = 0; i < tween.vec.length; i++){
-                        tween.vec[i] = tween.ovec[i] + Math.sin(Math.min(t, time) / 1000 * frq * Math.PI * 2) * amp[i];
+                        tween.vec[i] = tween.ovec[i] + Math.sin(Math.min(t, time) / 1000 * frq[0] * Math.PI * 2) * amp[i];
                     }
                     
                     return t - time;
@@ -4256,10 +4301,18 @@
         Tessellator.Tween.prototype.cos = function (amp, frq, time){
             time = Tessellator.float.forValue(time || 0);
             
+            if (!isNaN(amp)){
+                amp = Tessellator.float(amp);
+            }
+            
+            if (!isNaN(frq)){
+                frq = Tessellator.float(frq);
+            }
+            
             if (time <= 0){
                 this.add(function (tween, t){
                     for (var i = 0; i < tween.vec.length; i++){
-                        tween.vec[i] = tween.ovec[i] + Math.cos(t / 1000 * frq * Math.PI * 2) * amp[i];
+                        tween.vec[i] = tween.ovec[i] + Math.cos(t / 1000 * frq[0] * Math.PI * 2) * amp[i];
                     }
                     
                     return -1;
@@ -4267,7 +4320,7 @@
             }else{
                 this.add(function (tween, t){
                     for (var i = 0; i < tween.vec.length; i++){
-                        tween.vec[i] = tween.ovec[i] + Math.cos(Math.min(t, time) / 1000 * frq * Math.PI * 2) * amp[i];
+                        tween.vec[i] = tween.ovec[i] + Math.cos(Math.min(t, time) / 1000 * frq[0] * Math.PI * 2) * amp[i];
                     }
                     
                     return t - time;
@@ -4280,12 +4333,20 @@
         Tessellator.Tween.prototype.rad = function (start, cycles, rsin, rcos, time){
             time = Tessellator.float.forValue(time || 0);
             
+            if (!isNaN(start)){
+                start = Tessellator.float(start);
+            }
+            
+            if (!isNaN(cycles)){
+                cycles = Tessellator.float(cycles);
+            }
+            
             if (time <= 0){
                 this.add(function (tween, t){
                     for (var i = 0; i < tween.vec.length; i++){
                         tween.vec[i] = tween.ovec[i] + 
-                            Math.sin(t / 1000 * cycles * Math.PI * 2 + start * Math.PI * 2) * rsin[i] +
-                            Math.cos(t / 1000 * cycles * Math.PI * 2 + start * Math.PI * 2) * rcos[i];
+                            Math.sin(t / 1000 * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rsin[i] +
+                            Math.cos(t / 1000 * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rcos[i];
                     }
                     
                     return -1;
@@ -4294,8 +4355,8 @@
                 this.add(function (tween, t){
                     for (var i = 0; i < tween.vec.length; i++){
                         tween.vec[i] = tween.ovec[i] + 
-                            Math.sin(Math.min(t / time, 1) * cycles * Math.PI * 2 + start * Math.PI * 2) * rsin[i] +
-                            Math.cos(Math.min(t / time, 1) * cycles * Math.PI * 2 + start * Math.PI * 2) * rcos[i];
+                            Math.sin(Math.min(t / time, 1) * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rsin[i] +
+                            Math.cos(Math.min(t / time, 1) * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rcos[i];
                     }
                     
                     return t - time;
@@ -6007,9 +6068,9 @@
                 
                 this.model = arguments[1];
             }
-			
-			this.noLightingTexture = Tessellator.NO_LIGHT = new Tessellator.TextureData(this.tessellator, 1, 1, Tessellator.RGBA, Tessellator.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255]));
-			this.lightingTexture = new Tessellator.TextureData(this.tessellator, 4, 128, Tessellator.RGBA, Tessellator.FLOAT);
+            
+			this.noLightingTexture = Tessellator.NO_LIGHT = new Tessellator.TextureData(this.tessellator, 1, 2, Tessellator.RGBA, Tessellator.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255, 0, 0, 0, 0]));
+			this.lightingTexture = new Tessellator.TextureData(this.tessellator, 4, 256, Tessellator.RGBA, Tessellator.FLOAT);
         }
         
         Tessellator.extend(Tessellator.ModelRenderer, Tessellator.RendererAbstract);
@@ -6017,8 +6078,11 @@
         Tessellator.ModelRenderer.prototype.setLighting = function (model, matrix, index){
             if (!matrix){
                 matrix = Tessellator.mat4();
+                var float = Tessellator.float();
                 
-                return this.setLighting(model, matrix, Tessellator.float());
+                return this.setLighting(model, matrix, float);
+                
+                this.lightingTexture.data[float[0] * 4 * 4] = 0;
             }else{
                 for (var i = 0, k = model.model.length; i < k; i++){
                     var action = model.model[i];
@@ -6049,6 +6113,10 @@
                         action.set(this.lightingTexture.data, index[0] * 4 * 4, matrix);
                         
                         index[0]++;
+                        
+                        if (index[0] > 256){
+                            throw "too many lights. The limit is 256";
+                        }
                     }else if (action.type === Tessellator.MODEL){
                         if (action.render){
                             this.setLighting(action, matrix.clone(), index);
@@ -6077,13 +6145,11 @@
                 return false;
             }
             
-            this.setLighting(model, matrix.get("pMatrix") ? matrix.get("pMatrix").clone().multiply(matrix.get("mvMatrix")) : null, Tessellator.float());
+            this.setLighting(model);
             
-			this.lightingTexture.update();
-            matrix.set("lighting", this.lightingTexture);
+            this.lightingTexture.update();
         }
-
-
+        
         Tessellator.ModelRenderer.prototype.renderRaw = function (matrix, model){
             model = model || this.model;
             
@@ -8033,17 +8099,15 @@
             this.type = Tessellator.ENABLE;
             this.arg = arg;
         }
-
-
+        
         Tessellator.Enable.prototype.apply = function (render){
             if (this.arg === Tessellator.LIGHTING){
-                render.set("lights", render.gets("lighting"));
+                render.set("lights", render.renderer.lightingTexture);
             }else{
                 render.enable(this.arg);
             }
         }
-
-
+        
         Tessellator.Enable.prototype.init = function (interpreter){
             if (this.arg === Tessellator.NORMAL){
                 interpreter.set("lighting", true);
@@ -9701,11 +9765,9 @@
 
             Tessellator.AmbientLight.prototype.set = function (lighting, index, matrix){
                 lighting[0 + index] = 1;
-                lighting[1 + index] = this.r;
-                lighting[2 + index] = this.g;
-                lighting[3 + index] = this.b;
-                
-                return 1;
+                lighting[1 + index] = this.color[0] * this.color[3] / 255 / 255;
+                lighting[2 + index] = this.color[1] * this.color[3] / 255 / 255;;
+                lighting[3 + index] = this.color[2] * this.color[3] / 255 / 255;;
             }
 
 
@@ -9713,10 +9775,7 @@
 
 
             Tessellator.AmbientLight.prototype.init = function (interpreter){
-                var color = interpreter.get("color").clone().divide(Tessellator.float(255));
-                this.r = color[0] * color[3];
-                this.g = color[1] * color[3];
-                this.b = color[2] * color[3];
+                this.color = interpreter.get("color");
             }
             
             Tessellator.AmbientLight.prototype.postInit = Tessellator.EMPTY_FUNC;
@@ -9730,7 +9789,7 @@
                 this.type = Tessellator.LIGHTING_SPECULAR;
                 this.subtype = Tessellator.LIGHTING;
                 
-                this.intensity = intensity;
+                this.intensity = isNaN(intensity) ? intensity : Tessellator.float(intensity);
             }
             
             Tessellator.SpecularLight.prototype.init = function (interpreter){
@@ -9741,73 +9800,57 @@
             Tessellator.SpecularLight.prototype.postInit = Tessellator.EMPTY_FUNC;
             
             Tessellator.SpecularLight.prototype.apply = function (render){
-                render.set("specular", this.intensity);
+                render.set("specular", this.intensity.x());
             }
         }
         { //point lighting
-            Tessellator.Model.prototype.setPointLight = function (x, y, z, range){
-                return this.add(new Tessellator.PointLight(x, y, z, range));
+            Tessellator.Model.prototype.setPointLight = function (){
+                return this.add(Tessellator.new.apply(Tessellator.PointLight, arguments));
             }
             
-            Tessellator.PointLight = function (x, y, z, range){
+            Tessellator.PointLight = function (){
+                if (arguments.length === 1 || arguments.length === 2){
+                    this.pos = arguments[0];
+                    var range = arguments[1];
+                    
+                    if (range === undefined || isNaN(range)){
+                        this.range = range;
+                    }else{
+                        this.range = Tessellator.float(range);
+                    }
+                }else if (arguments.length === 3 || arguments.length === 4){
+                    this.pos = Tessellator.vec3(arguments[0], arguments[1], arguments[2]);
+                    var range = arguments[3];
+                    
+                    if (range === undefined || isNaN(range)){
+                        this.range = range;
+                    }else{
+                        this.range = Tessellator.float(range);
+                    }
+                }else{
+                    throw "invalid arguments in Tessellator.PointLight";
+                }
+                
                 this.type = Tessellator.LIGHTING_POINT;
                 this.subtype = Tessellator.LIGHTING;
-                
-                this.x = x;
-                this.y = y;
-                this.z = z;
-                this.range = range;
             }
             
             Tessellator.PointLight.prototype.set = function (lighting, index, matrix){
+                lighting[1 + index] = this.color[0] * this.color[3] / 255 / 255;
+                lighting[2 + index] = this.color[1] * this.color[3] / 255 / 255;
+                lighting[3 + index] = this.color[2] * this.color[3] / 255 / 255;
+                
+                var vec = this.pos.clone().multiply(matrix);
+                lighting[4 + index] = vec[0];
+                lighting[5 + index] = vec[1];
+                lighting[6 + index] = vec[2];
+                
                 if (this.range){
                     lighting[0 + index] = 4;
-                    lighting[1 + index] = this.r;
-                    lighting[2 + index] = this.g;
-                    lighting[3 + index] = this.b;
                     
-                    {
-                        //calculate scale values
-                        var
-                            sx = matrix[ 0] * this.x + matrix[ 4] * this.y + matrix[ 8] * this.z,
-                            sy = matrix[ 1] * this.x + matrix[ 5] * this.y + matrix[ 9] * this.z,
-                            sz = matrix[ 2] * this.x + matrix[ 6] * this.y + matrix[10] * this.z;
-                        
-                        //calculate translated values
-                        var
-                            tx = sx + matrix[12],
-                            ty = sy + matrix[13],
-                            tz = sz + matrix[14];
-                        
-                        lighting[4 + index] = tx;
-                        lighting[5 + index] = ty;
-                        lighting[6 + index] = tz;
-                    }
-                    
-                    lighting[7 + index] = this.range;
+                    lighting[7 + index] = Math.abs(this.range.x());
                 }else{
                     lighting[0 + index] = 3;
-                    lighting[1 + index] = this.r;
-                    lighting[2 + index] = this.g;
-                    lighting[3 + index] = this.b;
-                    
-                    {
-                        //calculate scale values
-                        var
-                            sx = matrix[ 0] * this.x + matrix[ 4] * this.y + matrix[ 8] * this.z,
-                            sy = matrix[ 1] * this.x + matrix[ 5] * this.y + matrix[ 9] * this.z,
-                            sz = matrix[ 2] * this.x + matrix[ 6] * this.y + matrix[10] * this.z;
-                        
-                        //calculate translated values
-                        var
-                            tx = sx + matrix[12],
-                            ty = sy + matrix[13],
-                            tz = sz + matrix[14];
-                        
-                        lighting[4 + index] = tx;
-                        lighting[5 + index] = ty;
-                        lighting[6 + index] = tz;
-                    }
                 }
                 
                 return 2;
@@ -9817,176 +9860,117 @@
 
 
             Tessellator.PointLight.prototype.init = function (interpreter){
-                var color = interpreter.get("color").clone().divide(Tessellator.float(255));
-                this.r = color[0] * color[3];
-                this.g = color[1] * color[3];
-                this.b = color[2] * color[3];
+                this.color = interpreter.get("color");
             }
             
             Tessellator.PointLight.prototype.postInit = Tessellator.EMPTY_FUNC;
         }
         { //spot lighting
-            Tessellator.Model.prototype.setSpotLight = function (x, y, z, vx, vy, vz, angle, range){
-                return this.add(new Tessellator.SpotLight(x, y, z, vx, vy, vz, angle, range));
+            Tessellator.Model.prototype.setSpotLight = function (){
+                return this.add(Tessellator.new.apply(Tessellator.SpotLight, arguments));
             }
             
-            Tessellator.SpotLight = function (x, y, z, vx, vy, vz, angle, range){
+            Tessellator.SpotLight = function (){
+                if (arguments.length === 3 || arguments.length === 4){
+                    this.pos = arguments[0];
+                    this.vec = arguments[1];
+                    this.angle = isNaN(arguments[2]) ? arguments[2] : Tessellator.float(arguments[2]);
+                    
+                    var range = arguments[3];
+                    
+                    if (range === undefined || isNaN(range)){
+                        this.range = range;
+                    }else{
+                        this.range = Tessellator.float(range);
+                    }
+                }else if (arguments.length === 7 || arguments.length === 8){
+                    this.pos = Tessellator.vec3(arguments[0], arguments[1], arguments[2]);
+                    this.vec = Tessellator.vec3(arguments[3], arguments[4], arguments[5]);
+                    this.angle = isNaN(arguments[6]) ? arguments[6] : Tessellator.float(arguments[6]);
+                    
+                    var range = arguments[7];
+                    
+                    if (range === undefined || isNaN(range)){
+                        this.range = range;
+                    }else{
+                        this.range = Tessellator.float(range);
+                    }
+                }
+                
                 this.type = Tessellator.LIGHTING_SPOT;
                 this.subtype = Tessellator.LIGHTING;
-                
-                this.x = x;
-                this.y = y;
-                this.z = z;
-                this.vx = vx;
-                this.vy = vy;
-                this.vz = vz;
-                this.angle = angle;
-                this.range = range;
             }
             
             Tessellator.SpotLight.prototype.set = function (lighting, index, matrix){
+                lighting[1 + index] = this.color[0] * this.color[3] / 255 / 255;
+                lighting[2 + index] = this.color[1] * this.color[3] / 255 / 255;
+                lighting[3 + index] = this.color[2] * this.color[3] / 255 / 255;
+                
+                var pos = this.pos.clone().multiply(matrix);
+                lighting[4 + index] = pos[0];
+                lighting[5 + index] = pos[1];
+                lighting[6 + index] = pos[2];
+                
+                var vec = this.vec.clone().rotate(matrix);
+                lighting[8  + index] = vec[0];
+                lighting[9  + index] = vec[1];
+                lighting[10 + index] = vec[2];
                 if (!this.range){
                     lighting[0 + index] = 5;
-                    lighting[1 + index] = this.r;
-                    lighting[2 + index] = this.g;
-                    lighting[3 + index] = this.b;
                     
-                    //calculate translated values
-                    lighting[4 + index] = matrix[ 0] * this.x + matrix[ 4] * this.y + matrix[ 8] * this.z + matrix[12];
-                    lighting[5 + index] = matrix[ 1] * this.x + matrix[ 5] * this.y + matrix[ 9] * this.z + matrix[13];
-                    lighting[6 + index] = matrix[ 2] * this.x + matrix[ 6] * this.y + matrix[10] * this.z + matrix[14];
-                    
-                    //adjust vector to follow matrix rotations
-                    {
-                        var
-                            tx = matrix[ 0] * this.vx + matrix[ 4] * this.vy + matrix[ 8] * this.vz,
-                            ty = matrix[ 1] * this.vx + matrix[ 5] * this.vy + matrix[ 9] * this.vz,
-                            tz = matrix[ 2] * this.vx + matrix[ 6] * this.vy + matrix[10] * this.vz;
-                        
-                        //normalize
-                        var l = Math.sqrt(tx * tx + ty * ty + tz * tz);
-                        tx /= l;
-                        ty /= l;
-                        tz /= l;
-                        
-                        lighting[8  + index] = tx;
-                        lighting[9  + index] = ty;
-                        lighting[10 + index] = tz;
-                    }
-                    
-                    lighting[11 + index] = this.angle;
+                    lighting[11 + index] = this.angle.x();
                 }else{
                     lighting[0 + index] = 6;
-                    lighting[1 + index] = this.r;
-                    lighting[2 + index] = this.g;
-                    lighting[3 + index] = this.b;
                     
-                    //adjust position to follow matrix
-                    {
-                        //calculate scale values
-                        var
-                            sx = matrix[ 0] * this.x + matrix[ 4] * this.y + matrix[ 8] * this.z,
-                            sy = matrix[ 1] * this.x + matrix[ 5] * this.y + matrix[ 9] * this.z,
-                            sz = matrix[ 2] * this.x + matrix[ 6] * this.y + matrix[10] * this.z;
-                        
-                        //calculate translated values
-                        var
-                            tx = sx + matrix[12],
-                            ty = sy + matrix[13],
-                            tz = sz + matrix[14];
-                        
-                        lighting[4 + index] = tx;
-                        lighting[5 + index] = ty;
-                        lighting[6 + index] = tz;
-                    }
-                    
-                    lighting[7 + index] = this.range;
-                    
-                    //adjust vector to follow matrix rotations
-                    {
-                        var
-                            tx = (matrix[ 0] * this.vx + matrix[ 4] * this.vy + matrix[ 8] * this.vz),
-                            ty = (matrix[ 1] * this.vx + matrix[ 5] * this.vy + matrix[ 9] * this.vz),
-                            tz = (matrix[ 2] * this.vx + matrix[ 6] * this.vy + matrix[10] * this.vz);
-                        
-                        //normalize
-                        var l = Math.sqrt(tx * tx + ty * ty + tz * tz);
-                        tx /= l;
-                        ty /= l;
-                        tz /= l;
-                        
-                        lighting[8  + index] = tx;
-                        lighting[9  + index] = ty;
-                        lighting[10 + index] = tz;
-                    }
-                    
-                    lighting[11 + index] = this.angle;
+                    lighting[7 + index] = Math.abs(this.range.x());
+                    lighting[11 + index] = this.angle.x();
                 }
-                
-                return 3;
             }
             
             Tessellator.SpotLight.prototype.apply = Tessellator.EMPTY_FUNC;
-
-
+            
             Tessellator.SpotLight.prototype.init = function (interpreter){
-                var color = interpreter.get("color").clone().divide(Tessellator.float(255));
-                this.r = color[0] * color[3];
-                this.g = color[1] * color[3];
-                this.b = color[2] * color[3];
+                this.color = interpreter.get("color");
             }
             
             Tessellator.SpotLight.prototype.postInit = Tessellator.EMPTY_FUNC;
         }
         { //direction lighting
-            Tessellator.Model.prototype.setDirectionalLight = function (x, y, z){
-                return this.add(new Tessellator.DirectionalLight(x, y, z));
+            Tessellator.Model.prototype.setDirectionalLight = function (){
+                return this.add(Tessellator.new.apply(Tessellator.DirectionalLight, arguments));
             }
             
-            Tessellator.DirectionalLight = function (x, y, z){
+            Tessellator.DirectionalLight = function (){
+                if (arguments.length === 1){
+                    this.vec = arguments[0];
+                }else if (arguments.length === 3){
+                    this.vec = Tessellator.vec3(arguments);
+                }else{
+                    throw "invalid arguments in Tessellator.DirectionLight";
+                }
+                
                 this.type = Tessellator.LIGHTING_DIRECTIONAL;
                 this.subtype = Tessellator.LIGHTING;
                 
-                this.x = x;
-                this.y = y;
-                this.z = z;
             }
             
             Tessellator.DirectionalLight.prototype.set = function (lighting, index, matrix){
                 lighting[0 + index] = 2;
-                lighting[1 + index] = this.r;
-                lighting[2 + index] = this.g;
-                lighting[3 + index] = this.b;
+                lighting[1 + index] = this.color[0] * this.color[3] / 255 / 255;
+                lighting[2 + index] = this.color[1] * this.color[3] / 255 / 255;
+                lighting[3 + index] = this.color[2] * this.color[3] / 255 / 255;
                 
-                //adjust vector to follow matrix rotations
-                {
-                    var
-                        tx = (matrix[ 0] * this.x + matrix[ 4] * this.y + matrix[ 8] * this.z),
-                        ty = (matrix[ 1] * this.x + matrix[ 5] * this.y + matrix[ 9] * this.z),
-                        tz = (matrix[ 2] * this.x + matrix[ 6] * this.y + matrix[10] * this.z);
-                    
-                    //normalize
-                    var l = Math.sqrt(tx * tx + ty * ty + tz * tz);
-                    tx /= l;
-                    ty /= l;
-                    tz /= l;
-                    
-                    lighting[4 + index] = tx;
-                    lighting[5 + index] = ty;
-                    lighting[6 + index] = tz;
-                }
+                var vec = this.vec.clone().rotate(matrix).normalize();
                 
-                return 2;
+                lighting[4 + index] = vec[0];
+                lighting[5 + index] = vec[1];
+                lighting[6 + index] = vec[2];
             }
             
             Tessellator.DirectionalLight.prototype.apply = Tessellator.EMPTY_FUNC;
 
-
             Tessellator.DirectionalLight.prototype.init = function (interpreter){
-                var color = interpreter.get("color").clone().divide(Tessellator.float(255));
-                this.r = color[0] * color[3];
-                this.g = color[1] * color[3];
-                this.b = color[2] * color[3];
+                this.color = interpreter.get("color");
             }
             
             Tessellator.DirectionalLight.prototype.postInit = Tessellator.EMPTY_FUNC;
@@ -10644,6 +10628,42 @@
             
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.CLAMP_TO_EDGE);
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.CLAMP_TO_EDGE);
+        }
+        
+        Tessellator.TEXTURE_FILTER_LINEAR_REPEAT = function (tessellator, texture){
+            Tessellator.TEXTURE_FILTER_LINEAR(tessellator, texture);
+            
+            tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.REPEAT);
+            tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.REPEAT);
+        }
+        
+        Tessellator.TEXTURE_FILTER_NEAREST_REPEAT = function (tessellator, texture){
+            Tessellator.TEXTURE_FILTER_NEAREST(tessellator, texture);
+            
+            tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.REPEAT);
+            tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.REPEAT);
+        }
+        
+        Tessellator.TEXTURE_FILTER_LINEAR_REPEAT = function (tessellator, texture){
+            if (!tessellator.extensions.get("TEXTURE_MAX_ANISOTROPY_EXT")){
+                throw "anisotropic filtering not supported";
+            }
+            
+            Tessellator.TEXTURE_FILTER_LINEAR(tessellator, texture);
+            
+            tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.TEXTURE_MAX_ANISOTROPY_EXT);
+            tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.TEXTURE_MAX_ANISOTROPY_EXT);
+        }
+        
+        Tessellator.TEXTURE_FILTER_NEAREST_REPEAT = function (tessellator, texture){
+            if (!tessellator.extensions.get("TEXTURE_MAX_ANISOTROPY_EXT")){
+                throw "anisotropic filtering not supported";
+            }
+            
+            Tessellator.TEXTURE_FILTER_NEAREST(tessellator, texture);
+            
+            tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.TEXTURE_MAX_ANISOTROPY_EXT);
+            tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.TEXTURE_MAX_ANISOTROPY_EXT);
         }
         
         Tessellator.DEFAULT_TEXTURE_FILTER = Tessellator.TEXTURE_FILTER_NEAREST;
@@ -11849,7 +11869,6 @@
         
         Tessellator.TextureData.prototype.configure = function (target, track){
             var gl = this.tessellator.GL;
-            
             if (this.isReady()){
                 if (!track || track.constructor === Tessellator.RenderMatrix){
                     track = null;
@@ -11865,7 +11884,10 @@
                 }
                 
                 if (!this.isTracking(track)){
+                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
                     this.tessellator.GL.texImage2D(this.tessellator.glConst(target), 0, this.dataType, this.width, this.height, 0, this.dataType, this.storeType, this.data);
+                    
+                    this.track(track);
                 }
             }
         }
@@ -12302,8 +12324,6 @@
     };
     
     { //shader program
-        Tessellator.MODEL_VIEW_LIGHT_UNIFORM_SIZE = 32;
-        
         Tessellator.PIXEL_SHADER_VERTEX_SHADER = "precision lowp float;attribute vec2 position;uniform vec2 aspect;varying vec2 texturePos;void main(void){texturePos=(position+1.0)/2.0;gl_Position=vec4(position*(aspect+1.),0.0,1.0);}";
         Tessellator.ATLAS_ANIMATION_VERTEX_SHADER = "precision lowp float;attribute vec2 position;attribute vec2 textureCoord;varying vec2 texturePos;void main(void){texturePos=textureCoord;gl_Position=vec4(position,0.0,1.0);}";
         Tessellator.ATLAS_VERTEX_SHADER = "precision lowp float;attribute vec2 position;uniform vec2 atlasDims;uniform vec2 atlas;varying vec2 texturePos;void main(void){texturePos=(position+1.0)/2.0;gl_Position=vec4((atlas+texturePos)/atlasDims*2.0-1.0,0.0,1.0);}";
@@ -12351,13 +12371,13 @@
         );
         
         Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_VERTEX_SHADER_COLOR = "attribute vec3 position;attribute vec4 color;attribute vec3 normal;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec3 lightNormal;varying vec4 mvPosition;varying vec4 vColor;void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);vColor=color;}";
-        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_FRAGMENT_SHADER_COLOR = "precision mediump float;const int lightCount=32;uniform vec4 clip;uniform vec2 window;uniform float specular;varying vec4 vColor;varying vec3 lightNormal;varying vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<128.;i++){vec4 light0=texture2D(lights,vec2(0./4.,i/128.));int type=int(light0.x);vec3 color=light0.yzw;if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights,vec2(1./4.,i/128.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights,vec2(1./4.,i/128.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights,vec2(1./4.,i/128.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float specularLight=0.0;if(specular>1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights,vec2(1./4.,i/128.));vec4 light2=texture2D(lights,vec2(2./4.,i/128.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights,vec2(1./4.,i/128.));vec4 light2=texture2D(lights,vec2(2./4.,i/128.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=vColor;if(mainColor.w==0.0){discard;}else{if(lightNormal.x!=0.0||lightNormal.y!=0.0||lightNormal.z!=0.0){mainColor*=vec4(getLightMask(),1.0);}gl_FragColor=mainColor;}}";
+        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_FRAGMENT_SHADER_COLOR = "precision mediump float;const int lightCount=32;uniform vec4 clip;uniform vec2 window;uniform float specular;varying vec4 vColor;varying vec3 lightNormal;varying vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights,vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights,vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights,vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float specularLight=0.0;if(specular>1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=vColor;if(mainColor.w==0.0){discard;}else{if(lightNormal.x!=0.0||lightNormal.y!=0.0||lightNormal.z!=0.0){mainColor*=vec4(getLightMask(),1.0);}gl_FragColor=mainColor;}}";
         Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_VERTEX_SHADER_TEXTURE = "attribute vec3 position;attribute vec2 color;attribute vec3 normal;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec3 lightNormal;varying vec4 mvPosition;varying vec2 vTexture;void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);vTexture=color;}";
-        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_FRAGMENT_SHADER_TEXTURE = "precision mediump float;const int lightCount=32;uniform sampler2D texture;uniform vec4 mask;uniform vec4 clip;uniform vec2 window;uniform float specular;varying vec2 vTexture;varying vec3 lightNormal;varying vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<128.;i++){vec4 light0=texture2D(lights,vec2(0./4.,i/128.));int type=int(light0.x);vec3 color=light0.yzw;if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights,vec2(1./4.,i/128.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights,vec2(1./4.,i/128.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights,vec2(1./4.,i/128.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float specularLight=0.0;if(specular>1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights,vec2(1./4.,i/128.));vec4 light2=texture2D(lights,vec2(2./4.,i/128.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights,vec2(1./4.,i/128.));vec4 light2=texture2D(lights,vec2(2./4.,i/128.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=texture2D(texture,vTexture)*mask;if(mainColor.w==0.0){discard;}else{if(lightNormal.x!=0.0||lightNormal.y!=0.0||lightNormal.z!=0.0){mainColor.xyz*=getLightMask();}gl_FragColor=mainColor;}}";
+        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_FRAGMENT_SHADER_TEXTURE = "precision mediump float;const int lightCount=32;uniform sampler2D texture;uniform vec4 mask;uniform vec4 clip;uniform vec2 window;uniform float specular;varying vec2 vTexture;varying vec3 lightNormal;varying vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights,vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights,vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights,vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float specularLight=0.0;if(specular>1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=texture2D(texture,vTexture)*mask;if(mainColor.w==0.0){discard;}else{if(lightNormal.x!=0.0||lightNormal.y!=0.0||lightNormal.z!=0.0){mainColor.xyz*=getLightMask();}gl_FragColor=mainColor;}}";
         
-        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER_COLOR = "attribute vec3 position;attribute vec4 color;attribute vec3 normal;const int lightCount=32;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;vec3 lightNormal;vec4 mvPosition;varying vec4 vColor;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<128.;i++){vec4 light0=texture2D(lights, vec2(0./4.,i/128.));int type=int(light0.x);vec3 color=light0.yzw;if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights, vec2(1./4.,i/128.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights, vec2(1./4.,i/128.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights, vec2(1./4.,i/128.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights, vec2(1./4.,i/128.));vec4 light2=texture2D(lights, vec2(2./4.,i/128.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights, vec2(1./4.,i/128.));vec4 light2=texture2D(lights, vec2(2./4.,i/128.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;vColor=color;lightNormal=normalize(nMatrix*normal);vColor.rgb*=getLightMask();}";
+        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER_COLOR = "attribute vec3 position;attribute vec4 color;attribute vec3 normal;const int lightCount=32;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;vec3 lightNormal;vec4 mvPosition;varying vec4 vColor;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights, vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights, vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights, vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;vColor=color;lightNormal=normalize(nMatrix*normal);vColor.rgb*=getLightMask();}";
         Tessellator.MODEL_VIEW_VERTEX_LIGHTING_FRAGMENT_SHADER_COLOR = "precision mediump float;uniform vec4 clip;uniform vec2 window;varying vec4 vColor;void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}if(vColor.w==0.0){discard;}else{gl_FragColor=vColor;}}";
-        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER_TEXTURE = "attribute vec3 position;attribute vec2 color;attribute vec3 normal;const int lightCount=32;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec2 vTexture;varying vec3 lightMask;vec3 lightNormal;vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<128.;i++){vec4 light0=texture2D(lights, vec2(0./4.,i/128.));int type=int(light0.x);vec3 color=light0.yzw;if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights, vec2(1./4.,i/128.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights, vec2(1./4.,i/128.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights, vec2(1./4.,i/128.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights, vec2(1./4.,i/128.));vec4 light2=texture2D(lights, vec2(2./4.,i/128.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights, vec2(1./4.,i/128.));vec4 light2=texture2D(lights, vec2(2./4.,i/128.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);lightMask=getLightMask();vTexture=color;}";
+        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER_TEXTURE = "attribute vec3 position;attribute vec2 color;attribute vec3 normal;const int lightCount=32;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec2 vTexture;varying vec3 lightMask;vec3 lightNormal;vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights, vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights, vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights, vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);lightMask=getLightMask();vTexture=color;}";
         Tessellator.MODEL_VIEW_VERTEX_LIGHTING_FRAGMENT_SHADER_TEXTURE = "precision mediump float;uniform sampler2D texture;uniform vec4 mask;uniform vec4 clip;uniform vec2 window;varying vec2 vTexture;varying vec3 lightMask;void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=texture2D(texture,vTexture)*mask;mainColor.xyz*=lightMask;if(mainColor.w==0.0){discard;}else{gl_FragColor=mainColor;}}";
         
         Tessellator.MODEL_VIEW_VERTEX_SHADER_COLOR = "attribute vec3 position;attribute vec4 color;uniform mat4 mvMatrix;uniform mat4 pMatrix;varying vec4 vColor;void main(void){gl_Position=pMatrix*mvMatrix*vec4(position,1.0);vColor=color;}";
