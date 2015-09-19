@@ -195,7 +195,7 @@
         }
     }
     
-    Tessellator.VERSION = "5b beta";
+    Tessellator.VERSION = "5c beta";
     
     if (window.module){
         window.module.exports = Tessellator;
@@ -987,9 +987,11 @@
                                 level.__proto__.SUPER_WILDCARD = level;
                                 level = level.__proto__;
                                 
-                                level[obj].apply(self, arguments);
+                                var value = level[obj].apply(self, arguments);
                                 
                                 level = level.SUPER_WILDCARD;
+                                
+                                return value;
                             }
                         })(oo);
                     }
@@ -1032,13 +1034,21 @@
             for (var i = 0; i < avaliable.length; i++){
                 this.extensions[avaliable[i]] = undefined;
             }
+            
+            this.vendors = [
+                "",
+                "WEBKIT_",
+                "MOZ_"
+            ];
         }
         
         Tessellator.Extensions.prototype.get = function (key){
             var c = this.extensions[key];
             
             if (c === undefined){
-                c = this.tessellator.GL.getExtension(key) || this.tessellator.GL.getExtension("MOS_" + key) || this.tessellator.GL.getExtension("WEBKIT_" + key);
+                for (var i = 0; i < this.vendors.length && !c; i++){
+                    c = this.tessellator.GL.getExtension(this.vendors[i] + key);
+                }
                 
                 if (!c){
                     c = undefined;
@@ -4376,8 +4386,20 @@
                 this.create(type);
             }
             
-            this.loaded = false;
-            this.disposable - true;
+            this.ready = false;
+            this.disposable = true;
+        }
+        
+        Tessellator.Shader.prototype.setReady = function (){
+            this.ready = true;
+            
+            if (this.listener){
+                this.listener(this);
+            }
+        }
+        
+        Tessellator.Shader.prototype.isReady = function (){
+            return this.ready;
         }
         
         Tessellator.Shader.prototype.loadDOM = function (dom){
@@ -4514,11 +4536,7 @@
                 }
             }
             
-            this.loaded = true;
-            
-            if (this.listener){
-                this.listener(this);
-            }
+            this.setReady();
             
             return this;
         }
@@ -4528,8 +4546,6 @@
                 throw "shader is already initialized!";
             }else{
                 this.type = this.tessellator.glConst(type);
-                this.loaded = false;
-                
                 this.shader = this.tessellator.GL.createShader(this.type);
             }
             
@@ -4552,7 +4568,7 @@
             
             this.linked = [];
             this.shader = this.tessellator.GL.createProgram();
-            this.loaded = false;
+            this.ready = false;
             this.active = false;
             
             this.attribs = {};
@@ -4565,7 +4581,7 @@
         Tessellator.Program.prototype.link = function (shader){
             this.linked.push(shader);
             
-            if (shader.loaded){
+            if (shader.isReady()){
                 var res = shader.onLink(this);
                 
                 if (res === undefined || res){
@@ -4594,7 +4610,7 @@
             var ready = true;
             
             for (var i = 0; i < this.linked.length; i++){
-                if (!this.linked[i].loaded){
+                if (!this.linked[i].isReady()){
                     ready = false;
                     break;
                 }
@@ -4683,10 +4699,18 @@
                     }
                 }
                 
-                this.loaded = true;
+                this.setReady();
             }
             
             return this;
+        }
+        
+        Tessellator.Program.prototype.setReady = function (){
+            this.ready = true;
+        }
+        
+        Tessellator.Program.prototype.isReady = function (){
+            return this.ready;
         }
         
         Tessellator.Program.prototype.hasUniform = function (key){
@@ -4786,14 +4810,8 @@
             return false;
         }
         
-        Tessellator.Program.prototype.init = function () {
-            return true;
-        }
-        
-        Tessellator.Program.prototype.postInit = function (){}
-        
         Tessellator.Program.prototype.set = function (){
-            return true;
+            return this.isReady();
         }
         
         Tessellator.Program.prototype.postSet = function (){}
@@ -5023,9 +5041,12 @@
     }
     { //shader set DrawDependant
         Tessellator.ShaderSetDrawDependant = function (drawMode, shaders){
+            if (drawMode.length !== shaders.length){
+                throw "the length of the arrays does not match!";
+            }
+            
             this.drawMode = drawMode;
             this.shaders = shaders;
-            this.loaded = true;
             
             for (var i = 0, k = this.shaders.length; i < k; i++){
                 if (this.tessellator){
@@ -5059,17 +5080,15 @@
         }
         
         Tessellator.ShaderSetDrawDependant.prototype.set = function (matrix, render, draw){
+            var drawMode = draw.drawMode;
+            
             for (var i = 0, k = this.drawMode.length; i < k; i++){
-                if (draw.drawMode === this.drawMode[i]){
-                    this.shader = this.shaders[i]
+                if (i + 1 === k || drawMode === this.drawMode[i]){
+                    this.shader = this.shaders[i];
                     this.uniforms = this.shader.uniforms;
                     this.attribs = this.shader.attribs;
                     
-                    if (this.shader.loaded){
-                        return true;
-                    }else{
-                        return false;
-                    }
+                    return this.shader.set();
                 }
             }
             
@@ -5105,6 +5124,10 @@
         Tessellator.ShaderSetDrawDependant.prototype.bind = function (){
             return this.shader.bind();
         }
+        
+        Tessellator.ShaderSetDrawDependant.prototype.isReady = function (){
+            return true;
+        }
     }
     { //shader preset
         Tessellator.ShaderPreset = function (create){
@@ -5116,13 +5139,13 @@
                 return new Tessellator.ShaderSetDrawDependant(
                     [
                         Tessellator.COLOR,
-                        Tessellator.TEXTURE,
-                        Tessellator.LINE
+                        Tessellator.LINE,
+                        Tessellator.TEXTURE
                     ],
                     [
                         tessellator.createShaderProgram(svert1, sfrag1),
-                        tessellator.createShaderProgram(svert2, sfrag2),
                         tessellator.createShaderProgram(svert3, sfrag3),
+                        tessellator.createShaderProgram(svert2, sfrag2),
                     ]
                 );
             }
@@ -5567,28 +5590,82 @@
             }
         }
         
+        this.animate = 
+            window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame;
+        
+        if (!this.animate){
+            this.usingFallback = true;
+            
+            this.animate = function (func){
+                return window.setTimeout(function (){
+                    func();
+                }, 1000 / 60);
+            }
+        }
+        
         var self = this;
         
-        this.renderLoop = function (){
+        this.renderLoop = function (currTime){
+            
             if (self.item){
-                if (self.item.render()){
-                    window.requestAnimationFrame(self.renderLoop);
+                var time = self.item.render(currTime);
+                
+                if (time <= 0){
+                    self.animationFrame = self.animate.call(window, self.renderLoop);
+                    self.fpswait = undefined;
+                }else{
+                    self.animationFrame = null;
+                    
+                    self.fpswait = window.setTimeout(function (){
+                        self.fpswait = undefined;
+                        self.animationFrame = self.animate.call(window, self.renderLoop);
+                    }, time);
                 }
             }
         }
         
-        this.eventLoop = function (){
-            if (self.item){
-                self.item.event();
-            }
+        this.start();
+    }
+    
+    Tessellator.RenderLoop.prototype.stop = function (){
+        if (this.fpswait !== undefined){
+            window.clearTimeout(this.fpswait);
         }
         
-        window.setInterval(this.eventLoop, 1000);
-        window.requestAnimationFrame(this.renderLoop);
+        if (this.animationFrame !== undefined){
+            if (this.usingFallback){
+                window.clearTimeout(this.animationFrame);
+            }else{
+                (
+                window.cancelAnimationFrame ||
+                window.webkitCancelAnimationFrame || 
+                window.mozCancelAnimationFrame
+                )
+                (this.animationFrame);
+            }
+            
+            this.animationFrame = undefined;
+        }
+    }
+    
+    Tessellator.RenderLoop.prototype.start = function (){
+        if (this.animationFrame === undefined){
+            this.animationFrame = this.animate.call(window, this.renderLoop);
+        }
     }
     
     Tessellator.RenderLoop.prototype.getFPS = function (){
         return this.item.fps;
+    }
+    
+    Tessellator.RenderLoop.prototype.getAverageFPS = function (){
+        return this.item.averageFps;
+    }
+    
+    Tessellator.RenderLoop.prototype.setFPS = function (fps){
+        this.item.setFPS(fps);
     }
     
     Tessellator.RenderLoop.prototype.getRenderTime = function (){
@@ -5599,117 +5676,49 @@
         this.item.renderer = renderer;
     }
     
-    Tessellator.RenderLoop.prototype.setModel = function (model){
-        this.item.model = model;
+    Tessellator.RenderLoop.prototype.renderArg = function (arg){
+        this.item.setRenderArg(arg);
     }
     
-    Tessellator.RenderLoop.Item = function (){
+    Tessellator.RenderLoop.Item = function (renderer, renderArg){
         this.frames = 0;
-        this.lastSample = 0;
+        this.avSample = Tessellator.vec3();
         
-        if (arguments.length === 1){
-            if (arguments[0].type === Tessellator.MODEL){
-                this.model = arguments[0];
-            }else{
-                this.renderer = arguments[0];
-            }
-            
-        }else if (arguments.length === 2){
-            this.renderer = arguments[0];
-            this.model = arguments[1];
-        }else if (arguments.length === 3){
-            this.renderer = arguments[0];
-            this.model = arguments[1];
-            this.maxFPS = arguments[2];
-        }
+        this.fps = 0;
+        this.averageFps = 0;
         
-        if (this.maxFPS){
-            var self = this;
-            
-            window.setInterval(function (){
-                window.requestAnimationFrame(function (){
-                    self.render();
-                });
-            }, 1000 / this.maxFPS);
-        }
+        this.renderer = arguments[0];
+        this.renderArg = arguments[1];
+    }
+    
+    Tessellator.RenderLoop.Item.prototype.setFPS = function (fps){
+        this.maxFPS = fps && !isNaN(fps) ? Tessellator.float(fps) : fps;
+    }
+    
+    Tessellator.RenderLoop.Item.prototype.setRenderArg = function (arg){
+        this.renderArg = arg;
     }
     
     Tessellator.RenderLoop.Item.prototype.render = function (){
+        var time = Date.now();
         this.frames++;
-        this.lastRender = Date.now();
         
-        if (this.renderer){
-            this.renderer.render(null, this.model);
-        }else{
-            this.model.renderModel();
+        this.fps = 1000 / (time - this.lastRender) || 0;
+        
+        if (this.avSample[1] >= 32){
+            this.avSample[2] = this.avSample[0] / 32;
+            this.avSample[0] = 0;
+            this.avSample[1] = 0;
         }
         
+        this.avSample[0] += this.fps;
+        var det = ++this.avSample[1] / 32;
+        this.averageFps = this.avSample[0] / this.avSample[1] * det + (1-det) * this.avSample[2];
+        
+        this.lastRender = time;
+        this.renderer.render(null, this.renderArg);
         this.renderTime = Date.now() - this.lastRender;
-        
-        return !this.maxFPS;
-    }
-    
-    Tessellator.RenderLoop.Item.prototype.event = function (){
-        this.fps = this.frames - this.lastSample;
-        
-        this.lastSample = this.frames;
-    }
-}
-{ //render queue
-    Tessellator.RenderQueue = function (){
-        this.queue = [];
-        
-        for (var i = 0; i < arguments.length; i++){
-            this.queue.push({
-                render: arguments[i],
-            });
-        }
-    }
-
-
-    Tessellator.RenderQueue.add = function (renderer, arg){
-        this.queue.push({
-            render: renderer,
-            arg: arg,
-        });
-    }
-
-
-    Tessellator.RenderQueue.remove = function (renderer){
-        for (var i = 0, k = this.queue.length; i < k; i++){
-            if (this.queue[i].render == renderer){
-                this.queue.splice(i, i + 1);
-                
-                return true;
-            }
-        }
-        
-        return false;
-    }
-
-
-    Tessellator.RenderQueue.removeModel = function (arg){
-        for (var i = 0, k = this.queue.length; i < k; i++){
-            if (this.queue[i].arg === arg){
-                this.queue.splice(i, i + 1);
-                
-                return true;
-            }
-        }
-        
-        return false;
-    }
-
-
-    Tessellator.RenderQueue.clear = function (){
-        this.queue = [];
-    }
-
-
-    Tessellator.RenderQueue.prototype.render = function (){
-        for (var i = 0, k = this.queue.length; i < k; i++){
-            this.queue[i].render.render(null, this.queue[i].arg);
-        }
+        return this.maxFPS ? 1000 / this.maxFPS.x() - this.renderTime - 1 : 0;
     }
 }
 { //render matrix
@@ -5964,10 +5973,10 @@
         Tessellator.RendererAbstract.prototype.render = function (matrix, arg){
             if (!matrix){
                 this.preRender();
-                this.renderNew(new Tessellator.RenderMatrix(this), arg);
+                this.render(new Tessellator.RenderMatrix(this), arg);
                 this.postRender();
-            }else{
-                this.renderNew(matrix, arg);
+            }else if (this.init(matrix, arg)){
+                this.renderRaw(matrix, arg);
             }
         }
         
@@ -5977,26 +5986,9 @@
             return this;
         }
         
-        Tessellator.RendererAbstract.prototype.renderNew = function (matrix, arg){
-            if (arguments.length === 1){
-                arg = matrix;
-                matrix = new Tessellator.RenderMatrix(this);
-            }
-            
-            if (!this.shader){
-                return;
-            }else if (!this.shader.loaded){
-                return;
-            }
-            
-            if (this.init(matrix, arg) !== false){
-                this.enableRenderer();
-                this.renderRaw(matrix, arg);
-                this.disableRenderer();
-            }
+        Tessellator.RendererAbstract.prototype.init = function (){
+            return this.shader;
         }
-        
-        Tessellator.RendererAbstract.prototype.init = Tessellator.EMPTY_FUNC;
         
         Tessellator.RendererAbstract.prototype.configure = function (matrix){
             if (this.shader){
@@ -6009,14 +6001,6 @@
                     this.uniformSetter(matrix);
                 }
             }
-        }
-        
-        Tessellator.RendererAbstract.prototype.enableRenderer = function (){
-            this.shader.init(this)
-        }
-        
-        Tessellator.RendererAbstract.prototype.disableRenderer = function (){
-            this.shader.postInit(this);
         }
         
         Tessellator.RendererAbstract.prototype.preRender = function (){
@@ -6067,9 +6051,11 @@
                 }
                 
                 this.model = arguments[1];
+            }else{
+                this.super();
             }
             
-			this.noLightingTexture = Tessellator.NO_LIGHT = new Tessellator.TextureData(this.tessellator, 1, 2, Tessellator.RGBA, Tessellator.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255, 0, 0, 0, 0]));
+			this.noLightingTexture = new Tessellator.TextureData(this.tessellator, 1, 1, Tessellator.RGBA, Tessellator.UNSIGNED_BYTE, new Uint8Array([0, 255, 255, 255]));
 			this.lightingTexture = new Tessellator.TextureData(this.tessellator, 4, 256, Tessellator.RGBA, Tessellator.FLOAT);
         }
         
@@ -6084,6 +6070,8 @@
                 
                 this.lightingTexture.data[float[0] * 4 * 4] = 0;
             }else{
+                var lighting = false;
+                
                 for (var i = 0, k = model.model.length; i < k; i++){
                     var action = model.model[i];
                     
@@ -6119,10 +6107,14 @@
                         }
                     }else if (action.type === Tessellator.MODEL){
                         if (action.render){
-                            this.setLighting(action, matrix.clone(), index);
+                            lighting = this.setLighting(action, matrix.clone(), index) || lighting;
                         }
+                    }else if (action.type === Tessellator.ENABLE && action.arg === Tessellator.LIGHTING){
+                        lighting = true;
                     }
                 }
+                
+                return lighting;
             }
         }
         
@@ -6141,13 +6133,15 @@
         Tessellator.ModelRenderer.prototype.init = function (matrix, model){
             model = model || this.model;
             
-            if (!model.render){
+            if (!this.super.init() || !model.render){
                 return false;
             }
             
-            this.setLighting(model);
+            if (this.setLighting(model)){
+                this.lightingTexture.update();
+            }
             
-            this.lightingTexture.update();
+            return true;
         }
         
         Tessellator.ModelRenderer.prototype.renderRaw = function (matrix, model){
@@ -6164,9 +6158,7 @@
                             copy.set("mvMatrix", matrix.get("mvMatrix").clone());
                             copy.dirty();
                             
-                            this.disableRenderer();
-                            mod.renderer.renderNew(copy, mod);
-                            this.enableRenderer();
+                            mod.renderer.render(copy, mod);
                         }else{
                             var copy = matrix.copy();
                             
@@ -6396,6 +6388,35 @@
             }
         }
     }
+    { //queued renderer
+        Tessellator.QueuedRenderer = function (){
+            this.setQueue(arguments);
+        }
+        
+        Tessellator.extend(Tessellator.QueuedRenderer, Tessellator.RendererAbstract);
+        
+        Tessellator.QueuedRenderer.prototype.setQueue = function (){
+            if (arguments.length === 1){
+                if (arguments[0].length){
+                    this.queue = arguments[0];
+                }else{
+                    this.queue = arguments;
+                }
+            }else{
+                this.queue = arguments;
+            }
+        }
+       
+        Tessellator.QueuedRenderer.prototype.init = function (){
+            return this.queue;
+        }
+        
+        Tessellator.QueuedRenderer.prototype.renderRaw = function (matrix, arg){
+            for (var i = 0; i < this.queue.length; i++){
+                this.queue[i].render(matrix.copy(), arg);
+            }
+        }
+    }
     { //fill renderer
         Tessellator.FillRenderer = function (renderer){
             this.color = Tessellator.getColor(Array.prototype.slice.call(arguments, 1, arguments.length));
@@ -6414,7 +6435,7 @@
             var newrender = new Tessellator.RenderMatrix(this.renderer);
             newrender.set("window", render.gets("window"));
             
-            this.renderer.renderNew(newrender, arg);
+            this.renderer.render(newrender, arg);
         }
     }
     { //pixel shader renderer
@@ -9998,7 +10019,7 @@
         Tessellator.FontSheet.prototype.apply = Tessellator.EMPTY_FUNC;
     }
     { //texture scale
-        Tessellator.Model.prototype.setTextureScale = function (){
+        Tessellator.Model.prototype.scaleTexture = function (){
             if (arguments.length == 1){
                 return this.add(new Tessellator.TextureScale(arguments[0], arguments[0]));
             }else{
@@ -10029,7 +10050,7 @@
         Tessellator.TextureScale.prototype.apply = Tessellator.EMPTY_FUNC;
     }
     { //texture translate
-        Tessellator.Model.prototype.setTextureTranslation = function (){
+        Tessellator.Model.prototype.translateTexture = function (){
             if (arguments.length == 1){
                 return this.add(new Tessellator.TextureTranslate(arguments[0], arguments[0]));
             }else{
@@ -10431,6 +10452,8 @@
             }else{
                 matrix.unify();
             }
+        }else if (!shader.isReady()){
+            return;
         }
         
         if (this.oes){
@@ -10594,76 +10617,93 @@
 }
 { //textures
     { //texture filters
-        Tessellator.TEXTURE_FILTER_NEAREST = function (tessellator, texture){
+        Tessellator.TEXTURE_FILTER_NEAREST = function TEXTURE_FILTER_NEAREST (tessellator, texture){
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MAG_FILTER, tessellator.GL.NEAREST);
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MIN_FILTER, tessellator.GL.NEAREST);
         }
         
-        Tessellator.TEXTURE_FILTER_LINEAR = function (tessellator, texture){
+        Tessellator.TEXTURE_FILTER_LINEAR = function TEXTURE_FILTER_LINEAR (tessellator, texture){
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MAG_FILTER, tessellator.GL.LINEAR);
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MIN_FILTER, tessellator.GL.LINEAR);
         }
         
-        Tessellator.TEXTURE_FILTER_MIPMAP_NEAREST = function (tessellator, texture){
+        Tessellator.TEXTURE_FILTER_MIPMAP_NEAREST = function TEXTURE_FILTER_MIPMAP_NEAREST (tessellator, texture){
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MAG_FILTER, tessellator.GL.NEAREST);
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MIN_FILTER, tessellator.GL.LINEAR_MIPMAP_NEAREST);
             tessellator.GL.generateMipmap(tessellator.glConst(texture.type));
         }
         
-        Tessellator.TEXTURE_FILTER_MIPMAP_LINEAR = function (tessellator, texture){
+        Tessellator.TEXTURE_FILTER_MIPMAP_LINEAR = function TEXTURE_FILTER_MIPMAP_LINEAR (tessellator, texture){
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MAG_FILTER, tessellator.GL.LINEAR);
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MIN_FILTER, tessellator.GL.LINEAR_MIPMAP_NEAREST);
             tessellator.GL.generateMipmap(tessellator.glConst(texture.type));
         }
         
-        Tessellator.TEXTURE_FILTER_LINEAR_CLAMP = function (tessellator, texture){
+        Tessellator.TEXTURE_FILTER_LINEAR_CLAMP = function TEXTURE_FILTER_LINEAR_CLAMP (tessellator, texture){
             Tessellator.TEXTURE_FILTER_LINEAR(tessellator, texture);
             
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.CLAMP_TO_EDGE);
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.CLAMP_TO_EDGE);
         }
         
-        Tessellator.TEXTURE_FILTER_NEAREST_CLAMP = function (tessellator, texture){
+        Tessellator.TEXTURE_FILTER_NEAREST_CLAMP = function TEXTURE_FILTER_NEAREST_CLAMP (tessellator, texture){
             Tessellator.TEXTURE_FILTER_NEAREST(tessellator, texture);
             
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.CLAMP_TO_EDGE);
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.CLAMP_TO_EDGE);
         }
         
-        Tessellator.TEXTURE_FILTER_LINEAR_REPEAT = function (tessellator, texture){
+        Tessellator.TEXTURE_FILTER_LINEAR_REPEAT = function TEXTURE_FILTER_LINEAR_REPEAT (tessellator, texture){
             Tessellator.TEXTURE_FILTER_LINEAR(tessellator, texture);
             
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.REPEAT);
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.REPEAT);
         }
         
-        Tessellator.TEXTURE_FILTER_NEAREST_REPEAT = function (tessellator, texture){
+        Tessellator.TEXTURE_FILTER_NEAREST_REPEAT = function TEXTURE_FILTER_NEAREST_REPEAT (tessellator, texture){
             Tessellator.TEXTURE_FILTER_NEAREST(tessellator, texture);
             
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.REPEAT);
             tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.REPEAT);
         }
         
-        Tessellator.TEXTURE_FILTER_LINEAR_REPEAT = function (tessellator, texture){
-            if (!tessellator.extensions.get("TEXTURE_MAX_ANISOTROPY_EXT")){
-                throw "anisotropic filtering not supported";
-            }
+        Tessellator.TEXTURE_FILTER_NEAREST_ANISOTROPY = function (tessellator, texture){
+            var f = tessellator.extensions.get("EXT_texture_filter_anisotropic");
             
-            Tessellator.TEXTURE_FILTER_LINEAR(tessellator, texture);
-            
-            tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.TEXTURE_MAX_ANISOTROPY_EXT);
-            tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.TEXTURE_MAX_ANISOTROPY_EXT);
-        }
-        
-        Tessellator.TEXTURE_FILTER_NEAREST_REPEAT = function (tessellator, texture){
-            if (!tessellator.extensions.get("TEXTURE_MAX_ANISOTROPY_EXT")){
+            if (!f){
                 throw "anisotropic filtering not supported";
             }
             
             Tessellator.TEXTURE_FILTER_NEAREST(tessellator, texture);
             
-            tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.TEXTURE_MAX_ANISOTROPY_EXT);
-            tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.TEXTURE_MAX_ANISOTROPY_EXT);
+            var max = tessellator.GL.getParameter(f.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+            tessellator.GL.texParameteri(tessellator.glConst(texture.type), f.TEXTURE_MAX_ANISOTROPY_EXT, max);
+        }
+        
+        Tessellator.TEXTURE_FILTER_LINEAR_ANISOTROPY = function (tessellator, texture){
+            var f = tessellator.extensions.get("EXT_texture_filter_anisotropic");
+            
+            if (!f){
+                throw "anisotropic filtering not supported";
+            }
+            
+            Tessellator.TEXTURE_FILTER_LINEAR(tessellator, texture);
+            
+            var max = tessellator.GL.getParameter(f.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+            tessellator.GL.texParameteri(tessellator.glConst(texture.type), f.TEXTURE_MAX_ANISOTROPY_EXT, max);
+        }
+        
+        Tessellator.TEXTURE_FILTER_NEAREST_ANISOTROPY = function (tessellator, texture){
+            var f = tessellator.extensions.get("EXT_texture_filter_anisotropic");
+            
+            if (!f){
+                throw "anisotropic filtering not supported";
+            }
+            
+            Tessellator.TEXTURE_FILTER_NEAREST(tessellator, texture);
+            
+            var max = tessellator.GL.getParameter(f.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+            tessellator.GL.texParameteri(tessellator.glConst(texture.type), f.TEXTURE_MAX_ANISOTROPY_EXT, max);
         }
         
         Tessellator.DEFAULT_TEXTURE_FILTER = Tessellator.TEXTURE_FILTER_NEAREST;
@@ -10679,9 +10719,7 @@
     }
     { //texture
         Tessellator.Texture = function (tessellator){
-            if (tessellator) tessellator.resources.push(this);
-            
-            this.tessellator = tessellator;
+            this.setTessellator(tessellator);
             this.disposable = false;
             this.disposed = false;
             this.ready = false;
@@ -10693,6 +10731,14 @@
             
             this.width = -1;
             this.height = -1;
+        }
+        
+        Tessellator.Texture.prototype.setTessellator = function (tess){
+            if (tess && !this.tessellator){
+                this.tessellator = tess;
+                
+                this.tessellator.resources.push(this);
+            }
         }
         
         Tessellator.Texture.prototype.track = function (obj){
@@ -10817,6 +10863,8 @@
         
         Tessellator.TextureImage = function (tessellator, src, filter){
             this.super (tessellator);
+            this.filter = filter;
+            this.autoUpdate = false;
             
             if (src){
                 if (src.constructor === String){
@@ -10883,7 +10931,7 @@
                 if (!track || track.constructor === Tessellator.RenderMatrix){
                     track = null;
                     
-                    if (!this.isTracking(track)){
+                    if (this.autoUpdate || !this.isTracking(track)){
                         if (!this.texture){
                             gl.bindTexture(gl.TEXTURE_2D, this.texture = gl.createTexture());
                         }else{
@@ -10894,7 +10942,7 @@
                     }
                 }
                 
-                if (!this.isTracking(track)){
+                if (this.autoUpdate || !this.isTracking(track)){
                     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
                     gl.texImage2D(this.tessellator.glConst(target), 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
                     
@@ -11816,51 +11864,73 @@
         }
     }
     { //texture data
-        Tessellator.TextureData = function (tessellator, width, height, type, storeType, data, filter){
+        Tessellator.TextureData = function (tessellator, width, height, dataType, storeType, data, filter){
             this.super(tessellator);
             
             this.width = width;
             this.height = height;
             this.data = data;
             this.filter = filter;
-            this.dataType = tessellator.glConst(type || Tessellator.RGBA);
-			this.storeType = tessellator.glConst(storeType || Tessellator.UNSIGNED_BYTE);
             
-			{
-				var dataStorageType = Uint8Array;
-				
-				if (this.storeType === tessellator.GL.FLOAT){
-					if (!tessellator.extensions.get("OES_texture_float")){
-						throw "floating point textures not supported!";
-					}
-					
-					dataStorageType = Float32Array;
-				}else if (this.storeType === tessellator.GL.UNSIGNED_SHORT_4_4_4_4){
-					dataStorageType = Uint16Array;
-				}else if (this.storeType === tessellator.GL.UNSIGNED_SHORT_5_5_5_1){
-					dataStorageType = Uint16Array;
-				}else if (this.storeType === tessellator.GL.UNSIGNED_SHORT_5_6_5){
-					dataStorageType = Uint16Array;
-				}
-				
-				if (!this.data){
-					if (this.dataType === tessellator.GL.ALPHA){
-						this.data = new dataStorageType(this.width * this.height * 1);
-					}else if (this.dataType === tessellator.GL.LUMINANCE){
-						this.data = new dataStorageType(this.width * this.height * 1);
-					}else if (this.dataType === tessellator.GL.LUMINANCE_ALPHA){
-						this.data = new dataStorageType(this.width * this.height * 2);
-					}else if (this.dataType === tessellator.GL.RGB){
-						this.data = new dataStorageType(this.width * this.height * 3);
-					}else if (this.dataType === tessellator.GL.RGBA){
-						this.data = new dataStorageType(this.width * this.height * 4);
-					}
-				}
-			}
+            dataType = dataType || Tessellator.RGBA;
+            storeType = storeType || Tessellator.UNSIGNED_BYTE;
             
             if (!this.filter){
                 this.filter = Tessellator.getAppropriateTextureFilter(this.width, this.height);
             }
+            
+			{
+				var dataStorageType = Uint8Array;
+				
+				if (storeType === Tessellator.FLOAT || storeType === Tessellator.FLOAT32){
+                    if (this.filter.name.indexOf("LINEAR") >= 0){
+                        if (!tessellator.extensions.get("OES_texture_float_linear")){
+                            throw "floating point linear textures not supported. Support for a non-linear texture filter may be possibe";
+                        }
+                    }else{
+                        if (!tessellator.extensions.get("OES_texture_float")){
+                            throw "floating point textures not supported!";
+                        }
+                    }
+					
+					dataStorageType = Float32Array;
+				}else if (storeType === Tessellator.FLOAT16){
+                    if (this.filter.name.indexOf("LINEAR") >= 0){
+                        if (!tessellator.extensions.get("OES_texture_half_float_linear")){
+                            throw "half floating point linear textures not supported. Support for a non-linear texture filter may be possibe";
+                        }
+                    }else{
+                        if (!tessellator.extensions.get("OES_texture_half_float")){
+                            throw "half floating point textures not supported!";
+                        }
+                    }
+					
+					dataStorageType = Uint16Array;
+				}else if (storeType === Tessellator.UNSIGNED_SHORT_4_4_4_4){
+					dataStorageType = Uint16Array;
+				}else if (storeType === Tessellator.UNSIGNED_SHORT_5_5_5_1){
+					dataStorageType = Uint16Array;
+				}else if (storeType === Tessellator.UNSIGNED_SHORT_5_6_5){
+					dataStorageType = Uint16Array;
+				}
+				
+				if (!this.data){
+					if (dataType === Tessellator.ALPHA){
+						this.data = new dataStorageType(this.width * this.height * 1);
+					}else if (dataType === Tessellator.LUMINANCE){
+						this.data = new dataStorageType(this.width * this.height * 1);
+					}else if (dataType === Tessellator.LUMINANCE_ALPHA){
+						this.data = new dataStorageType(this.width * this.height * 2);
+					}else if (dataType === Tessellator.RGB){
+						this.data = new dataStorageType(this.width * this.height * 3);
+					}else if (dataType === Tessellator.RGBA){
+						this.data = new dataStorageType(this.width * this.height * 4);
+					}
+				}
+                
+                this.dataType = tessellator.glConst(dataType);
+                this.storeType = tessellator.glConst(storeType);
+			}
             
             this.setReady();
         }
@@ -12117,7 +12187,8 @@
             this.textures[Tessellator.TextureCubeMap.INDEX_LOOKUP.indexOf(side)] = {
                 texture: texture,
                 target: side,
-                ref: this
+                ref: this,
+                tessellator: this.tessellator,
             }
         }
         
@@ -12283,7 +12354,9 @@
     Tessellator.COLOR_INDIAN_RED = Tessellator.vec4(0.8008, 0.3594, 0.3594, 1);
     Tessellator.COLOR_AMBER = Tessellator.vec4(1, 0.4921, 0, 1);
     Tessellator.COLOR_CLEAR = Tessellator.vec4(0, 0, 0, 0);
-
+    
+    Tessellator.FLOAT32 = Tessellator.Constant.create("FLOAT");
+    Tessellator.FLOAT16 = new Tessellator.Constant("HALF_FLOAT_OES", 0x8D61);
 
     Tessellator.DEFAULT_COLOR = Tessellator.COLOR_WHITE;
     Tessellator.NO_CLIP = new Float32Array([0, 0, 1, 1]);
@@ -12371,13 +12444,13 @@
         );
         
         Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_VERTEX_SHADER_COLOR = "attribute vec3 position;attribute vec4 color;attribute vec3 normal;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec3 lightNormal;varying vec4 mvPosition;varying vec4 vColor;void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);vColor=color;}";
-        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_FRAGMENT_SHADER_COLOR = "precision mediump float;const int lightCount=32;uniform vec4 clip;uniform vec2 window;uniform float specular;varying vec4 vColor;varying vec3 lightNormal;varying vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights,vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights,vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights,vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float specularLight=0.0;if(specular>1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=vColor;if(mainColor.w==0.0){discard;}else{if(lightNormal.x!=0.0||lightNormal.y!=0.0||lightNormal.z!=0.0){mainColor*=vec4(getLightMask(),1.0);}gl_FragColor=mainColor;}}";
+        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_FRAGMENT_SHADER_COLOR = "precision mediump float;const int lightCount=32;uniform vec4 clip;uniform vec2 window;uniform float specular;varying vec4 vColor;varying vec3 lightNormal;varying vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights,vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==0){lightMask+=color;break;}else if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights,vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights,vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float specularLight=0.0;if(specular>1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=vColor;if(mainColor.w==0.0){discard;}else{if(lightNormal.x!=0.0||lightNormal.y!=0.0||lightNormal.z!=0.0){mainColor*=vec4(getLightMask(),1.0);}gl_FragColor=mainColor;}}";
         Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_VERTEX_SHADER_TEXTURE = "attribute vec3 position;attribute vec2 color;attribute vec3 normal;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec3 lightNormal;varying vec4 mvPosition;varying vec2 vTexture;void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);vTexture=color;}";
-        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_FRAGMENT_SHADER_TEXTURE = "precision mediump float;const int lightCount=32;uniform sampler2D texture;uniform vec4 mask;uniform vec4 clip;uniform vec2 window;uniform float specular;varying vec2 vTexture;varying vec3 lightNormal;varying vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights,vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights,vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights,vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float specularLight=0.0;if(specular>1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=texture2D(texture,vTexture)*mask;if(mainColor.w==0.0){discard;}else{if(lightNormal.x!=0.0||lightNormal.y!=0.0||lightNormal.z!=0.0){mainColor.xyz*=getLightMask();}gl_FragColor=mainColor;}}";
+        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_FRAGMENT_SHADER_TEXTURE = "precision mediump float;const int lightCount=32;uniform sampler2D texture;uniform vec4 mask;uniform vec4 clip;uniform vec2 window;uniform float specular;varying vec2 vTexture;varying vec3 lightNormal;varying vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights,vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==0){lightMask+=color;break;}else if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights,vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights,vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float specularLight=0.0;if(specular>1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=texture2D(texture,vTexture)*mask;if(mainColor.w==0.0){discard;}else{if(lightNormal.x!=0.0||lightNormal.y!=0.0||lightNormal.z!=0.0){mainColor.xyz*=getLightMask();}gl_FragColor=mainColor;}}";
         
-        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER_COLOR = "attribute vec3 position;attribute vec4 color;attribute vec3 normal;const int lightCount=32;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;vec3 lightNormal;vec4 mvPosition;varying vec4 vColor;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights, vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights, vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights, vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;vColor=color;lightNormal=normalize(nMatrix*normal);vColor.rgb*=getLightMask();}";
+        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER_COLOR = "attribute vec3 position;attribute vec4 color;attribute vec3 normal;const int lightCount=32;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;vec3 lightNormal;vec4 mvPosition;varying vec4 vColor;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights, vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==0){lightMask+=color;break;}else if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights, vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights, vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;vColor=color;lightNormal=normalize(nMatrix*normal);vColor.rgb*=getLightMask();}";
         Tessellator.MODEL_VIEW_VERTEX_LIGHTING_FRAGMENT_SHADER_COLOR = "precision mediump float;uniform vec4 clip;uniform vec2 window;varying vec4 vColor;void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}if(vColor.w==0.0){discard;}else{gl_FragColor=vColor;}}";
-        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER_TEXTURE = "attribute vec3 position;attribute vec2 color;attribute vec3 normal;const int lightCount=32;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec2 vTexture;varying vec3 lightMask;vec3 lightNormal;vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights, vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights, vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights, vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);lightMask=getLightMask();vTexture=color;}";
+        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER_TEXTURE = "attribute vec3 position;attribute vec2 color;attribute vec3 normal;const int lightCount=32;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec2 vTexture;varying vec3 lightMask;vec3 lightNormal;vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights, vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==0){lightMask+=color;break;}else if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights, vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights, vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);lightMask=getLightMask();vTexture=color;}";
         Tessellator.MODEL_VIEW_VERTEX_LIGHTING_FRAGMENT_SHADER_TEXTURE = "precision mediump float;uniform sampler2D texture;uniform vec4 mask;uniform vec4 clip;uniform vec2 window;varying vec2 vTexture;varying vec3 lightMask;void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=texture2D(texture,vTexture)*mask;mainColor.xyz*=lightMask;if(mainColor.w==0.0){discard;}else{gl_FragColor=mainColor;}}";
         
         Tessellator.MODEL_VIEW_VERTEX_SHADER_COLOR = "attribute vec3 position;attribute vec4 color;uniform mat4 mvMatrix;uniform mat4 pMatrix;varying vec4 vColor;void main(void){gl_Position=pMatrix*mvMatrix*vec4(position,1.0);vColor=color;}";
