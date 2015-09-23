@@ -195,7 +195,7 @@
         }
     }
     
-    Tessellator.VERSION = "5e beta";
+    Tessellator.VERSION = "5f beta";
     
     Tessellator.VENDORS = [
         "",
@@ -4949,9 +4949,9 @@
         Tessellator.Program.prototype.preUnify = function (matrix){
             for (var o in this.uniforms){
                 var u = this.uniforms[o];
-                
+				
                 if (u.startMap){
-                    u.startMap(matrix);
+                    u.startMap(matrix, matrix.gets(o));
                 }
             }
         }
@@ -5181,13 +5181,13 @@
             Tessellator.Program.textureUnit++;
         }
         
-        Tessellator.Program.BIND_TEXTURE_2D.startMap = function (matrix){
-            if (this.value && this.inherit && this.value.lastFrameUpdate !== this.shader.tessellator.frame){
-                this.value.lastFrameUpdate = this.shader.tessellator.frame;
+        Tessellator.Program.BIND_TEXTURE_2D.startMap = function (matrix, value){
+			if (value && this.inherit && value.lastFrameUpdate !== this.shader.tessellator.frame){
+                value.lastFrameUpdate = this.shader.tessellator.frame;
                 
-                this.value.configure(Tessellator.TEXTURE_2D, matrix);
+                value.configure(Tessellator.TEXTURE_2D, matrix);
             }
-            
+			
             Tessellator.Program.textureUnit = -1;
         }
         
@@ -5208,11 +5208,11 @@
             Tessellator.Program.textureUnit++;
         }
         
-        Tessellator.Program.BIND_TEXTURE_CUBE.startMap = function (matrix){
-            if (this.value && this.inherit && this.value.lastFrameUpdate !== this.shader.tessellator.frame){
-                this.value.lastFrameUpdate = this.shader.tessellator.frame;
+        Tessellator.Program.BIND_TEXTURE_CUBE.startMap = function (matrix, value){
+            if (value && this.inherit && value.lastFrameUpdate !== this.shader.tessellator.frame){
+                value.lastFrameUpdate = this.shader.tessellator.frame;
                 
-                this.value.configure(Tessellator.TEXTURE_CUBE_MAP, matrix);
+                value.configure(Tessellator.TEXTURE_CUBE_MAP, matrix);
             }
             
             Tessellator.Program.textureUnit = -1;
@@ -5320,7 +5320,9 @@
             return false;
         }
         
-        Tessellator.ShaderSetDrawDependant.prototype.postSet = function (){}
+        Tessellator.ShaderSetDrawDependant.prototype.postSet = function (){
+			this.shader.postSet();
+		}
         
         Tessellator.ShaderSetDrawDependant.prototype.setInheriter = function (key, value){
             for (var i = 0, k = this.shaders.length; i < k; i++){
@@ -6341,16 +6343,15 @@
         Tessellator.extend(Tessellator.ModelRenderer, Tessellator.RendererAbstract);
         
         Tessellator.ModelRenderer.prototype.setLighting = function (model, matrix, index){
+            var lighting = false;
+			
             if (!matrix){
                 matrix = Tessellator.mat4();
                 var float = Tessellator.float();
                 
-                return this.setLighting(model, matrix, float);
-                
+                lighting = this.setLighting(model, matrix, float);
                 this.lightingTexture.data[float[0] * 4 * 4] = 0;
             }else{
-                var lighting = false;
-                
                 for (var i = 0, k = model.model.length; i < k; i++){
                     var action = model.model[i];
                     
@@ -6360,13 +6361,13 @@
                         var thing = [ action ];
                         
                         while (thing[thing.length - 1].view){
-                            thing.push(thing[thing.length - 1].view);
+							if (thing[thing.length - 1].subtype === Tessellator.CAMERA){
+								thing.push(thing[thing.length - 1].view);
+							}
                         }
                         
                         for (var ii = thing.length - 1; ii >= 0; ii--){
-                            if (thing[ii].subtype === Tessellator.CAMERA){
-                                thing[ii].set(matrix);
-                            }
+                            thing[ii].set(matrix);
                         }
                     }else if (action.type === Tessellator.VIEW){
                         matrix.identity();
@@ -6392,9 +6393,9 @@
                         lighting = true;
                     }
                 }
-				
-                return lighting;
             }
+			
+            return lighting;
         }
         
         Tessellator.ModelRenderer.prototype.configure = function (matrix){
@@ -10544,10 +10545,6 @@
             var matrix = shader;
             shader = shader.renderer.shader;
             
-            if (!shader.set(matrix.renderer, matrix, this)){
-                return;
-            }
-            
             if (this.uniformCount > 0){
                 matrix = matrix.copy();
                 
@@ -10555,9 +10552,17 @@
                     matrix.set(o, this.uniforms[o]);
                 }
             }
-            
+			
+			if (!shader.set(matrix.renderer, matrix, this)){
+                return;
+            }
+			
             shader.preUnify(matrix);
             
+			if (!shader.set(matrix.renderer, matrix, this)){
+                return;
+            }
+			
             if (shader.bind()){
                 matrix.unifyAll();
             }else{
@@ -11713,12 +11718,13 @@
                 
                 Tessellator.TextureModel.AttachmentModel.prototype.render = function (texture, render){
                     if (this.model){
-                        var matrix = new Tessellator.RenderMatrix(this.renderer);
+                        var matrix = new Tessellator.RenderMatrix(this.renderer || render.renderer);
                         
                         matrix.set("window", Tessellator.vec2(texture.width, texture.height));
-                        this.renderer.render(matrix, this.model);
                         
-                        if (render){
+						(this.renderer || render.renderer).render(matrix, this.model);
+                        
+                        if (render && render.dirty){
                             render.dirty();
                         }
                     }
@@ -11757,7 +11763,7 @@
                     
                     this.renderer.render(matrix, this.arg);
                     
-                    if (render){
+                    if (render && render.dirty){
                         render.dirty();
                     }
                 }
@@ -12567,20 +12573,20 @@
             Tessellator.PIXEL_SHADER_PASS
         );
         
-        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_VERTEX_SHADER_COLOR = "attribute vec3 position;attribute vec4 color;attribute vec3 normal;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec3 lightNormal;varying vec4 mvPosition;varying vec4 vColor;void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);vColor=color;}";
-        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_FRAGMENT_SHADER_COLOR = "precision mediump float;const int lightCount=32;uniform vec4 clip;uniform vec2 window;uniform float specular;varying vec4 vColor;varying vec3 lightNormal;varying vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights,vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==0){lightMask+=color;break;}else if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights,vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights,vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float specularLight=0.0;if(specular>1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=vColor;if(mainColor.w==0.0){discard;}else{if(lightNormal.x!=0.0||lightNormal.y!=0.0||lightNormal.z!=0.0){mainColor*=vec4(getLightMask(),1.0);}gl_FragColor=mainColor;}}";
-        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_VERTEX_SHADER_TEXTURE = "attribute vec3 position;attribute vec2 color;attribute vec3 normal;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec3 lightNormal;varying vec4 mvPosition;varying vec2 vTexture;void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);vTexture=color;}";
-        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_FRAGMENT_SHADER_TEXTURE = "precision mediump float;const int lightCount=32;uniform sampler2D texture;uniform vec4 mask;uniform vec4 clip;uniform vec2 window;uniform float specular;varying vec2 vTexture;varying vec3 lightNormal;varying vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights,vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==0){lightMask+=color;break;}else if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights,vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights,vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float specularLight=0.0;if(specular>1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=texture2D(texture,vTexture)*mask;if(mainColor.w==0.0){discard;}else{if(lightNormal.x!=0.0||lightNormal.y!=0.0||lightNormal.z!=0.0){mainColor.xyz*=getLightMask();}gl_FragColor=mainColor;}}";
+        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_VERTEX_SHADER_COLOR = new Tessellator.ShaderPreset(Tessellator.VERTEX_SHADER, "attribute vec3 position;attribute vec4 color;attribute vec3 normal;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec3 lightNormal;varying vec4 mvPosition;varying vec4 vColor;void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);vColor=color;}");
+        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_FRAGMENT_SHADER_COLOR = new Tessellator.ShaderPreset(Tessellator.FRAGMENT_SHADER, "precision mediump float;const int lightCount=32;uniform vec4 clip;uniform vec2 window;uniform float specular;varying vec4 vColor;varying vec3 lightNormal;varying vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights,vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==0){lightMask+=color;break;}else if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights,vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights,vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float specularLight=0.0;if(specular>1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=vColor;if(mainColor.w==0.0){discard;}else{if(lightNormal.x!=0.0||lightNormal.y!=0.0||lightNormal.z!=0.0){mainColor*=vec4(getLightMask(),1.0);}gl_FragColor=mainColor;}}");
+        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_VERTEX_SHADER_TEXTURE = new Tessellator.ShaderPreset(Tessellator.VERTEX_SHADER, "attribute vec3 position;attribute vec2 color;attribute vec3 normal;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec3 lightNormal;varying vec4 mvPosition;varying vec2 vTexture;void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);vTexture=color;}");
+        Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_FRAGMENT_SHADER_TEXTURE = new Tessellator.ShaderPreset(Tessellator.FRAGMENT_SHADER, "precision mediump float;const int lightCount=32;uniform sampler2D texture;uniform vec4 mask;uniform vec4 clip;uniform vec2 window;uniform float specular;varying vec2 vTexture;varying vec3 lightNormal;varying vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights,vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==0){lightMask+=color;break;}else if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights,vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights,vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float specularLight=0.0;if(specular>1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights,vec2(1./4.,i/256.));vec4 light2=texture2D(lights,vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float specularLight=0.0;if(specular>=1.0){specularLight=pow(max(0.,dot(reflect(-npos,lightNormal),normalize(-mvPosition.xyz))),specular);}float intensity=max(0.,dot(lightNormal,npos))+specularLight;lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=texture2D(texture,vTexture)*mask;if(mainColor.w==0.0){discard;}else{if(lightNormal.x!=0.0||lightNormal.y!=0.0||lightNormal.z!=0.0){mainColor.xyz*=getLightMask();}gl_FragColor=mainColor;}}");
         
-        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER_COLOR = "attribute vec3 position;attribute vec4 color;attribute vec3 normal;const int lightCount=32;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;vec3 lightNormal;vec4 mvPosition;varying vec4 vColor;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights, vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==0){lightMask+=color;break;}else if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights, vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights, vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;vColor=color;lightNormal=normalize(nMatrix*normal);vColor.rgb*=getLightMask();}";
-        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_FRAGMENT_SHADER_COLOR = "precision mediump float;uniform vec4 clip;uniform vec2 window;varying vec4 vColor;void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}if(vColor.w==0.0){discard;}else{gl_FragColor=vColor;}}";
-        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER_TEXTURE = "attribute vec3 position;attribute vec2 color;attribute vec3 normal;const int lightCount=32;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec2 vTexture;varying vec3 lightMask;vec3 lightNormal;vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights, vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==0){lightMask+=color;break;}else if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights, vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights, vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);lightMask=getLightMask();vTexture=color;}";
-        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_FRAGMENT_SHADER_TEXTURE = "precision mediump float;uniform sampler2D texture;uniform vec4 mask;uniform vec4 clip;uniform vec2 window;varying vec2 vTexture;varying vec3 lightMask;void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=texture2D(texture,vTexture)*mask;mainColor.xyz*=lightMask;if(mainColor.w==0.0){discard;}else{gl_FragColor=mainColor;}}";
+        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER_COLOR = new Tessellator.ShaderPreset(Tessellator.VERTEX_SHADER, "attribute vec3 position;attribute vec4 color;attribute vec3 normal;const int lightCount=32;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;vec3 lightNormal;vec4 mvPosition;varying vec4 vColor;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights, vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==0){lightMask+=color;break;}else if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights, vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights, vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;vColor=color;lightNormal=normalize(nMatrix*normal);vColor.rgb*=getLightMask();}");
+        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_FRAGMENT_SHADER_COLOR = new Tessellator.ShaderPreset(Tessellator.FRAGMENT_SHADER, "precision mediump float;uniform vec4 clip;uniform vec2 window;varying vec4 vColor;void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}if(vColor.w==0.0){discard;}else{gl_FragColor=vColor;}}");
+        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER_TEXTURE = new Tessellator.ShaderPreset(Tessellator.VERTEX_SHADER, "attribute vec3 position;attribute vec2 color;attribute vec3 normal;const int lightCount=32;uniform mat4 mvMatrix;uniform mat4 pMatrix;uniform mat3 nMatrix;varying vec2 vTexture;varying vec3 lightMask;vec3 lightNormal;vec4 mvPosition;uniform sampler2D lights;vec3 getLightMask(void){vec3 lightMask=vec3(0);for(float i=0.;i<256.;i++){vec4 light0=texture2D(lights, vec2(0./4.,i/256.));int type=int(light0.x);vec3 color=light0.yzw;if(type==0){lightMask+=color;break;}else if(type==1){lightMask+=color;}else if(type==2){vec3 dir=texture2D(lights, vec2(1./4.,i/256.)).xyz;float intensity=max(0.,dot(lightNormal,dir));lightMask+=color*intensity;}else if(type==3){vec3 pos=texture2D(lights, vec2(1./4.,i/256.)).xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}else if(type==4){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);if(range>=length){vec3 npos=dist/length;float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else if(type==5){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;vec3 npos=normalize(pos-mvPosition.xyz);vec3 vec=light2.xyz;float size=light2.w;if(dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity;}}else if(type==6){vec4 light1=texture2D(lights, vec2(1./4.,i/256.));vec4 light2=texture2D(lights, vec2(2./4.,i/256.));vec3 pos=light1.xyz;float range=light1.w;vec3 dist=pos-mvPosition.xyz;float length=sqrt(dist.x*dist.x+dist.y*dist.y+dist.z*dist.z);vec3 npos=dist/length;vec3 vec=light2.xyz;float size=light2.w;if(range>length&&dot(vec,npos)>size){vec3 look=normalize(-mvPosition.xyz);vec3 reflection=reflect(-npos,lightNormal);float intensity=max(0.,dot(lightNormal,npos));lightMask+=color*intensity*((range-length)/range);}}else{return lightMask;}}return lightMask;}void main(void){mvPosition=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*mvPosition;lightNormal=normalize(nMatrix*normal);lightMask=getLightMask();vTexture=color;}");
+        Tessellator.MODEL_VIEW_VERTEX_LIGHTING_FRAGMENT_SHADER_TEXTURE = new Tessellator.ShaderPreset(Tessellator.FRAGMENT_SHADER, "precision mediump float;uniform sampler2D texture;uniform vec4 mask;uniform vec4 clip;uniform vec2 window;varying vec2 vTexture;varying vec3 lightMask;void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=texture2D(texture,vTexture)*mask;mainColor.xyz*=lightMask;if(mainColor.w==0.0){discard;}else{gl_FragColor=mainColor;}}");
         
-        Tessellator.MODEL_VIEW_VERTEX_SHADER_COLOR = "attribute vec3 position;attribute vec4 color;uniform mat4 mvMatrix;uniform mat4 pMatrix;varying vec4 vColor;void main(void){gl_Position=pMatrix*mvMatrix*vec4(position,1.0);vColor=color;}";
-        Tessellator.MODEL_VIEW_FRAGMENT_SHADER_COLOR = "precision mediump float;uniform vec4 clip;uniform vec2 window;varying vec4 vColor;void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}if(vColor.w==0.0){discard;}else{gl_FragColor=vColor;}}";
-        Tessellator.MODEL_VIEW_VERTEX_SHADER_TEXTURE = "attribute vec3 position;attribute vec2 color;uniform mat4 mvMatrix;uniform mat4 pMatrix;varying vec2 vTexture;void main(void){gl_Position=pMatrix*mvMatrix*vec4(position,1.0);vTexture=color;}";
-        Tessellator.MODEL_VIEW_FRAGMENT_SHADER_TEXTURE = "precision mediump float;uniform sampler2D texture;uniform vec4 mask;uniform vec4 clip;uniform vec2 window;varying vec2 vTexture;void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=texture2D(texture,vTexture)*mask;if(mainColor.w==0.0){discard;}else{gl_FragColor=mainColor;}}";
+        Tessellator.MODEL_VIEW_VERTEX_SHADER_COLOR = new Tessellator.ShaderPreset(Tessellator.VERTEX_SHADER, "attribute vec3 position;attribute vec4 color;uniform mat4 mvMatrix;uniform mat4 pMatrix;varying vec4 vColor;void main(void){gl_Position=pMatrix*mvMatrix*vec4(position,1.0);vColor=color;}");
+        Tessellator.MODEL_VIEW_FRAGMENT_SHADER_COLOR = new Tessellator.ShaderPreset(Tessellator.FRAGMENT_SHADER, "precision mediump float;uniform vec4 clip;uniform vec2 window;varying vec4 vColor;void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}if(vColor.w==0.0){discard;}else{gl_FragColor=vColor;}}");
+        Tessellator.MODEL_VIEW_VERTEX_SHADER_TEXTURE = new Tessellator.ShaderPreset(Tessellator.VERTEX_SHADER, "attribute vec3 position;attribute vec2 color;uniform mat4 mvMatrix;uniform mat4 pMatrix;varying vec2 vTexture;void main(void){gl_Position=pMatrix*mvMatrix*vec4(position,1.0);vTexture=color;}");
+        Tessellator.MODEL_VIEW_FRAGMENT_SHADER_TEXTURE = new Tessellator.ShaderPreset(Tessellator.FRAGMENT_SHADER, "precision mediump float;uniform sampler2D texture;uniform vec4 mask;uniform vec4 clip;uniform vec2 window;varying vec2 vTexture;void main(void){{float xarea=gl_FragCoord.x/window.x;float yarea=gl_FragCoord.y/window.y;if(xarea<clip.x||yarea<clip.y||clip.x+clip.z<xarea||clip.y+clip.w<yarea){discard;}}vec4 mainColor=texture2D(texture,vTexture)*mask;if(mainColor.w==0.0){discard;}else{gl_FragColor=mainColor;}}");
         
         Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_SHADER = new Tessellator.ShaderPreset().configureDrawDependant(
             Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_VERTEX_SHADER_COLOR,
