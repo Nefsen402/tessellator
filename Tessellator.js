@@ -1176,8 +1176,6 @@
                     }else{
                         color = Tessellator.vec4();
                     }
-                }else if (arg.constructor === Tessellator.Color){
-                    color = arg;
                 }else if (arg.length === 9 && arg.chatAt(0) === '#'){
                     var red = parseInt(arg.substring(1, 3), 16) / 256;
                     var green = parseInt(arg.substring(3, 5), 16) / 256;
@@ -7605,8 +7603,23 @@
             this.setVertex(quads);
             this.end();
         }
-
-
+        
+        Tessellator.Model.prototype.lineCross = function (x, y, z, xx, yy, zz){
+            if (arguments.length === 4){
+                yy = xx;
+                zz = xx;
+            }
+            
+            model.start(Tessellator.LINE);
+            model.setVertex(x, y, z, xx + x, y, z);
+            model.setVertex(x, y, z, -xx + x, y, z);
+            model.setVertex(x, y, z, x, yy + y, z);
+            model.setVertex(x, y, z, x, -yy + y, z);
+            model.setVertex(x, y, z, x, y, zz + z);
+            model.setVertex(x, y, z, x, y, -zz + z);
+            model.end();
+        }
+        
         Tessellator.Model.prototype.fillFlange = function (x, y, z, height, radius0, radius1, quality){
             if (!quality){
                 quality = Math.max(8, Math.max(radius0, radius1) * 8);
@@ -8109,7 +8122,70 @@
             }
         }
 
-
+        Tessellator.Model.prototype.fullGrid = function (){
+            if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    width = arguments[2],
+                    height = arguments[3],
+                    segX = arguments[4],
+                    segY = arguments[5];
+                
+                this.start(Tessellator.QUAD);
+                for (var xx = 0; xx < segX; xx++){
+                    for (var yy = 0; yy < segY; yy++){
+                        this.setVertex([
+                            x + (xx / segX) * width      , -y - ((yy + 1) / segY) * height, 0,
+                            x + ((xx + 1) / segX) * width, -y - ((yy + 1) / segY) * height, 0,
+                            x + ((xx + 1) / segX) * width, -y - (yy / segY) * height,       0,
+                            x + (xx / segX) * width      , -y - (yy / segY) * height,       0,
+                        ]);
+                    }
+                }
+                this.end();
+            }else if (arguments.length === 8){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    width = arguments[2],
+                    height = arguments[3],
+                    segX = arguments[4],
+                    segY = arguments[5],
+                    tw = arguments[6],
+                    th = arguments[7];
+                
+                var vertices = [];
+                var texture = [];
+                
+                for (var xx = 0; xx < segX; xx++){
+                    for (var yy = 0; yy < segY; yy++){
+                        Array.prototype.push.apply(texture, [
+                            (xx % tw) / tw, ((yy % th) + 1) / th,
+                            ((xx % tw) + 1) / tw, ((yy % th) + 1) / th,
+                            ((xx % tw) + 1) / tw, (yy % th) / th,
+                            (xx % tw) / tw, (yy % th) / th,
+                        ]);
+                        
+                        Array.prototype.push.apply(vertices, [
+                            x + (xx / segX) * width      , -y - ((yy + 1) / segY) * height, 0,
+                            x + ((xx + 1) / segX) * width, -y - ((yy + 1) / segY) * height, 0,
+                            x + ((xx + 1) / segX) * width, -y - (yy / segY) * height,       0,
+                            x + (xx / segX) * width      , -y - (yy / segY) * height,       0,
+                        ]);
+                    }
+                }
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(texture);
+                this.end();
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(vertices);
+                this.end();
+            }
+        }
+        
         Tessellator.Model.prototype.fullGrid = function (){
             if (arguments.length === 6){
                 var
@@ -8175,6 +8251,27 @@
         }
 
 
+        Tessellator.Model.prototype.drawGrid = function (x, y, width, height, segX, segY){
+            this.start(Tessellator.LINE);
+            
+            if (!segX){
+                segX = width;
+            }
+            
+            if (!segY){
+                segY = height;
+            }
+            
+            for (var xx = 0; xx <= segX; xx++){
+                this.setVertex(x + width * xx / segX, y, 0, x + width * xx / segX, y - height, 0);
+            }
+            
+            for (var yy = 0; yy <= segY; yy++){
+                this.setVertex(x, y - height * yy / segY, 0, x + width, y - height * yy / segY, 0);
+            }
+            this.end();
+        }
+        
         Tessellator.Model.prototype.fillGrid = function (x, y, width, height, segX, segY){
             this.start(Tessellator.QUAD);
             
@@ -8422,7 +8519,7 @@
         }
         
         Tessellator.Clear.prototype.apply = function (render){
-            if (this.clearCode & Tessellator.COLOR_BUFFER_BIT.gl != 0){
+            if ((this.clearCode & Tessellator.COLOR_BUFFER_BIT.gl) !== 0){
                 if (this.color){
                     render.tessellator.GL.clearColor(this.color[0], this.color[1], this.color[2], this.color[3]);
                 }else{
@@ -8567,7 +8664,7 @@
         Tessellator.ColorSet = function (color){
             this.type = Tessellator.COLOR;
             
-            this.color = color.clone().multiply(Tessellator.float(255));
+            this.color = color;
         }
 
 
@@ -8584,6 +8681,7 @@
             
             interpreter.set("textureBounds", null);
             interpreter.set("color", this.color);
+            interpreter.set("color255", this.color.clone().multiply(255));
             
             return null;
         }
@@ -9269,7 +9367,7 @@
                 if (this.vertices.length){
                     if (interpreter.get("colorAttribEnabled") && interpreter.get("draw") !== Tessellator.TEXTURE){
                         var k = this.vertices.length / 3;
-                        var c = interpreter.get("color");
+                        var c = interpreter.get("color255");
                         
                         for (var i = 0; i < k; i++){
                             interpreter.shape.colors.push(c);
@@ -9880,10 +9978,12 @@
 
 
             Tessellator.AmbientLight.prototype.set = function (lighting, index, matrix){
+                if (this.color.tween) this.color.tween.update();
+                
                 lighting[0 + index] = 1;
-                lighting[1 + index] = this.color[0] * this.color[3] / 255 / 255;
-                lighting[2 + index] = this.color[1] * this.color[3] / 255 / 255;
-                lighting[3 + index] = this.color[2] * this.color[3] / 255 / 255;
+                lighting[1 + index] = this.color[0] * this.color[3];
+                lighting[2 + index] = this.color[1] * this.color[3];
+                lighting[3 + index] = this.color[2] * this.color[3];
             }
             
             Tessellator.AmbientLight.prototype.applyLighting = function (matrix, index, renderer){
@@ -9956,9 +10056,11 @@
             }
             
             Tessellator.PointLight.prototype.set = function (lighting, index, matrix){
-                lighting[1 + index] = this.color[0] * this.color[3] / 255 / 255;
-                lighting[2 + index] = this.color[1] * this.color[3] / 255 / 255;
-                lighting[3 + index] = this.color[2] * this.color[3] / 255 / 255;
+                if (this.color.tween) this.color.tween.update();
+                
+                lighting[1 + index] = this.color[0] * this.color[3];
+                lighting[2 + index] = this.color[1] * this.color[3];
+                lighting[3 + index] = this.color[2] * this.color[3];
                 
                 var vec = this.pos.clone().multiply(matrix);
                 lighting[4 + index] = vec[0];
@@ -10025,9 +10127,11 @@
             }
             
             Tessellator.SpotLight.prototype.set = function (lighting, index, matrix){
-                lighting[1 + index] = this.color[0] * this.color[3] / 255 / 255;
-                lighting[2 + index] = this.color[1] * this.color[3] / 255 / 255;
-                lighting[3 + index] = this.color[2] * this.color[3] / 255 / 255;
+                if (this.color.tween) this.color.tween.update();
+                
+                lighting[1 + index] = this.color[0] * this.color[3];
+                lighting[2 + index] = this.color[1] * this.color[3];
+                lighting[3 + index] = this.color[2] * this.color[3];
                 
                 var pos = this.pos.clone().multiply(matrix);
                 lighting[4 + index] = pos[0];
@@ -10084,10 +10188,12 @@
             }
             
             Tessellator.DirectionalLight.prototype.set = function (lighting, index, matrix){
+                if (this.color.tween) this.color.tween.update();
+                
                 lighting[0 + index] = 2;
-                lighting[1 + index] = this.color[0] * this.color[3] / 255 / 255;
-                lighting[2 + index] = this.color[1] * this.color[3] / 255 / 255;
-                lighting[3 + index] = this.color[2] * this.color[3] / 255 / 255;
+                lighting[1 + index] = this.color[0] * this.color[3];
+                lighting[2 + index] = this.color[1] * this.color[3];
+                lighting[3 + index] = this.color[2] * this.color[3];
                 
                 var vec = this.vec.clone().rotate(matrix).normalize();
                 
@@ -12484,6 +12590,8 @@
     Tessellator.COLOR_WHITE = Tessellator.vec4(1, 1, 1, 1);
     Tessellator.COLOR_BLACK = Tessellator.vec4(0, 0, 0, 1);
     Tessellator.COLOR_GRAY = Tessellator.vec4(0.5, 0.5, 0.5, 1);
+	Tessellator.COLOR_LIGHT_GRAY = Tessellator.vec4(0.75, 0.75, 0.75, 1);
+	Tessellator.COLOR_DARK_GRAY = Tessellator.vec4(0.25, 0.25, 0.25, 1);
     Tessellator.COLOR_RED = Tessellator.vec4(1, 0, 0, 1);
     Tessellator.COLOR_GREEN = Tessellator.vec4(0, 1, 0, 1);
     Tessellator.COLOR_BLUE = Tessellator.vec4(0, 0, 1, 1);
@@ -12528,6 +12636,8 @@
         "GREEN": Tessellator.COLOR_GREEN,
         "BLUE": Tessellator.COLOR_BLUE,
         "GRAY": Tessellator.COLOR_GRAY,
+		"LIGHT GRAY": Tessellator.COLOR_LIGHT_GRAY,
+		"DARK GRAY": Tessellator.COLOR_DARK_GRAY,
         "YELLOW": Tessellator.COLOR_YELLOW,
         "CYAN": Tessellator.COLOR_CYAN,
         "MAGENTA": Tessellator.COLOR_MAGENTA,
