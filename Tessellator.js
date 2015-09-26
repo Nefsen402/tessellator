@@ -195,7 +195,7 @@
         }
     }
     
-    Tessellator.VERSION = "5g beta";
+    Tessellator.VERSION = "6 beta";
     
     Tessellator.VENDORS = [
         "",
@@ -1957,6 +1957,26 @@
             this[ 8] = x[2] * x00 + y[2] * x10 + z[2] * x20;
             this[ 9] = x[2] * x01 + y[2] * x11 + z[2] * x21;
             this[10] = x[2] * x02 + y[2] * x12 + z[2] * x22;
+            
+            return this;
+        }
+        
+        Tessellator.mat4.prototype.align = function (v1, v2){
+            if (v1.tween) v1.tween.update();
+            if (v2.tween) v2.tween.update();
+            
+            v1 = v1.clone().normalize();
+            v2 = v2.clone().normalize();
+            
+            var v = v1.clone().cross(v2);
+            var c = v1.clone().dot(v2);
+            
+            if (v[0] === 0 && v[1] === 0 && v[2] === 0){
+                v = Tessellator.vec3(1, 0, 0);
+            }
+            
+            this.rotate(Math.acos(c[0]), v);
+            return this;
         }
         
         Tessellator.mat4.prototype.toString = function (){
@@ -2239,27 +2259,93 @@
             return this;
         }
         
-        Tessellator.mat3.prototype.rotate = function (rad){
-            if (rad.length){
-                if (rad.tween) rad.tween.update();
+        Tessellator.mat3.prototype.rotate = function (){
+            if (arguments.length === 1){
+                var rad = arguments[0];
                 
-                rad = Tessellator.float.forValue(rad);
-            }
-            
-            var
-                s = Math.sin(rad),
-                c = Math.cos(rad),
+                if (rad.length){
+                    rad = Tessellator.float.forValue(rad);
+                }
                 
-                a00 = this[0], a01 = this[1], a02 = this[2],
-                a10 = this[3], a11 = this[4], a12 = this[5];
-            
-            this[0] = c * a00 + s * a10;
-            this[1] = c * a01 + s * a11;
-            this[2] = c * a02 + s * a12;
+                var
+                    s = Math.sin(rad),
+                    c = Math.cos(rad),
+                    
+                    a00 = this[0], a01 = this[1], a02 = this[2],
+                    a10 = this[3], a11 = this[4], a12 = this[5];
+                
+                this[0] = c * a00 + s * a10;
+                this[1] = c * a01 + s * a11;
+                this[2] = c * a02 + s * a12;
 
-            this[3] = c * a10 - s * a00;
-            this[4] = c * a11 - s * a01;
-            this[5] = c * a12 - s * a02;
+                this[3] = c * a10 - s * a00;
+                this[4] = c * a11 - s * a01;
+                this[5] = c * a12 - s * a02;
+            }else{
+                var
+                    rot = arguments[0],
+                    vec3 = arguments[1];
+                
+                if (rot.length){
+                    rot = Tessellator.float.forValue(rot);
+                }
+                
+                if (vec3.tween){
+                    vec3.tween.update();
+                }
+                
+                //normalize
+                var
+                    x = vec3[0],
+                    y = vec3[1],
+                    z = vec3[2],
+                    
+                    l = Math.sqrt(x * x + y * y + z * z);
+                x /= l;
+                y /= l;
+                z /= l;
+                
+                var
+                    s = Math.sin(rot),
+                    c = Math.cos(rot),
+                    t = 1 - c,
+                    
+                    a00 = this[0],
+                    a01 = this[1],
+                    a02 = this[2],
+                    
+                    a10 = this[3],
+                    a11 = this[4],
+                    a12 = this[5],
+                    
+                    a20 = this[6],
+                    a21 = this[7],
+                    a22 = this[8],
+                    
+                    b00 = x * x * t + c,
+                    b01 = y * x * t + z * s,
+                    b02 = z * x * t - y * s,
+                    
+                    b10 = x * y * t - z * s,
+                    b11 = y * y * t + c,
+                    b12 = z * y * t + x * s,
+                    
+                    b20 = x * z * t + y * s,
+                    b21 = y * z * t - x * s,
+                    b22 = z * z * t + c;
+                
+                this[0] = a00 * b00 + a10 * b01 + a20 * b02;
+                this[1] = a01 * b00 + a11 * b01 + a21 * b02;
+                this[2] = a02 * b00 + a12 * b01 + a22 * b02;
+                
+                this[3] = a00 * b10 + a10 * b11 + a20 * b12;
+                this[4] = a01 * b10 + a11 * b11 + a21 * b12;
+                this[5] = a02 * b10 + a12 * b11 + a22 * b12;
+                
+                this[6] = a00 * b20 + a10 * b21 + a20 * b22;
+                this[7] = a01 * b20 + a11 * b21 + a21 * b22;
+                this[8] = a02 * b20 + a12 * b21 + a22 * b22;
+            }
             
             return this;
         }
@@ -2294,6 +2380,26 @@
             this[6] = x[2] * x00 + y[2] * x10 + z[2] * x20;
             this[7] = x[2] * x01 + y[2] * x11 + z[2] * x21;
             this[8] = x[2] * x02 + y[2] * x12 + z[2] * x22;
+            
+            return this;
+        }
+        
+        Tessellator.mat3.prototype.align = function (v1, v2){
+            if (v1.tween) v1.tween.update();
+            if (v2.tween) v2.tween.update();
+            
+            v1 = v1.clone().normalize();
+            v2 = v2.clone().normalize();
+            
+            var v = v1.clone().cross(v2);
+            var c = v1.clone().dot(v2);
+            
+            if (v[0] === 0 && v[1] === 0 && v[2] === 0){
+                v = Tessellator.vec3(1, 0, 0);
+            }
+            
+            this.rotate(Math.acos(c[0]), v);
+            return this;
         }
         
         Tessellator.mat3.prototype.toString = function (){
@@ -6988,7 +7094,7 @@
         
         var e = this.buffer[i + 1];
         
-        if (e.constructor === Tessellator.FragmentedArray){
+        if (e.constructor === Tessellator.FragmentedArray || e.constructor === Tessellator.Array){
             return e.get(index - pos);
         }else{
             return e[index - pos];
@@ -7404,424 +7510,1209 @@
         }
     }
     { //draw helper methods
-        Tessellator.Model.prototype.drawRect = function (x, y, width, height){
-            this.start(Tessellator.LINE);
-            this.setVertex ([
-                x, -y, 0,
-                x + width, -y, 0,
-                
-                x, -y - height, 0,
-                x + width, -y - height, 0,
-                
-                x, -y, 0,
-                x, -y - height, 0,
-                
-                x + width, -y, 0,
-                x + width, -y - height, 0,
-            ]);
-            this.end();
-        }
-
-
-        /*Tessellator.Model.prototype.fillTriPrism = function (x1, y1, z1, x2, y2, z2){
-            var deltaX = x2 - x1;
-            var deltaY = y2 - y1;
-            var deltaZ = z2 - z1;
-            
-            this.start(Tessellator.TRIANGLE);
-            this.setVertex([
-                
-            ]);
-            this.end();
-            this.start(Tessellator.QUAD);
-            this.setVertex([
-                x1, y2, z1,
-                x2, y2, z1,
-                x2, y2, z2,
-                x1, y2, z1,
-            ]);
-            this.end();
-        }*/
-
-
-        Tessellator.Model.prototype.fillCilinder = function (x, y, z, height, radius, quality){
-            if (!quality){
-                quality = Math.max(8, radius * 16);
-            }
-            
-            this.start(Tessellator.TRIANGLE_FAN_CW);
-            for (var i = 0; i <= quality; i++){
-                if (i === 0){
-                    this.setVertex(x, y + height / 2, 0);
-                    
-                    {
-                        var angle = (i / quality * (Math.PI * 2));
-                        
-                        var xx = Math.sin(angle) * radius;
-                        var zz = Math.cos(angle) * radius;
-                        
-                        this.setVertex(xx + x, y + height / 2, zz + z);
-                    }
-                }
-                
-                {
-                    var angle = ((i + 1) / quality * (Math.PI * 2));
-                    
-                    var xx = Math.sin(angle) * radius;
-                    var zz = Math.cos(angle) * radius;
-                    
-                    this.setVertex(xx + x, y + height / 2, zz + z);
-                }
-            }
-            this.end();
-            
-            this.start(Tessellator.TRIANGLE_FAN_CCW);
-            for (var i = 0; i <= quality; i++){
-                if (i === 0){
-                    this.setVertex(x, y - height / 2, 0);
-                    
-                    {
-                        var angle = ((i + 1) / quality * (Math.PI * 2));
-                        
-                        var xx = Math.sin(angle) * radius;
-                        var zz = Math.cos(angle) * radius;
-                        
-                        this.setVertex(xx + x, y - height / 2, zz + z);
-                    }
-                }
-                
-                {
-                    var angle = (i / quality * (Math.PI * 2));
-                    
-                    var xx = Math.sin(angle) * radius;
-                    var zz = Math.cos(angle) * radius;
-                    
-                    this.setVertex(xx + x, y - height / 2, zz + z);
-                }
-            }
-            this.end();
-            
-            var quads = [];
-            var normals = [];
-            var texCoords = [];
-            
-            for (var i = 0; i < quality; i++){
-                {
-                    var angle = ((i + 1) / quality * (Math.PI * 2));
-                    
-                    var sin = Math.sin(angle);
-                    var cos = Math.cos(angle);
-                    
-                    var xx = sin * radius;
-                    var zz = cos * radius;
-                    
-                    quads.push(xx + x);
-                    quads.push(y + height / 2);
-                    quads.push(zz);
-                    
-                    texCoords.push((i + 1) / quality);
-                    texCoords.push(1);
-                    
-                    normals.push(sin);
-                    normals.push(0);
-                    normals.push(cos);
-                }
-                
-                {
-                    var angle = (i / quality * (Math.PI * 2));
-                    
-                    var sin = Math.sin(angle);
-                    var cos = Math.cos(angle);
-                    
-                    var xx = sin * radius;
-                    var zz = cos * radius;
-                    
-                    quads.push(xx + x);
-                    quads.push(y + height / 2);
-                    quads.push(zz);
-                    
-                    texCoords.push(i / quality);
-                    texCoords.push(1);
-                    
-                    normals.push(sin);
-                    normals.push(0);
-                    normals.push(cos);
-                }
-                
-                {
-                    var angle = (i / quality * (Math.PI * 2));
-                    
-                    var sin = Math.sin(angle);
-                    var cos = Math.cos(angle);
-                    
-                    var xx = sin * radius;
-                    var zz = cos * radius;
-                    
-                    quads.push(xx + x);
-                    quads.push(y - height / 2);
-                    quads.push(zz);
-                    
-                    texCoords.push(i / quality);
-                    texCoords.push(0);
-                    
-                    normals.push(sin);
-                    normals.push(0);
-                    normals.push(cos);
-                }
-                
-                {
-                    var angle = ((i + 1) / quality * (Math.PI * 2));
-                    
-                    var sin = Math.sin(angle);
-                    var cos = Math.cos(angle);
-                    
-                    var xx = sin * radius;
-                    var zz = cos * radius;
-                    
-                    quads.push(xx + x);
-                    quads.push(y - height / 2);
-                    quads.push(zz);
-                    
-                    texCoords.push((i + 1) / quality);
-                    texCoords.push(0);
-                    
-                    normals.push(sin);
-                    normals.push(0);
-                    normals.push(cos);
-                }
-            }
-            
-            this.start(Tessellator.NORMAL);
-            this.setVertex(normals);
-            this.end();
-            
-            this.start(Tessellator.TEXTURE);
-            this.setVertex(texCoords);
-            this.end();
-            
-            this.start(Tessellator.QUAD);
-            this.setVertex(quads);
-            this.end();
-        }
-        
-        Tessellator.Model.prototype.lineCross = function (x, y, z, xx, yy, zz){
+        Tessellator.Model.prototype.drawRect = function (){
             if (arguments.length === 4){
-                yy = xx;
-                zz = xx;
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    w = arguments[2],
+                    h = arguments[3];
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    x, y, 0,
+                    x + w, y, 0,
+                    x, y + h, 0,
+                    x + w, y + h, 0
+                );
+                this.end([0, 1, 0, 2, 3, 1, 3, 2]);
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    w = arguments[2],
+                    h = arguments[3],
+                    vec = arguments[4];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(Tessellator.vec3(x, 0, y).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, 0, y).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, 0, y + h).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, 0, y + h).multiply(mat));
+                this.end([0, 1, 0, 2, 3, 1, 3, 2]);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    h = arguments[4],
+                    vec = arguments[5];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(Tessellator.vec3(x, z, y).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, z, y).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, z, y + h).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, z, y + h).multiply(mat));
+                this.end([0, 1, 0, 2, 3, 1, 3, 2]);
             }
-            
-            model.start(Tessellator.LINE);
-            model.setVertex(x, y, z, xx + x, y, z);
-            model.setVertex(x, y, z, -xx + x, y, z);
-            model.setVertex(x, y, z, x, yy + y, z);
-            model.setVertex(x, y, z, x, -yy + y, z);
-            model.setVertex(x, y, z, x, y, zz + z);
-            model.setVertex(x, y, z, x, y, -zz + z);
-            model.end();
         }
         
-        Tessellator.Model.prototype.fillFlange = function (x, y, z, height, radius0, radius1, quality){
-            if (!quality){
-                quality = Math.max(8, Math.max(radius0, radius1) * 8);
+        Tessellator.Model.prototype.fillRect = function (){
+            if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    w = arguments[2],
+                    h = arguments[3];
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(
+                    x, y, 0,
+                    x + w, y, 0,
+                    x + w, y + h, 0,
+                    x, y + h, 0
+                );
+                this.end();
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    w = arguments[2],
+                    h = arguments[3],
+                    vec = arguments[4];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, -1, 0));
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(Tessellator.vec3(x, 0, y).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, 0, y).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, 0, y + h).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, 0, y + h).multiply(mat));
+                this.end();
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    h = arguments[4],
+                    vec = arguments[5];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, -1, 0));
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(Tessellator.vec3(x, z, y).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, z, y).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, z, y + h).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, z, y + h).multiply(mat));
+                this.end();
             }
-            
-            var quads = [];
-            var normals = [];
-            var texCoords = [];
-            
-            for (var i = 0; i < quality; i++){
-                {
-                    var angle = ((i + 1) / quality * (Math.PI * 2));
-                    
-                    var sin = Math.sin(angle);
-                    var cos = Math.cos(angle);
-                    
-                    var xx = sin * radius0;
-                    var zz = cos * radius0;
-                    
-                    quads.push(xx + x);
-                    quads.push(y + height / 2);
-                    quads.push(zz);
-                    
-                    texCoords.push((i + 1) / quality);
-                    texCoords.push(1);
-                    
-                    normals.push(sin);
-                    normals.push(0);
-                    normals.push(cos);
-                }
-                
-                {
-                    var angle = (i / quality * (Math.PI * 2));
-                    
-                    var sin = Math.sin(angle);
-                    var cos = Math.cos(angle);
-                    
-                    var xx = sin * radius0;
-                    var zz = cos * radius0;
-                    
-                    quads.push(xx + x);
-                    quads.push(y + height / 2);
-                    quads.push(zz);
-                    
-                    texCoords.push(i / quality);
-                    texCoords.push(1);
-                    
-                    normals.push(sin);
-                    normals.push(0);
-                    normals.push(cos);
-                }
-                
-                {
-                    var angle = (i / quality * (Math.PI * 2));
-                    
-                    var sin = Math.sin(angle);
-                    var cos = Math.cos(angle);
-                    
-                    var xx = sin * radius1;
-                    var zz = cos * radius1;
-                    
-                    quads.push(xx + x);
-                    quads.push(y - height / 2);
-                    quads.push(zz);
-                    
-                    texCoords.push(i / quality);
-                    texCoords.push(0);
-                    
-                    normals.push(sin);
-                    normals.push(0);
-                    normals.push(cos);
-                }
-                
-                {
-                    var angle = ((i + 1) / quality * (Math.PI * 2));
-                    
-                    var sin = Math.sin(angle);
-                    var cos = Math.cos(angle);
-                    
-                    var xx = sin * radius1;
-                    var zz = cos * radius1;
-                    
-                    quads.push(xx + x);
-                    quads.push(y - height / 2);
-                    quads.push(zz);
-                    
-                    texCoords.push((i + 1) / quality);
-                    texCoords.push(0);
-                    
-                    normals.push(sin);
-                    normals.push(0);
-                    normals.push(cos);
-                }
-            }
-            
-            this.start(Tessellator.NORMAL);
-            this.setVertex(normals);
-            this.end();
-            
-            this.start(Tessellator.TEXTURE);
-            this.setVertex(texCoords);
-            this.end();
-            
-            this.start(Tessellator.QUAD);
-            this.setVertex(quads);
-            this.end();
-        }
-
-
-        Tessellator.Model.prototype.fillInverseCilinder = function (x, y, z, height, radius, quality){
-            if (!quality){
-                quality = Math.max(8, radius * 16);
-            }
-            
-            this.start(Tessellator.QUAD);
-            for (var i = 0; i < quality; i++){
-                {
-                    var angle = (i / quality * (Math.PI * 2));
-                    
-                    var xx = Math.sin(angle) * radius;
-                    var zz = Math.cos(angle) * radius;
-                    
-                    this.setVertex(xx + x, y + height / 2, zz);
-                }
-                
-                {
-                    var angle = ((i + 1) / quality * (Math.PI * 2));
-                    
-                    var xx = Math.sin(angle) * radius;
-                    var zz = Math.cos(angle) * radius;
-                    
-                    this.setVertex(xx + x, y + height / 2, zz);
-                }
-                
-                {
-                    var angle = ((i + 1) / quality * (Math.PI * 2));
-                    
-                    var xx = Math.sin(angle) * radius;
-                    var zz = Math.cos(angle) * radius;
-                    
-                    this.setVertex(xx + x, y - height / 2, zz);
-                }
-                
-                {
-                    var angle = (i / quality * (Math.PI * 2));
-                    
-                    var xx = Math.sin(angle) * radius;
-                    var zz = Math.cos(angle) * radius;
-                    
-                    this.setVertex(xx + x, y - height / 2, zz);
-                }
-            }
-            this.end();
         }
         
-        Tessellator.Model.prototype.fillCircle = function (x, y, radius, quality){
-            return this.fillOval(x, y, radius, radius, quality);
+        Tessellator.Model.prototype.drawCuboid = function (){
+            if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3] / 2;
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    x - w, y - w, z - w,
+                    x + w, y - w, z - w,
+                    x - w, y + w, z - w,
+                    x + w, y + w, z - w,
+                    x - w, y - w, z + w,
+                    x + w, y - w, z + w,
+                    x - w, y + w, z + w,
+                    x + w, y + w, z + w
+                );
+                this.end([0, 1, 0, 2, 0, 4, 7, 3, 7, 6, 7, 5, 3, 2, 3, 1, 4, 5, 4, 6, 5, 1, 6, 2]);
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3] / 2,
+                    vec = arguments[4];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(Tessellator.vec3(x - w, y - w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y - w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w, y + w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y + w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w, y - w, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y - w, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w, y + w, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y + w, z + w).multiply(mat));
+                this.end([0, 1, 0, 2, 0, 4, 7, 3, 7, 6, 7, 5, 3, 2, 3, 1, 4, 5, 4, 6, 5, 1, 6, 2]);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5];
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    x , y , z ,
+                    xx, y , z ,
+                    x , yy, z ,
+                    xx, yy, z ,
+                    x , y , zz,
+                    xx, y , zz,
+                    x , yy, zz,
+                    xx, yy, zz
+                );
+                this.end([0, 1, 0, 2, 0, 4, 7, 3, 7, 6, 7, 5, 3, 2, 3, 1, 4, 5, 4, 6, 5, 1, 6, 2]);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5],
+                    vec = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(Tessellator.vec3(x , y , z ).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y , z ).multiply(mat));
+                this.setVertex(Tessellator.vec3(x , yy, z ).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, yy, z ).multiply(mat));
+                this.setVertex(Tessellator.vec3(x , y , zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y , zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x , yy, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, yy, zz).multiply(mat));
+                this.end([0, 1, 0, 2, 0, 4, 7, 3, 7, 6, 7, 5, 3, 2, 3, 1, 4, 5, 4, 6, 5, 1, 6, 2]);
+            }
         }
         
-        Tessellator.Model.prototype.fillOval = function (x, y, xx, yy, quality){
-            if (!quality){
-                quality = Math.max(8, Math.max(xx, yy) * 16);
-            }
-            
-            this.start(Tessellator.TRIANGLE_FAN_CCW);
-            for (var i = 0; i <= quality; i++){
-                if (i === 0){
-                    this.setVertex(x, y, 0);
-                    
-                    {
-                        var angle = ((i + 1) / quality * (Math.PI * 2));
-                        
-                        var xx = Math.sin(angle) * xx;
-                        var yy = Math.cos(angle) * yy;
-                        
-                        this.setVertex(xx + x, yy + y, 0);
-                    }
-                }
+        Tessellator.Model.prototype.fillCuboid = function (){
+            if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3] / 2;
                 
-                {
-                    var angle = (i / quality * (Math.PI * 2));
+                this.start(Tessellator.QUAD);
+                this.setVertex(
+                    x - w, y - w, z + w,
+                    x + w, y - w, z + w,
+                    x + w, y + w, z + w,
+                    x - w, y + w, z + w,
                     
-                    var xx = Math.sin(angle) * xx;
-                    var yy = Math.cos(angle) * yy;
+                    x + w, y - w, z - w,
+                    x - w, y - w, z - w,
+                    x - w, y + w, z - w,
+                    x + w, y + w, z - w,
                     
-                    this.setVertex(xx + x, yy + y, 0);
-                }
+                    x - w, y - w, z - w,
+                    x - w, y - w, z + w,
+                    x - w, y + w, z + w,
+                    x - w, y + w, z - w,
+                    
+                    x + w, y - w, z + w,
+                    x + w, y - w, z - w,
+                    x + w, y + w, z - w,
+                    x + w, y + w, z + w,
+                    
+                    x - w, y + w, z + w,
+                    x + w, y + w, z + w,
+                    x + w, y + w, z - w,
+                    x - w, y + w, z - w,
+                    
+                    x - w, y - w, z - w,
+                    x + w, y - w, z - w,
+                    x + w, y - w, z + w,
+                    x - w, y - w, z + w
+                );
+                this.end();
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3] / 2,
+                    vec = arguments[4];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(Tessellator.vec3(x - w, y - w, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y - w, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y + w, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w, y + w, z + w).multiply(mat));
+                
+                this.setVertex(Tessellator.vec3(x + w, y - w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w, y - w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w, y + w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y + w, z - w).multiply(mat));
+                
+                this.setVertex(Tessellator.vec3(x - w, y - w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w, y - w, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w, y + w, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w, y + w, z - w).multiply(mat));
+                    
+                this.setVertex(Tessellator.vec3(x + w, y - w, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y - w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y + w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y + w, z + w).multiply(mat));
+                    
+                this.setVertex(Tessellator.vec3(x - w, y + w, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y + w, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y + w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w, y + w, z - w).multiply(mat));
+                    
+                this.setVertex(Tessellator.vec3(x - w, y - w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y - w, z - w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w, y - w, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w, y - w, z + w).multiply(mat));
+                this.end();
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5];
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(
+                    x, y, zz,
+                    xx, y, zz,
+                    xx, yy, zz,
+                    x, yy, zz,
+                    
+                    xx, y, z,
+                    x, y, z,
+                    x, yy, z,
+                    xx, yy, z,
+                    
+                    x, y, z,
+                    x, y, zz,
+                    x, yy, zz,
+                    x, yy, z,
+                    
+                    xx, y, zz,
+                    xx, y, z,
+                    xx, yy, z,
+                    xx, yy, zz,
+                    
+                    x, yy, zz,
+                    xx, yy, zz,
+                    xx, yy, z,
+                    x, yy, z,
+                    
+                    x, y, z,
+                    xx, y, z,
+                    xx, y, zz,
+                    x, y, zz
+                );
+                this.end();
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5],
+                    vec = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(Tessellator.vec3(x, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, yy, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, yy, zz).multiply(mat));
+                
+                this.setVertex(Tessellator.vec3(xx, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, yy, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, yy, z).multiply(mat));
+                
+                this.setVertex(Tessellator.vec3(x, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, yy, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, yy, z).multiply(mat));
+                    
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, yy, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, yy, zz).multiply(mat));
+                    
+                this.setVertex(Tessellator.vec3(x, yy, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, yy, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, yy, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, yy, z).multiply(mat));
+                    
+                this.setVertex(Tessellator.vec3(x, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, zz).multiply(mat));
+                this.end();
             }
-            this.end();
         }
-
-
-        Tessellator.Model.prototype.fillSphere = function (){
+        
+        Tessellator.Model.prototype.fillCube = Tessellator.Model.prototype.fillCuboid;
+        
+        Tessellator.Model.prototype.drawCube = Tessellator.Model.prototype.drawCuboid;
+        
+        Tessellator.Model.prototype.drawPrism = function (){
+            if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3];
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    x - w / 2, y - w / 2, z - w / 2,
+                    x + w / 2, y - w / 2, z - w / 2,
+                    x - w / 2, y - w / 2, z + w / 2,
+                    x + w / 2, y - w / 2, z + w / 2,
+                    x, y + w / 2, z + w / 2,
+                    x, y + w / 2, z - w / 2
+                );
+                this.end([0, 1, 0, 2, 3, 2, 3, 1, 0, 5, 1, 5, 2, 4, 3, 4, 4, 5]);
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    vec = arguments[4];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z - w / 2).multiply(mat));
+                this.end([0, 1, 0, 2, 3, 2, 3, 1, 0, 5, 1, 5, 2, 4, 3, 4, 4, 5]);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5];
+                
+                var dx = (x + xx) / 2;
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    x , y , z ,
+                    xx, y , z ,
+                    x , y , zz,
+                    xx, y , zz,
+                    dx, yy, zz,
+                    dx, yy, z
+                );
+                this.end([0, 1, 0, 2, 3, 2, 3, 1, 0, 5, 1, 5, 2, 4, 3, 4, 4, 5]);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5],
+                    vec = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                var dx = (x + xx) / 2;
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(Tessellator.vec3(x, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, z).multiply(mat));
+                this.end([0, 1, 0, 2, 3, 2, 3, 1, 0, 5, 1, 5, 2, 4, 3, 4, 4, 5]);
+            }
+        }
+        
+        Tessellator.Model.prototype.fillPrism = function (){
+            if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3];
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(
+                    x + w / 2, y - w / 2, z - w / 2,
+                    x - w / 2, y - w / 2, z - w / 2,
+                    x, y + w / 2, z - w / 2,
+                    
+                    x - w / 2, y - w / 2, z + w / 2,
+                    x + w / 2, y - w / 2, z + w / 2,
+                    x, y + w / 2, z + w / 2
+                );
+                this.end();
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(
+                    x + w / 2, y - w / 2, z + w / 2,
+                    x - w / 2, y - w / 2, z + w / 2,
+                    x - w / 2, y - w / 2, z - w / 2,
+                    x + w / 2, y - w / 2, z - w / 2,
+                    
+                    x + w / 2, y - w / 2, z + w / 2,
+                    x + w / 2, y - w / 2, z - w / 2,
+                    x, y + w / 2, z - w / 2,
+                    x, y + w / 2, z + w / 2,
+                    
+                    x - w / 2, y - w / 2, z - w / 2,
+                    x - w / 2, y - w / 2, z + w / 2,
+                    x, y + w / 2, z + w / 2,
+                    x, y + w / 2, z - w / 2
+                );
+                this.end();
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    vec = arguments[4];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z + w / 2).multiply(mat));
+                this.end();
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z - w / 2).multiply(mat));
+                this.end();
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5];
+                
+                var dx = (x + xx) / 2;
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(
+                    xx, y, z,
+                    x, y, z,
+                    dx, yy, z,
+                    
+                    x, y, zz,
+                    xx, y, zz,
+                    dx, yy, zz
+                );
+                this.end();
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(
+                    xx, y, zz,
+                    x, y, zz,
+                    x, y, z,
+                    xx, y, z,
+                    
+                    xx, y, zz,
+                    xx, y, z,
+                    dx, yy, z,
+                    dx, yy, zz,
+                    
+                    x, y, z,
+                    x, y, zz,
+                    dx, yy, zz,
+                    dx, yy, z
+                );
+                this.end();
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5],
+                    vec = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                var dx = (x + xx) / 2;
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(Tessellator.vec3(xx, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, zz).multiply(mat));
+                this.end();
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, z).multiply(mat));
+                this.end();
+            }
+        }
+        
+        Tessellator.Model.prototype.drawTetrahedron = function (){
+            if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3];
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    x - w / 2, y - w / 2, z - w / 2,
+                    x + w / 2, y - w / 2, z - w / 2,
+                    x - w / 2, y - w / 2, z + w / 2,
+                    x + w / 2, y - w / 2, z + w / 2,
+                    x, y + w / 2, z
+                );
+                this.end([0, 1, 0, 2, 3, 1, 3, 2, 0, 4, 1, 4, 2, 4, 3, 4]);
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    vec = arguments[4];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z).multiply(mat));
+                this.end([0, 1, 0, 2, 3, 1, 3, 2, 0, 4, 1, 4, 2, 4, 3, 4]);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5];
+                
+                var
+                    dx = (x + xx) / 2,
+                    dz = (z + zz) / 2;
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    x , y, z ,
+                    xx, y, z ,
+                    x , y, zz,
+                    xx, y, zz,
+                    dx, yy, dz
+                );
+                this.end([0, 1, 0, 2, 3, 1, 3, 2, 0, 4, 1, 4, 2, 4, 3, 4]);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5],
+                    vec = arguments[6];
+                
+                var
+                    dx = (x + xx) / 2,
+                    dz = (z + zz) / 2;
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(Tessellator.vec3(x , y, z ).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, z ).multiply(mat));
+                this.setVertex(Tessellator.vec3(x , y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, dz).multiply(mat));
+                this.end([0, 1, 0, 2, 3, 1, 3, 2, 0, 4, 1, 4, 2, 4, 3, 4]);
+            }
+        }
+        
+        Tessellator.Model.prototype.fillTetrahedron = function (){
+            if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3];
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(
+                    x + w / 2, y - w / 2, z - w / 2,
+                    x - w / 2, y - w / 2, z - w / 2,
+                    x, y + w / 2, z,
+                    
+                    x - w / 2, y - w / 2, z - w / 2,
+                    x - w / 2, y - w / 2, z + w / 2,
+                    x, y + w / 2, z,
+                    
+                    x + w / 2, y - w / 2, z + w / 2,
+                    x + w / 2, y - w / 2, z - w / 2,
+                    x, y + w / 2, z,
+                    
+                    x - w / 2, y - w / 2, z + w / 2,
+                    x + w / 2, y - w / 2, z + w / 2,
+                    x, y + w / 2, z
+                );
+                this.end();
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(
+                    x + w / 2, y - w / 2, z + w / 2,
+                    x - w / 2, y - w / 2, z + w / 2,
+                    x - w / 2, y - w / 2, z - w / 2,
+                    x + w / 2, y - w / 2, z - w / 2
+                );
+                this.end();
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    vec = arguments[4];
+                
+                var mat = Tessellator.mat3().rotateVec(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z).multiply(mat));
+                
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z).multiply(mat));
+                
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z).multiply(mat));
+                
+                this.setVertex(Tessellator.vec3(x - w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w / 2, y - w / 2, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w / 2, z).multiply(mat));
+                this.end();
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(Tessellator.vec3(x + w / 2, y, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w / 2, y, z + w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w / 2, y, z - w / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + w / 2, y, z - w / 2).multiply(mat));
+                this.end();
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5];
+                
+                var
+                    dx = (x + xx) / 2,
+                    dz = (z + zz) / 2;
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(
+                    xx, y, z,
+                    x , y, z,
+                    dx, yy, dz,
+                    
+                    x, y, z ,
+                    x, y, zz,
+                    dx, yy, dz,
+                    
+                    xx, y, zz,
+                    xx, y, z ,
+                    dx, yy, dz,
+                    
+                    x , y, zz,
+                    xx, y, zz,
+                    dx, yy, dz
+                );
+                this.end();
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(
+                    xx, y, zz,
+                    x , y, zz,
+                    x , y, z ,
+                    xx, y, z 
+                );
+                this.end();
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5],
+                    vec = arguments[6];
+                
+                var
+                    dx = (x + xx) / 2,
+                    dz = (z + zz) / 2;
+                
+                var mat = Tessellator.mat3().rotateVec(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(Tessellator.vec3(xx, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, dz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, dz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, dz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, dz).multiply(mat));
+                this.end();
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x , y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x , y, z ).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, z ).multiply(mat));
+                this.end();
+            }
+        }
+        
+        Tessellator.Model.prototype.drawPyramid = Tessellator.Model.prototype.drawTetrahedron;
+        
+        Tessellator.Model.prototype.fillPyramid = Tessellator.Model.prototype.fillPyramid;
+        
+        Tessellator.Model.prototype.drawHalfTetrahedron = function (){
             if (arguments.length === 5){
                 var
                     x = arguments[0],
                     y = arguments[1],
                     z = arguments[2],
-                    rx = arguments[3],
-                    ry = arguments[3],
-                    rz = arguments[3],
-                    quality = arguments[4];
+                    wx = arguments[3],
+                    wy = arguments[4];
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    x - wx / 2, y - wx / 2, z - wx / 2,
+                    x + wx / 2, y - wx / 2, z - wx / 2,
+                    x - wx / 2, y - wx / 2, z + wx / 2,
+                    x + wx / 2, y - wx / 2, z + wx / 2,
+                    x - wy / 2, y + wy / 2, z - wy / 2,
+                    x + wy / 2, y + wy / 2, z - wy / 2,
+                    x - wy / 2, y + wy / 2, z + wy / 2,
+                    x + wy / 2, y + wy / 2, z + wy / 2
+                );
+                this.end([0, 1, 0, 2, 0, 4, 7, 3, 7, 6, 7, 5, 3, 2, 3, 1, 4, 5, 4, 6, 5, 1, 6, 2]);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    wx = arguments[3],
+                    wy = arguments[4]
+                    vec = arguments[5];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(Tessellator.vec3(x - wx / 2, y - wx / 2, z - wx / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wx / 2, y - wx / 2, z - wx / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - wx / 2, y - wx / 2, z + wx / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wx / 2, y - wx / 2, z + wx / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - wy / 2, y + wy / 2, z - wy / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wy / 2, y + wy / 2, z - wy / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - wy / 2, y + wy / 2, z + wy / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wy / 2, y + wy / 2, z + wy / 2).multiply(mat));
+                this.end([0, 1, 0, 2, 0, 4, 7, 3, 7, 6, 7, 5, 3, 2, 3, 1, 4, 5, 4, 6, 5, 1, 6, 2]);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5],
+                    cut = arguments[6];
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    x , y, z ,
+                    xx, y, z ,
+                    x , y, zz,
+                    xx, y, zz,
+                    
+                    x  + cut * (xx - x) / 2, yy, z  + cut * (zz - z) / 2,
+                    xx - cut * (xx - x) / 2, yy, z  + cut * (zz - z) / 2,
+                    x  + cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2,
+                    xx - cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2
+                );
+                this.end([0, 1, 0, 2, 0, 4, 7, 3, 7, 6, 7, 5, 3, 2, 3, 1, 4, 5, 4, 6, 5, 1, 6, 2]);
+            }else if (arguments.length === 8){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5],
+                    cut = arguments[6],
+                    vec = arguments[7];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(Tessellator.vec3(x , y, z ).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, z ).multiply(mat));
+                this.setVertex(Tessellator.vec3(x , y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x  + cut * (xx - x) / 2, yy, z  + cut * (zz - z) / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx - cut * (xx - x) / 2, yy, z  + cut * (zz - z) / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x  + cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx - cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2).multiply(mat));
+                this.end([0, 1, 0, 2, 0, 4, 7, 3, 7, 6, 7, 5, 3, 2, 3, 1, 4, 5, 4, 6, 5, 1, 6, 2]);
+            }
+        }
+        
+        Tessellator.Model.prototype.fillHalfTetrahedron = function (){
+            if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    wx = arguments[3] / 2,
+                    wy = arguments[4] / 2;
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(
+                    x - wx, y - wx, z + wx,
+                    x + wx, y - wx, z + wx,
+                    x + wy, y + wy, z + wy,
+                    x - wy, y + wy, z + wy,
+                    
+                    x + wx, y - wx, z - wx,
+                    x - wx, y - wx, z - wx,
+                    x - wy, y + wy, z - wy,
+                    x + wy, y + wy, z - wy,
+                    
+                    x - wx, y - wx, z - wx,
+                    x - wx, y - wx, z + wx,
+                    x - wy, y + wy, z + wy,
+                    x - wy, y + wy, z - wy,
+                    
+                    x + wx, y - wx, z + wx,
+                    x + wx, y - wx, z - wx,
+                    x + wy, y + wy, z - wy,
+                    x + wy, y + wy, z + wy,
+                    
+                    x - wy, y + wy, z + wy,
+                    x + wy, y + wy, z + wy,
+                    x + wy, y + wy, z - wy,
+                    x - wy, y + wy, z - wy,
+                    
+                    x - wx, y - wx, z - wx,
+                    x + wx, y - wx, z - wx,
+                    x + wx, y - wx, z + wx,
+                    x - wx, y - wx, z + wx
+                );
+                this.end();
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    wx = arguments[3] / 2,
+                    wy = arguments[4] / 2,
+                    vec = arguments[5];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(Tessellator.vec3(x - wx, y - wx, z + wx).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wx, y - wx, z + wx).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wy, y + wy, z + wy).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - wy, y + wy, z + wy).multiply(mat));
+                
+                this.setVertex(Tessellator.vec3(x + wx, y - wx, z - wx).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - wx, y - wx, z - wx).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - wy, y + wy, z - wy).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wy, y + wy, z - wy).multiply(mat));
+                
+                this.setVertex(Tessellator.vec3(x - wx, y - wx, z - wx).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - wx, y - wx, z + wx).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - wy, y + wy, z + wy).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - wy, y + wy, z - wy).multiply(mat));
+                    
+                this.setVertex(Tessellator.vec3(x + wx, y - wx, z + wx).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wx, y - wx, z - wx).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wy, y + wy, z - wy).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wy, y + wy, z + wy).multiply(mat));
+                    
+                this.setVertex(Tessellator.vec3(x - wy, y + wy, z + wy).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wy, y + wy, z + wy).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wy, y + wy, z - wy).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - wy, y + wy, z - wy).multiply(mat));
+                    
+                this.setVertex(Tessellator.vec3(x - wx, y - wx, z - wx).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wx, y - wx, z - wx).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + wx, y - wx, z + wx).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - wx, y - wx, z + wx).multiply(mat));
+                this.end();
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5],
+                    cut = arguments[6];
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(
+                    x, y, zz,
+                    xx, y, zz,
+                    xx - cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2,
+                    x + cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2,
+                    
+                    xx, y, z,
+                    x, y, z,
+                    x + cut * (xx - x) / 2, yy, z + cut * (zz - z) / 2,
+                    xx - cut * (xx - x) / 2, yy, z + cut * (zz - z) / 2,
+                    
+                    x, y, z,
+                    x, y, zz,
+                    x + cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2,
+                    x + cut * (xx - x) / 2, yy, z + cut * (zz - z) / 2,
+                    
+                    xx, y, zz,
+                    xx, y, z,
+                    xx - cut * (xx - x) / 2, yy, z + cut * (zz - z) / 2,
+                    xx - cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2,
+                    
+                    x + cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2,
+                    xx - cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2,
+                    xx - cut * (xx - x) / 2, yy, z + cut * (zz - z) / 2,
+                    x + cut * (xx - x) / 2, yy, z + cut * (zz - z) / 2,
+                    
+                    x, y, z,
+                    xx, y, z,
+                    xx, y, zz,
+                    x, y, zz
+                );
+                this.end();
+            }else if (arguments.length === 8){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5],
+                    cut = arguments[6]
+                    vec = arguments[7];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.QUAD);
+                this.setVertex(Tessellator.vec3(x, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx - cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2).multiply(mat));
+                
+                this.setVertex(Tessellator.vec3(xx, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + cut * (xx - x) / 2, yy, z + cut * (zz - z) / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx - cut * (xx - x) / 2, yy, z + cut * (zz - z) / 2).multiply(mat));
+                
+                this.setVertex(Tessellator.vec3(x, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + cut * (xx - x) / 2, yy, z + cut * (zz - z) / 2).multiply(mat));
+                    
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx - cut * (xx - x) / 2, yy, z + cut * (zz - z) / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx - cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2).multiply(mat));
+                    
+                this.setVertex(Tessellator.vec3(x + cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx - cut * (xx - x) / 2, yy, zz - cut * (zz - z) / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx - cut * (xx - x) / 2, yy, z + cut * (zz - z) / 2).multiply(mat));
+                this.setVertex(Tessellator.vec3(x + cut * (xx - x) / 2, yy, z + cut * (zz - z) / 2).multiply(mat));
+                    
+                this.setVertex(Tessellator.vec3(x, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(xx, y, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, zz).multiply(mat));
+                this.end();
+            }
+        }
+        
+        Tessellator.Model.prototype.drawHalfPyramid = Tessellator.Model.prototype.drawHalfTetrahedron;
+        
+        Tessellator.Model.prototype.fillHalfPyramid = Tessellator.Model.prototype.fillHalfTetrahedron;
+        
+        Tessellator.Model.prototype.drawSphere = function (){
+            if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    q = Math.max(8, Math.ceil(r * 8));
+                
+                var vertices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        vertices.push(xx * r + x);
+                        vertices.push(yy * r + y);
+                        vertices.push(zz * r + z);
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U + 1);
+                        vertexBuffer.push(V);
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V + 1);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    q = arguments[4];
+                
+                var vertices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        vertices.push(xx * r + x);
+                        vertices.push(yy * r + y);
+                        vertices.push(zz * r + z);
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U + 1);
+                        vertexBuffer.push(V);
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V + 1);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
             }else if (arguments.length === 7){
                 var
                     x = arguments[0],
@@ -7830,504 +8721,2747 @@
                     rx = arguments[3],
                     ry = arguments[4],
                     rz = arguments[5],
-                    quality = arguments[6];
-            }
-            
-            if (!quality){
-                quality = Math.max(4, Math.max(rx, Math.max(ry, rz)) * 16);
-            }
-            
-            var normals = [];
-            var texture = [];
-            var vertices = [];
-            
-            for (var i = 0; i <= quality; i++){
-                var angleY = Math.PI * (i / quality);
+                    q = arguments[6];
                 
-                var sinY = Math.sin(angleY);
-                var cosY = Math.cos(angleY);
+                var vertices = [];
                 
-                for (var ii = 0; ii <= quality * 2; ii++){
-                    var angleX = -(Math.PI * 2) * (ii / (quality * 2));
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q);
                     
-                    var sinX = Math.sin(angleX);
-                    var cosX = Math.cos(angleX);
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
                     
-                    var
-                        xx = cosX * sinY,
-                        yy = cosY,
-                        zz = sinX * sinY;
-                    
-                    normals.push(xx);
-                    normals.push(yy);
-                    normals.push(zz);
-                    
-                    texture.push(ii / (quality * 2));
-                    texture.push(1 - (i / quality));
-                    
-                    vertices.push(xx * rx + x);
-                    vertices.push(yy * ry + y);
-                    vertices.push(zz * rz + z);
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        vertices.push(xx * rx + x);
+                        vertices.push(yy * ry + y);
+                        vertices.push(zz * rz + z);
+                    }
                 }
-            }
-            
-            var vertexBuffer = [];
-            for (var i = 0; i < quality; i++){
-                for (var ii = 0; ii < quality * 2; ii++){
-                    var U = (i * (quality * 2 + 1)) + ii;
-                    var V = U + quality * 2 + 1;
-                    
-                    vertexBuffer.push(U);
-                    vertexBuffer.push(V);
-                    vertexBuffer.push(U + 1);
-                    
-                    vertexBuffer.push(V);
-                    vertexBuffer.push(V + 1);
-                    vertexBuffer.push(U + 1);
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U + 1);
+                        vertexBuffer.push(V);
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V + 1);
+                    }
                 }
-            }
-            
-            this.start(Tessellator.NORMAL);
-            this.setVertex(normals);
-            this.end();
-            
-            this.start(Tessellator.TEXTURE);
-            this.setVertex(texture);
-            this.end();
-            
-            this.start(Tessellator.TRIANGLE);
-            this.setVertex(vertices);
-            this.end(vertexBuffer);
-        }
-
-
-        Tessellator.Model.prototype.fillPrism = function (){
-            if (arguments.length === 6){
-                var
-                    x1 = arguments[0],
-                    y1 = arguments[1],
-                    z1 = arguments[2],
-                    x2 = arguments[3],
-                    y2 = arguments[4],
-                    z2 = arguments[5];
                 
-                this.start(Tessellator.QUAD);
-                this.setVertex([
-                    x2, y1, z1,
-                    x1, y1, z1,
-                    x1, y2, z1,
-                    x2, y2, z1,
-                    
-                    x1, y1, z2,
-                    x2, y1, z2,
-                    x2, y2, z2,
-                    x1, y2, z2,
-                    
-                    x1, y1, z1,
-                    x1, y1, z2,
-                    x1, y2, z2,
-                    x1, y2, z1,
-                    
-                    x2, y1, z2,
-                    x2, y1, z1,
-                    x2, y2, z1,
-                    x2, y2, z2,
-                    
-                    x2, y1, z1,
-                    x2, y1, z2,
-                    x1, y1, z2,
-                    x1, y1, z1,
-                    
-                    x1, y2, z1,
-                    x1, y2, z2,
-                    x2, y2, z2,
-                    x2, y2, z1,
-                ]);
-                this.end();
-            }else if(arguments.length === 4){
-                var
-                    x = arguments[0],
-                    y = arguments[1],
-                    z = arguments[2],
-                    width = arguments[3];
-                
-                this.start(Tessellator.QUAD);
-                this.setVertex(
-                    x + width / 2, y - width / 2, z - width / 2,
-                    x - width / 2, y - width / 2, z - width / 2,
-                    x - width / 2, y + width / 2, z - width / 2,
-                    x + width / 2, y + width / 2, z - width / 2,
-                    
-                    x - width / 2, y - width / 2, z + width / 2,
-                    x + width / 2, y - width / 2, z + width / 2,
-                    x + width / 2, y + width / 2, z + width / 2,
-                    x - width / 2, y + width / 2, z + width / 2,
-                    
-                    x - width / 2, y - width / 2, z - width / 2,
-                    x - width / 2, y - width / 2, z + width / 2,
-                    x - width / 2, y + width / 2, z + width / 2,
-                    x - width / 2, y + width / 2, z - width / 2,
-                    
-                    x + width / 2, y - width / 2, z + width / 2,
-                    x + width / 2, y - width / 2, z - width / 2,
-                    x + width / 2, y + width / 2, z - width / 2,
-                    x + width / 2, y + width / 2, z + width / 2,
-                    
-                    x + width / 2, y - width / 2, z - width / 2,
-                    x + width / 2, y - width / 2, z + width / 2,
-                    x - width / 2, y - width / 2, z + width / 2,
-                    x - width / 2, y - width / 2, z - width / 2,
-                    
-                    x - width / 2, y + width / 2, z - width / 2,
-                    x - width / 2, y + width / 2, z + width / 2,
-                    x + width / 2, y + width / 2, z + width / 2,
-                    x + width / 2, y + width / 2, z - width / 2
-                );
-                this.end();
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
             }
         }
-
-
-        Tessellator.Model.prototype.drawPrism = function (){
-            if (arguments.length === 6){
-                var
-                    x1 = arguments[0],
-                    y1 = arguments[1],
-                    z1 = arguments[2],
-                    x2 = arguments[3],
-                    y2 = arguments[4],
-                    z2 = arguments[5];
-            
-                this.start(Tessellator.LINE);
-                this.setVertex([
-                    x1, y1, z1,
-                    x2, y1, z1,
-                    
-                    x1, y2, z1,
-                    x2, y2, z1,
-                    
-                    x1, y1, z2,
-                    x2, y1, z2,
-                    
-                    x1, y2, z2,
-                    x2, y2, z2,
-                    
-                    x1, y1, z1,
-                    x1, y2, z1,
-                    
-                    x2, y1, z1,
-                    x2, y2, z1,
-                    
-                    x1, y1, z2,
-                    x1, y2, z2,
-                    
-                    x2, y1, z2,
-                    x2, y2, z2,
-                    
-                    x1, y1, z1,
-                    x1, y1, z2,
-                    
-                    x1, y2, z1,
-                    x1, y2, z2,
-                    
-                    x2, y1, z1,
-                    x2, y1, z2,
-                    
-                    x2, y2, z1,
-                    x2, y2, z2,
-                ]);
-                this.end();
-            }else if (arguments.length === 4){
-                var
-                    x = arguments[0],
-                    y = arguments[1],
-                    z = arguments[2],
-                    width = arguments[3];
-                
-                this.start(Tessellator.LINE);
-                this.setVertex([
-                    x - width / 2, y - width / 2, z - width / 2,
-                    x + width / 2, y - width / 2, z - width / 2,
-                    
-                    x - width / 2, y + width / 2, z - width / 2,
-                    x + width / 2, y + width / 2, z - width / 2,
-                    
-                    x - width / 2, y - width / 2, z + width / 2,
-                    x + width / 2, y - width / 2, z + width / 2,
-                    
-                    x - width / 2, y + width / 2, z + width / 2,
-                    x + width / 2, y + width / 2, z + width / 2,
-                    
-                    x - width / 2, y - width / 2, z - width / 2,
-                    x - width / 2, y + width / 2, z - width / 2,
-                    
-                    x + width / 2, y - width / 2, z - width / 2,
-                    x + width / 2, y + width / 2, z - width / 2,
-                    
-                    x - width / 2, y - width / 2, z + width / 2,
-                    x - width / 2, y + width / 2, z + width / 2,
-                    
-                    x + width / 2, y - width / 2, z + width / 2,
-                    x + width / 2, y + width / 2, z + width / 2,
-                    
-                    x - width / 2, y - width / 2, z - width / 2,
-                    x - width / 2, y - width / 2, z + width / 2,
-                    
-                    x - width / 2, y + width / 2, z - width / 2,
-                    x - width / 2, y + width / 2, z + width / 2,
-                    
-                    x + width / 2, y - width / 2, z - width / 2,
-                    x + width / 2, y - width / 2, z + width / 2,
-                    
-                    x + width / 2, y + width / 2, z - width / 2,
-                    x + width / 2, y + width / 2, z + width / 2,
-                ]);
-                this.end();
-            }
-        }
-
-
-        Tessellator.Model.prototype.fillRect = function (){
+        
+        Tessellator.Model.prototype.fillSphere = function (){
             if (arguments.length === 4){
                 var
                     x = arguments[0],
                     y = arguments[1],
-                    width = arguments[2],
-                    height = arguments[3];
+                    z = arguments[2],
+                    r = arguments[3],
+                    q = Math.max(8, Math.ceil(r * 8));
+                
+                var normals = [];
+                var texture = [];
+                var vertices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        normals.push(xx);
+                        normals.push(yy);
+                        normals.push(zz);
+                        
+                        texture.push(ii / (q * 2));
+                        texture.push(1 - (i / q));
+                        
+                        vertices.push(xx * r + x);
+                        vertices.push(yy * r + y);
+                        vertices.push(zz * r + z);
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(U + 1);
+                        
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(V + 1);
+                        vertexBuffer.push(U + 1);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(normals);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(texture);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    q = arguments[4];
+                
+                var normals = [];
+                var texture = [];
+                var vertices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        normals.push(xx);
+                        normals.push(yy);
+                        normals.push(zz);
+                        
+                        texture.push(ii / (q * 2));
+                        texture.push(1 - (i / q));
+                        
+                        vertices.push(xx * r + x);
+                        vertices.push(yy * r + y);
+                        vertices.push(zz * r + z);
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(U + 1);
+                        
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(V + 1);
+                        vertexBuffer.push(U + 1);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(normals);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(texture);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4],
+                    rz = arguments[5],
+                    q = arguments[6];
+                
+                var normals = [];
+                var texture = [];
+                var vertices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        normals.push(xx);
+                        normals.push(yy);
+                        normals.push(zz);
+                        
+                        texture.push(ii / (q * 2));
+                        texture.push(1 - (i / q));
+                        
+                        vertices.push(xx * rx + x);
+                        vertices.push(yy * ry + y);
+                        vertices.push(zz * rz + z);
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(U + 1);
+                        
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(V + 1);
+                        vertexBuffer.push(U + 1);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(normals);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(texture);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
+            }
+        }
+        
+        Tessellator.Model.prototype.drawHemisphere = function (){
+            if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    q = Math.max(8, Math.ceil(r * 8));
+                
+                var vertices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q / 2);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        vertices.push(xx * r + x);
+                        vertices.push(yy * r + y);
+                        vertices.push(zz * r + z);
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U + 1);
+                        vertexBuffer.push(V);
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V + 1);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    q = arguments[4];
+                
+                var vertices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q / 2);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        vertices.push(xx * r + x);
+                        vertices.push(yy * r + y);
+                        vertices.push(zz * r + z);
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U + 1);
+                        vertexBuffer.push(V);
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V + 1);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4],
+                    rz = arguments[5],
+                    q = arguments[6];
+                
+                var vertices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q / 2);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        vertices.push(xx * rx + x);
+                        vertices.push(yy * ry + y);
+                        vertices.push(zz * rz + z);
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U + 1);
+                        vertexBuffer.push(V);
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V + 1);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
+            }else if (arguments.length === 8){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4],
+                    rz = arguments[5],
+                    vec = arguments[6],
+                    q = arguments[7];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                var vertices = new Tessellator.Array();
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q / 2);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        vertices.push(Tessellator.vec3(xx * rx + x, yy * ry + y, zz * rz + z).multiply(mat));
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U + 1);
+                        vertexBuffer.push(V);
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V + 1);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
+            }
+        }
+        
+        Tessellator.Model.prototype.fillHemisphere = function (){
+            if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    q = Math.max(8, Math.ceil(r * 8));
+                
+                var normals = [];
+                var texture = [];
+                var vertices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q / 2);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        normals.push(xx);
+                        normals.push(yy);
+                        normals.push(zz);
+                        
+                        texture.push(ii / (q * 2));
+                        texture.push(1 - (i / q));
+                        
+                        vertices.push(xx * r + x);
+                        vertices.push(yy * r + y);
+                        vertices.push(zz * r + z);
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(U + 1);
+                        
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(V + 1);
+                        vertexBuffer.push(U + 1);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(normals);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(texture);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    q = arguments[4];
+                
+                var normals = [];
+                var texture = [];
+                var vertices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q / 2);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        normals.push(xx);
+                        normals.push(yy);
+                        normals.push(zz);
+                        
+                        texture.push(ii / (q * 2));
+                        texture.push(1 - (i / q));
+                        
+                        vertices.push(xx * r + x);
+                        vertices.push(yy * r + y);
+                        vertices.push(zz * r + z);
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(U + 1);
+                        
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(V + 1);
+                        vertexBuffer.push(U + 1);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(normals);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(texture);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4],
+                    rz = arguments[5],
+                    q = arguments[6];
+                
+                var normals = [];
+                var texture = [];
+                var vertices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q / 2);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        normals.push(xx);
+                        normals.push(yy);
+                        normals.push(zz);
+                        
+                        texture.push(ii / (q * 2));
+                        texture.push(1 - (i / q));
+                        
+                        vertices.push(xx * rx + x);
+                        vertices.push(yy * ry + y);
+                        vertices.push(zz * rz + z);
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(U + 1);
+                        
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(V + 1);
+                        vertexBuffer.push(U + 1);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(normals);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(texture);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
+            }else if (arguments.length === 8){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4],
+                    rz = arguments[5],
+                    vec = arguments[6]
+                    q = arguments[7];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                var normals = new Tessellator.Array();
+                var texture = [];
+                var vertices = new Tessellator.Array();
+                
+                for (var i = 0; i <= q; i++){
+                    var angleY = Math.PI * (i / q / 2);
+                    
+                    var sinY = Math.sin(angleY);
+                    var cosY = Math.cos(angleY);
+                    
+                    for (var ii = 0; ii <= q * 2; ii++){
+                        var angleX = -(Math.PI * 2) * (ii / (q * 2));
+                        
+                        var sinX = Math.sin(angleX);
+                        var cosX = Math.cos(angleX);
+                        
+                        var
+                            xx = cosX * sinY,
+                            yy = cosY,
+                            zz = sinX * sinY;
+                        
+                        normals.push(Tessellator.vec3(xx, yy, zz).multiply(mat));
+                        
+                        texture.push(ii / (q * 2));
+                        texture.push(1 - (i / q));
+                        
+                        vertices.push(Tessellator.vec3(xx * rx + x, yy * ry + y, zz * rz + z).multiply(mat));
+                    }
+                }
+                
+                var vertexBuffer = [];
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii < q * 2; ii++){
+                        var U = (i * (q * 2 + 1)) + ii;
+                        var V = U + q * 2 + 1;
+                        
+                        vertexBuffer.push(U);
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(U + 1);
+                        
+                        vertexBuffer.push(V);
+                        vertexBuffer.push(V + 1);
+                        vertexBuffer.push(U + 1);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(normals);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(texture);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vertices);
+                this.end(vertexBuffer);
+            }
+        }
+        
+        Tessellator.Model.prototype.drawHalfSphere = Tessellator.Model.prototype.drawHemisphere;
+        
+        Tessellator.Model.prototype.fillHalfSphere = Tessellator.Model.prototype.fillHemisphere;
+        
+        Tessellator.Model.prototype.drawGrid = function (){
+            if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    w = arguments[2],
+                    h = arguments[3],
+                    sx = arguments[4],
+                    sy = arguments[5];
+                
+                this.start(Tessellator.LINE);
+                
+                for (var i = 0; i <= sx; i++){
+                    this.setVertex(
+                        x + w * i / sx, y, 0,
+                        x + w * i / sx, y + h, 0
+                    );
+                }
+                
+                for (var i = 0; i <= sy; i++){
+                    this.setVertex(
+                        x, y + h * i / sy, 0,
+                        x + w, y + h * i / sy, 0
+                    );
+                }
+                
+                this.end();
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    w = arguments[2],
+                    h = arguments[3],
+                    sx = arguments[4],
+                    sy = arguments[5],
+                    vec = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, -1, 0));
+                
+                this.start(Tessellator.LINE);
+                
+                for (var i = 0; i <= sx; i++){
+                    this.setVertex(Tessellator.vec3(x + w * i / sx, 0, y).multiply(mat));
+                    this.setVertex(Tessellator.vec3(x + w * i / sx, 0, y + h).multiply(mat));
+                }
+                
+                for (var i = 0; i <= sy; i++){
+                    this.setVertex(Tessellator.vec3(x, 0, y + h * i / sy).multiply(mat));
+                    this.setVertex(Tessellator.vec3(x + w, 0, y + h * i / sy).multiply(mat));
+                }
+                
+                this.end();
+            }else if (arguments.length === 8){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    h = arguments[4],
+                    sx = arguments[5],
+                    sy = arguments[6],
+                    vec = arguments[7];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, -1, 0));
+                
+                this.start(Tessellator.LINE);
+                
+                for (var i = 0; i <= sx; i++){
+                    this.setVertex(Tessellator.vec3(x + w * i / sx, z, y).multiply(mat));
+                    this.setVertex(Tessellator.vec3(x + w * i / sx, z, y + h).multiply(mat));
+                }
+                
+                for (var i = 0; i <= sy; i++){
+                    this.setVertex(Tessellator.vec3(x, z, y + h * i / sy).multiply(mat));
+                    this.setVertex(Tessellator.vec3(x + w, z, y + h * i / sy).multiply(mat));
+                }
+                
+                this.end();
+            }
+        }
+        
+        Tessellator.Model.prototype.fillGrid = function (){
+            if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    w = arguments[2],
+                    h = arguments[3],
+                    sx = arguments[4],
+                    sy = arguments[5];
                 
                 this.start(Tessellator.QUAD);
-                this.setVertex([
-                    x, -y - height, 0,
-                    x + width, -y - height, 0,
-                    x + width, -y, 0,
-                    x, -y, 0,
-                ]);
+                for (var i = 0; i <= sx; i++){
+                    for (var ii = 0; ii <= sy; ii++){
+                        if ((i + ii) % 2 === 0){
+                            this.setVertex(
+                                x + w * i / sx, y + h * ii / sy, 0,
+                                x + w * (i + 1) / sx, y + h * ii / sy, 0,
+                                x + w * (i + 1) / sx, y + h * (ii + 1) / sy, 0,
+                                x + w * i / sx, y + h * (ii + 1) / sy, 0
+                            );
+                        }
+                    }
+                }
+                this.end();
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    w = arguments[2],
+                    h = arguments[3],
+                    sx = arguments[4],
+                    sy = arguments[5],
+                    vec = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, -1, 0));
+                
+                this.start(Tessellator.QUAD);
+                for (var i = 0; i <= sx; i++){
+                    for (var ii = 0; ii <= sy; ii++){
+                        if ((i + ii) % 2 === 0){
+                            this.setVertex(Tessellator.vec3(x + w * i / sx, 0, y + h * ii / sy).multiply(mat));
+                            this.setVertex(Tessellator.vec3(x + w * (i + 1) / sx, 0, y + h * ii / sy).multiply(mat));
+                            this.setVertex(Tessellator.vec3(x + w * (i + 1) / sx, 0, y + h * (ii + 1) / sy).multiply(mat));
+                            this.setVertex(Tessellator.vec3(x + w * i / sx, 0, y + h * (ii + 1) / sy).multiply(mat));
+                        }
+                    }
+                }
+                this.end();
+            }else if (arguments.length === 8){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    h = arguments[4],
+                    sx = arguments[5],
+                    sy = arguments[6],
+                    vec = arguments[7];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, -1, 0));
+                
+                this.start(Tessellator.QUAD);
+                for (var i = 0; i <= sx; i++){
+                    for (var ii = 0; ii <= sy; ii++){
+                        if ((i + ii) % 2 === 0){
+                            this.setVertex(Tessellator.vec3(x + w * i / sx, z, y + h * ii / sy).multiply(mat));
+                            this.setVertex(Tessellator.vec3(x + w * (i + 1) / sx, z, y + h * ii / sy).multiply(mat));
+                            this.setVertex(Tessellator.vec3(x + w * (i + 1) / sx, z, y + h * (ii + 1) / sy).multiply(mat));
+                            this.setVertex(Tessellator.vec3(x + w * i / sx, z, y + h * (ii + 1) / sy).multiply(mat));
+                        }
+                    }
+                }
+                this.end();
+            }
+        }
+        
+        Tessellator.Model.prototype.fillInverseGrid = function (){
+            if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    w = arguments[2],
+                    h = arguments[3],
+                    sx = arguments[4],
+                    sy = arguments[5];
+                
+                this.start(Tessellator.QUAD);
+                for (var i = 0; i <= sx; i++){
+                    for (var ii = 0; ii <= sy; ii++){
+                        if ((i + ii) % 2 === 1){
+                            this.setVertex(
+                                x + w * i / sx, y + h * ii / sy, 0,
+                                x + w * (i + 1) / sx, y + h * ii / sy, 0,
+                                x + w * (i + 1) / sx, y + h * (ii + 1) / sy, 0,
+                                x + w * i / sx, y + h * (ii + 1) / sy, 0
+                            );
+                        }
+                    }
+                }
+                this.end();
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    w = arguments[2],
+                    h = arguments[3],
+                    sx = arguments[4],
+                    sy = arguments[5],
+                    vec = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, -1, 0));
+                
+                this.start(Tessellator.QUAD);
+                for (var i = 0; i <= sx; i++){
+                    for (var ii = 0; ii <= sy; ii++){
+                        if ((i + ii) % 2 === 1){
+                            this.setVertex(Tessellator.vec3(x + w * i / sx, 0, y + h * ii / sy).multiply(mat));
+                            this.setVertex(Tessellator.vec3(x + w * (i + 1) / sx, 0, y + h * ii / sy).multiply(mat));
+                            this.setVertex(Tessellator.vec3(x + w * (i + 1) / sx, 0, y + h * (ii + 1) / sy).multiply(mat));
+                            this.setVertex(Tessellator.vec3(x + w * i / sx, 0, y + h * (ii + 1) / sy).multiply(mat));
+                        }
+                    }
+                }
+                this.end();
+            }else if (arguments.length === 8){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    h = arguments[4],
+                    sx = arguments[5],
+                    sy = arguments[6],
+                    vec = arguments[7];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, -1, 0));
+                
+                this.start(Tessellator.QUAD);
+                for (var i = 0; i <= sx; i++){
+                    for (var ii = 0; ii <= sy; ii++){
+                        if ((i + ii) % 2 === 1){
+                            this.setVertex(Tessellator.vec3(x + w * i / sx, z, y + h * ii / sy).multiply(mat));
+                            this.setVertex(Tessellator.vec3(x + w * (i + 1) / sx, z, y + h * ii / sy).multiply(mat));
+                            this.setVertex(Tessellator.vec3(x + w * (i + 1) / sx, z, y + h * (ii + 1) / sy).multiply(mat));
+                            this.setVertex(Tessellator.vec3(x + w * i / sx, z, y + h * (ii + 1) / sy).multiply(mat));
+                        }
+                    }
+                }
+                this.end();
+            }
+        }
+        
+        Tessellator.Model.prototype.drawCross = function (){
+            if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3] / 2;
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    x + w, y, z,
+                    x - w, y, z,
+                    x, y + w, z,
+                    x, y - w, z,
+                    x, y, z + w,
+                    x, y, z - w
+                );
                 this.end();
             }else if (arguments.length === 5){
                 var
                     x = arguments[0],
                     y = arguments[1],
                     z = arguments[2],
-                    width = arguments[3],
-                    height = arguments[4];
+                    w = arguments[3] / 2,
+                    vec = arguments[4];
                 
-                this.start(Tessellator.QUAD);
-                this.setVertex([
-                    x, -y - height, z,
-                    x + width, -y - height, z,
-                    x + width, -y, z,
-                    x, -y, z,
-                ]);
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(Tessellator.vec3(x + w, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x - w, y, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y + w, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y - w, z).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, z + w).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, y, z - w).multiply(mat));
                 this.end();
-            }
-        }
-
-        Tessellator.Model.prototype.fullGrid = function (){
-            if (arguments.length === 6){
+            }else if (arguments.length === 6){
                 var
                     x = arguments[0],
                     y = arguments[1],
-                    width = arguments[2],
-                    height = arguments[3],
-                    segX = arguments[4],
-                    segY = arguments[5];
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5];
                 
-                this.start(Tessellator.QUAD);
-                for (var xx = 0; xx < segX; xx++){
-                    for (var yy = 0; yy < segY; yy++){
-                        this.setVertex([
-                            x + (xx / segX) * width      , -y - ((yy + 1) / segY) * height, 0,
-                            x + ((xx + 1) / segX) * width, -y - ((yy + 1) / segY) * height, 0,
-                            x + ((xx + 1) / segX) * width, -y - (yy / segY) * height,       0,
-                            x + (xx / segX) * width      , -y - (yy / segY) * height,       0,
-                        ]);
-                    }
-                }
+                var
+                    dx = (x + xx) / 2,
+                    dy = (y + yy) / 2,
+                    dz = (z + zz) / 2;
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    xx, dy, dz,
+                    x , dy, dz,
+                    dx, yy, dz,
+                    dx, y , dz,
+                    dx, dy, zz,
+                    dx, dy, z 
+                );
                 this.end();
-            }else if (arguments.length === 8){
+            }else if (arguments.length === 7){
                 var
                     x = arguments[0],
                     y = arguments[1],
-                    width = arguments[2],
-                    height = arguments[3],
-                    segX = arguments[4],
-                    segY = arguments[5],
-                    tw = arguments[6],
-                    th = arguments[7];
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5],
+                    vec = arguments[6];
                 
-                var vertices = [];
-                var texture = [];
+                var
+                    dx = (x + xx) / 2,
+                    dy = (y + yy) / 2,
+                    dz = (z + zz) / 2;
                 
-                for (var xx = 0; xx < segX; xx++){
-                    for (var yy = 0; yy < segY; yy++){
-                        Array.prototype.push.apply(texture, [
-                            (xx % tw) / tw, ((yy % th) + 1) / th,
-                            ((xx % tw) + 1) / tw, ((yy % th) + 1) / th,
-                            ((xx % tw) + 1) / tw, (yy % th) / th,
-                            (xx % tw) / tw, (yy % th) / th,
-                        ]);
-                        
-                        Array.prototype.push.apply(vertices, [
-                            x + (xx / segX) * width      , -y - ((yy + 1) / segY) * height, 0,
-                            x + ((xx + 1) / segX) * width, -y - ((yy + 1) / segY) * height, 0,
-                            x + ((xx + 1) / segX) * width, -y - (yy / segY) * height,       0,
-                            x + (xx / segX) * width      , -y - (yy / segY) * height,       0,
-                        ]);
-                    }
-                }
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
                 
-                this.start(Tessellator.TEXTURE);
-                this.setVertex(texture);
-                this.end();
-                
-                this.start(Tessellator.QUAD);
-                this.setVertex(vertices);
+                this.start(Tessellator.LINE);
+                this.setVertex(Tessellator.vec3(xx, dy, dz).multiply(mat));
+                this.setVertex(Tessellator.vec3(x, dy, dz).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, yy, dz).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, y, dz).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, dy, zz).multiply(mat));
+                this.setVertex(Tessellator.vec3(dx, dy, z).multiply(mat));
                 this.end();
             }
         }
         
-        Tessellator.Model.prototype.fullGrid = function (){
-            if (arguments.length === 6){
+        Tessellator.Model.prototype.drawLine = function (){
+            if (arguments.length === 4){
                 var
                     x = arguments[0],
                     y = arguments[1],
-                    width = arguments[2],
-                    height = arguments[3],
-                    segX = arguments[4],
-                    segY = arguments[5];
+                    xx = arguments[2],
+                    yy = arguments[3];
                 
-                this.start(Tessellator.QUAD);
-                for (var xx = 0; xx < segX; xx++){
-                    for (var yy = 0; yy < segY; yy++){
-                        this.setVertex([
-                            x + (xx / segX) * width      , -y - ((yy + 1) / segY) * height, 0,
-                            x + ((xx + 1) / segX) * width, -y - ((yy + 1) / segY) * height, 0,
-                            x + ((xx + 1) / segX) * width, -y - (yy / segY) * height,       0,
-                            x + (xx / segX) * width      , -y - (yy / segY) * height,       0,
-                        ]);
-                    }
-                }
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    x, y, 0,
+                    xx, yy, 0
+                );
                 this.end();
-            }else if (arguments.length === 8){
+            }else if (arguments.length === 6){
                 var
                     x = arguments[0],
                     y = arguments[1],
-                    width = arguments[2],
-                    height = arguments[3],
-                    segX = arguments[4],
-                    segY = arguments[5],
-                    tw = arguments[6],
-                    th = arguments[7];
+                    z = arguments[2],
+                    xx = arguments[3],
+                    yy = arguments[4],
+                    zz = arguments[5];
                 
-                var vertices = [];
-                var texture = [];
+                this.start(Tessellator.LINE);
+                this.setVertex(
+                    x, y, z,
+                    xx, yy, zz
+                );
+                this.end();
+            }
+        }
+        
+        Tessellator.Model.prototype.drawOval = function (){
+            if (arguments.length === 3){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    w = arguments[2],
+                    q = Math.max(8, Math.ceil(w * 8));
                 
-                for (var xx = 0; xx < segX; xx++){
-                    for (var yy = 0; yy < segY; yy++){
-                        Array.prototype.push.apply(texture, [
-                            (xx % tw) / tw, ((yy % th) + 1) / th,
-                            ((xx % tw) + 1) / tw, ((yy % th) + 1) / th,
-                            ((xx % tw) + 1) / tw, (yy % th) / th,
-                            (xx % tw) / tw, (yy % th) / th,
-                        ]);
-                        
-                        Array.prototype.push.apply(vertices, [
-                            x + (xx / segX) * width      , -y - ((yy + 1) / segY) * height, 0,
-                            x + ((xx + 1) / segX) * width, -y - ((yy + 1) / segY) * height, 0,
-                            x + ((xx + 1) / segX) * width, -y - (yy / segY) * height,       0,
-                            x + (xx / segX) * width      , -y - (yy / segY) * height,       0,
-                        ]);
+                
+                var indices = [];
+                
+                this.start(Tessellator.LINE);
+                for (var i = 0; i < q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    this.setVertex(x + s * w, y + c * w, 0);
+                    
+                    indices.push(i, (i + 1) % q);
+                }
+                this.end(indices);
+            }else if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    q = Math.max(8, Math.ceil(w * 8));
+                
+                
+                var indices = [];
+                
+                this.start(Tessellator.LINE);
+                for (var i = 0; i < q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    this.setVertex(x + s * w, y + c * w, z);
+                    
+                    indices.push(i, (i + 1) % q);
+                }
+                this.end(indices);
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    q = arguments[4];
+                
+                
+                var indices = [];
+                
+                this.start(Tessellator.LINE);
+                for (var i = 0; i < q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    this.setVertex(x + s * w, y + c * w, z);
+                    
+                    indices.push(i, (i + 1) % q);
+                }
+                this.end(indices);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    vec = arguments[4],
+                    q = arguments[5];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                var indices = [];
+                
+                this.start(Tessellator.LINE);
+                for (var i = 0; i < q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    this.setVertex(Tessellator.vec3(x + s * w, y, z + c * w).multiply(mat));
+                    
+                    indices.push(i, (i + 1) % q);
+                }
+                this.end(indices);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4]
+                    vec = arguments[5],
+                    q = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                var indices = [];
+                
+                this.start(Tessellator.LINE);
+                for (var i = 0; i < q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    this.setVertex(Tessellator.vec3(x + s * rx, y, z + c * ry).multiply(mat));
+                    
+                    indices.push(i, (i + 1) % q);
+                }
+                this.end(indices);
+            }
+        }
+        
+        Tessellator.Model.prototype.fillOval = function (){
+            if (arguments.length === 3){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    w = arguments[2],
+                    q = Math.max(8, Math.ceil(w * 8));
+                
+                
+                var indices = [];
+                var ver = [x, y, 0];
+                var tex = [.5, .5];
+                
+                for (var i = 0; i < q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(x + s * w, y + c * w, 0);
+                    tex.push(s / 2 + .5, c / 2 + .5);
+                    
+                    if (i + 1 === q){
+                        indices.push(0, i + 1, 1);
+                    }else{
+                        indices.push(0, i + 1, i + 2);
                     }
                 }
                 
                 this.start(Tessellator.TEXTURE);
-                this.setVertex(texture);
+                this.setVertex(tex);
                 this.end();
                 
-                this.start(Tessellator.QUAD);
-                this.setVertex(vertices);
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 4){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    q = Math.max(8, Math.ceil(w * 8));
+                
+                
+                var indices = [];
+                var ver = [x, y, z];
+                var tex = [.5, .5];
+                
+                for (var i = 0; i < q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(x + s * w, y + c * w, z);
+                    tex.push(s / 2 + .5, c / 2 + .5);
+                    
+                    if (i + 1 === q){
+                        indices.push(0, i + 1, 1);
+                    }else{
+                        indices.push(0, i + 1, i + 2);
+                    }
+                }
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
                 this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    q = arguments[4];
+                
+                
+                var indices = [];
+                var ver = [x, y, z];
+                var tex = [.5, .5];
+                
+                for (var i = 0; i < q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(x + s * w, y + c * w, z);
+                    tex.push(s / 2 + .5, c / 2 + .5);
+                    
+                    if (i + 1 === q){
+                        indices.push(0, i + 1, 1);
+                    }else{
+                        indices.push(0, i + 1, i + 2);
+                    }
+                }
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    w = arguments[3],
+                    vec = arguments[4],
+                    q = arguments[5];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                var indices = [];
+                var ver = new Tessellator.Array(Tessellator.vec3(x, y, z).multiply(mat));
+                var tex = [.5, .5];
+                
+                for (var i = 0; i < q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(Tessellator.vec3(x + s * w, y, z + c * w).multiply(mat));
+                    tex.push(s / 2 + .5, c / 2 + .5);
+                    
+                    if (i + 1 === q){
+                        indices.push(0, i + 1, 1);
+                    }else{
+                        indices.push(0, i + 1, i + 2);
+                    }
+                }
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4]
+                    vec = arguments[5],
+                    q = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                var indices = [];
+                var ver = new Tessellator.Array([x, y, z]);
+                var tex = [.5, .5];
+                
+                for (var i = 0; i < q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(Tessellator.vec3(x + s * rx, y, z + c * ry).multiply(mat));
+                    tex.push(s / 2 + .5, c / 2 + .5);
+                    
+                    if (i + 1 === q){
+                        indices.push(0, i + 1, 1);
+                    }else{
+                        indices.push(0, i + 1, i + 2);
+                    }
+                }
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
             }
-        }
-
-
-        Tessellator.Model.prototype.drawGrid = function (x, y, width, height, segX, segY){
-            this.start(Tessellator.LINE);
-            
-            if (!segX){
-                segX = width;
-            }
-            
-            if (!segY){
-                segY = height;
-            }
-            
-            for (var xx = 0; xx <= segX; xx++){
-                this.setVertex(x + width * xx / segX, y, 0, x + width * xx / segX, y - height, 0);
-            }
-            
-            for (var yy = 0; yy <= segY; yy++){
-                this.setVertex(x, y - height * yy / segY, 0, x + width, y - height * yy / segY, 0);
-            }
-            this.end();
         }
         
-        Tessellator.Model.prototype.fillGrid = function (x, y, width, height, segX, segY){
-            this.start(Tessellator.QUAD);
-            
-            if (!segX){
-                segX = width;
-            }
-            
-            if (!segY){
-                segY = height;
-            }
-            
-            for (var xx = 0; xx < segX; xx++){
-                for (var yy = 0; yy < segY; yy++){
-                    if (((xx + yy) % 2) === 1){
-                        continue;
-                    }
+        Tessellator.Model.prototype.drawCircle = Tessellator.Model.prototype.drawOval;
+        
+        Tessellator.Model.prototype.fillCircle = Tessellator.Model.prototype.fillOval;
+        
+        Tessellator.Model.prototype.drawCilinder = function (){
+            if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4] / 2,
+                    q = Math.max(8, Math.ceil(r * 8));
+                
+                var ver = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
                     
-                    this.setVertex([
-                        x + (xx / segX) * width      , -y - ((yy + 1) / segY) * height, 0,
-                        x + ((xx + 1) / segX) * width, -y - ((yy + 1) / segY) * height, 0,
-                        x + ((xx + 1) / segX) * width, -y - (yy / segY) * height,       0,
-                        x + (xx / segX) * width      , -y - (yy / segY) * height,       0,
-                    ]);
-                }
-            }
-            this.end();
-        }
-
-
-        Tessellator.Model.prototype.fillInverseGrid = function (x, y, width, height, segX, segY){
-            this.start(Tessellator.QUAD);
-            for (var xx = 0; xx < segX; xx++){
-                for (var yy = 0; yy < segY; yy++){
-                    if (((xx + yy) % 2) === 0){
-                        continue;
-                    }
+                    ver.push(
+                        x + s * r, y - h, z + c * r,
+                        x + s * r, y + h, z + c * r
+                    );
                     
-                    this.setVertex([
-                        x + (xx / segX) * width      , -y - ((yy + 1) / segY) * height, 0,
-                        x + ((xx + 1) / segX) * width, -y - ((yy + 1) / segY) * height, 0,
-                        x + ((xx + 1) / segX) * width, -y - (yy / segY) * height,       0,
-                        x + (xx / segX) * width      , -y - (yy / segY) * height,       0,
-                    ]);
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii, ii + 1, ii, ii + 2, ii + 1, ii + 3);
+                    }
                 }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4] / 2,
+                    q = arguments[5];
+                
+                var ver = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(
+                        x + s * r, y - h, z + c * r,
+                        x + s * r, y + h, z + c * r
+                    );
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii, ii + 1, ii, ii + 2, ii + 1, ii + 3);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4] / 2,
+                    vec = arguments[5],
+                    q = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                var ver = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(
+                        Tessellator.vec3(x + s * r, y - h, z + c * r).multiply(mat),
+                        Tessellator.vec3(x + s * r, y + h, z + c * r).multiply(mat)
+                    );
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii, ii + 1, ii, ii + 2, ii + 1, ii + 3);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(ver);
+                this.end(indices);
             }
-            this.end();
         }
-
-
-        Tessellator.Model.prototype.drawLine = function (x1, y1, x2, y2){
-            this.start(Tessellator.LINE);
-            this.setVertex([
-                x1, -y1, 0,
-                x2, -y2, 0,
-            ]);
-            this.end();
+        
+        Tessellator.Model.prototype.fillCilinder = function (){
+            if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4] / 2,
+                    q = Math.max(8, Math.ceil(r * 8));
+                
+                var ver = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var norm = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    norm.push(s, 0, c, s, 0, c);
+                    ver.push(
+                        x + s * r, y - h, z + c * r,
+                        x + s * r, y + h, z + c * r
+                    );
+                    tex.push(i / q, 0, i / q, 1);
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii + 1, ii, ii + 2, ii + 3, ii + 1, ii + 2);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(norm);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4] / 2,
+                    q = arguments[5];
+                
+                var ver = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var norm = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    norm.push(s, 0, c, s, 0, c);
+                    ver.push(
+                        x + s * r, y - h, z + c * r,
+                        x + s * r, y + h, z + c * r
+                    );
+                    tex.push(i / q, 0, i / q, 1);
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii + 1, ii, ii + 2, ii + 3, ii + 1, ii + 2);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(norm);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4] / 2,
+                    vec = arguments[5],
+                    q = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                var ver = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var norm = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    norm.push(Tessellator.vec3(s, 0, c).multiply(mat), Tessellator.vec3(s, 0, c).multiply(mat));
+                    
+                    ver.push(
+                        Tessellator.vec3(x + s * r, y - h, z + c * r).multiply(mat),
+                        Tessellator.vec3(x + s * r, y + h, z + c * r).multiply(mat)
+                    );
+                    
+                    tex.push(i / q, 0, i / q, 1);
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii + 1, ii, ii + 2, ii + 3, ii + 1, ii + 2);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(norm);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }
+        }
+        
+        Tessellator.Model.prototype.drawFullCilinder = Tessellator.Model.prototype.drawCilinder;
+        
+        Tessellator.Model.prototype.fillFullCilinder = function (){
+            if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4],
+                    q = Math.max(8, Math.ceil(r * 8));
+                
+                this.fillCilinder(x, y, z, r, h, q);
+                this.fillCircle(x, y, z - h / 2, r, Tessellator.vec3(0, -1, 0), q);
+                this.fillCircle(x, y, z - h / 2, r, Tessellator.vec3(0, 1, 0), q);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4],
+                    q = arguments[5];
+                
+                this.fillCilinder(x, y, z, r, h, q);
+                this.fillCircle(x, y, z - h / 2, r, Tessellator.vec3(0, -1, 0), q);
+                this.fillCircle(x, y, z - h / 2, r, Tessellator.vec3(0, 1, 0), q);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4],
+                    vec = arguments[5],
+                    q = arguments[6];
+                
+                this.fillCilinder(x, y, z, r, h, vec, q);
+                this.fillOval(x, y + h / 2, z, r, vec.clone().negate(), q);
+                this.fillOval(x, y + h / 2, z, r, vec, q);
+            }
+        }
+        
+        Tessellator.Model.prototype.drawCone = function (){
+            if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4] / 2,
+                    q = Math.max(8, Math.ceil(r * 8));
+                
+                var ver = new Tessellator.Array([x, y + h, z]);
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(x + s * r, y - h, z + c * r);
+                    
+                    if (i !== q){
+                        indices.push(i, i + 1, 0, i);
+                    }else{
+                        indices.push(i, 1, 0, i);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4] / 2,
+                    q = arguments[5];
+                
+                var ver = new Tessellator.Array([x, y + h, z]);
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(x + s * r, y - h, z + c * r);
+                    
+                    if (i !== q){
+                        indices.push(i, i + 1, 0, i);
+                    }else{
+                        indices.push(i, 1, 0, i);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4] / 2,
+                    vec = arguments[5],
+                    q = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                var ver = new Tessellator.Array(Tessellator.vec3(x, y + h, z).multiply(mat));
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(Tessellator.vec3(x + s * r, y - h, z + c * r).multiply(mat));
+                    
+                    if (i !== q){
+                        indices.push(i, i + 1, 0, i);
+                    }else{
+                        indices.push(i, 1, 0, i);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(ver);
+                this.end(indices);
+            }
+        }
+        
+        Tessellator.Model.prototype.fillCone = function (){
+            if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4] / 2,
+                    q = Math.max(8, Math.ceil(r * 8));
+                
+                var ver = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var norm = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    norm.push(s, 0, c, s, 0, c);
+                    ver.push(
+                        x + s * r, y - h, z + c * r,
+                        x, y + h, z
+                    );
+                    tex.push(i / q, 0, i / q, 1);
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii + 1, ii, ii + 2, ii + 3, ii + 1, ii + 2);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(norm);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4] / 2,
+                    q = arguments[5];
+                
+                var ver = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var norm = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    norm.push(s, 0, c, s, 0, c);
+                    ver.push(
+                        x + s * r, y - h, z + c * r,
+                        x, y + h, z
+                    );
+                    tex.push(i / q, 0, i / q, 1);
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii + 1, ii, ii + 2, ii + 3, ii + 1, ii + 2);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(norm);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    h = arguments[4] / 2,
+                    vec = arguments[5],
+                    q = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                var ver = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var norm = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    norm.push(s, 0, c, s, 0, c);
+                    ver.push(
+                        Tessellator.vec3(x + s * r, y - h, z + c * r).multiply(mat),
+                        Tessellator.vec3(x, y + h, z).multiply(mat)
+                    );
+                    tex.push(i / q, 0, i / q, 1);
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii + 1, ii, ii + 2, ii + 3, ii + 1, ii + 2);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(norm);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }
+        }
+        
+        Tessellator.Model.prototype.drawHalfCone = function (){
+            if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4],
+                    h = arguments[5] / 2,
+                    q = Math.max(8, Math.ceil(Math.max(rx, ry) * 8));
+                
+                var ver = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(
+                        x + s * rx, y - h, z + c * rx,
+                        x + s * ry, y + h, z + c * ry
+                    );
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii, ii + 1, ii, ii + 2, ii + 1, ii + 3);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4],
+                    h = arguments[5] / 2,
+                    q = arguments[6];
+                
+                var ver = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(
+                        x + s * rx, y - h, z + c * rx,
+                        x + s * ry, y + h, z + c * ry
+                    );
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii, ii + 1, ii, ii + 2, ii + 1, ii + 3);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 8){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4],
+                    h = arguments[5] / 2,
+                    vec = arguments[6],
+                    q = arguments[7];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                var ver = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    ver.push(
+                        Tessellator.vec3(x + s * rx, y - h, z + c * rx).multiply(mat),
+                        Tessellator.vec3(x + s * ry, y + h, z + c * ry).multiply(mat)
+                    );
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii, ii + 1, ii, ii + 2, ii + 1, ii + 3);
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(ver);
+                this.end(indices);
+            }
+        }
+        
+        Tessellator.Model.prototype.fillHalfCone = function (){
+            if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4],
+                    h = arguments[5] / 2,
+                    q = Math.max(8, Math.ceil(Math.max(rx, ry) * 8));
+                
+                var ver = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var norm = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    norm.push(s, 0, c, s, 0, c);
+                    ver.push(
+                        x + s * rx, y - h, z + c * rx,
+                        x + s * ry, y + h, z + c * ry
+                    );
+                    tex.push(i / q, 0, i / q, 1);
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii + 1, ii, ii + 2, ii + 3, ii + 1, ii + 2);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(norm);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4],
+                    h = arguments[5] / 2,
+                    q = arguments[6];
+                
+                var ver = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var norm = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    norm.push(s, 0, c, s, 0, c);
+                    ver.push(
+                        x + s * rx, y - h, z + c * rx,
+                        x + s * ry, y + h, z + c * ry
+                    );
+                    tex.push(i / q, 0, i / q, 1);
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii + 1, ii, ii + 2, ii + 3, ii + 1, ii + 2);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(norm);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }else if (arguments.length === 8){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    rx = arguments[3],
+                    ry = arguments[4],
+                    h = arguments[5] / 2,
+                    vec = arguments[6],
+                    q = arguments[7];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+                
+                var ver = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var norm = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i <= q; i++){
+                    var
+                        a = i / q * Math.PI * 2,
+                        s = Math.sin(a),
+                        c = Math.cos(a);
+                    
+                    norm.push(s, 0, c, s, 0, c);
+                    ver.push(
+                        Tessellator.vec3(x + s * rx, y - h, z + c * rx).multiply(mat),
+                        Tessellator.vec3(x + s * ry, y + h, z + c * ry).multiply(mat)
+                    );
+                    tex.push(i / q, 0, i / q, 1);
+                    
+                    var ii = i * 2;
+                    
+                    if (i !== q){
+                        indices.push(ii + 1, ii, ii + 2, ii + 3, ii + 1, ii + 2);
+                    }
+                }
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(norm);
+                this.end();
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(ver);
+                this.end(indices);
+            }
+        }
+        
+        Tessellator.Model.prototype.drawTorus = function (){
+            if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    s = arguments[4],
+                    q = Math.max(32, r * s * 32);
+                
+                var vec = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii <= q; ii++){
+                        for (var k = 1; k >= 0; k--){
+                            var
+                                ss = (i + k) % q + .5,
+                                tt = ii % q,
+                                
+                                sss = Math.sin(ss / q * Math.PI * 2),
+                                ssc = Math.cos(ss / q * Math.PI * 2),
+                                
+                                tts = Math.sin(tt / q * Math.PI * 2),
+                                ttc = Math.cos(tt / q * Math.PI * 2);
+                            
+                            vec.push(
+                                x + (1 + ssc * s) * ttc * r,
+                                y + (1 + ssc * s) * tts * r,
+                                z + sss * s * r
+                            );
+                        }
+                        
+                        if (ii < q){
+                            var iii = ii * 2 + i * (q + 1) * 2;
+                            
+                            indices.push(iii, iii + 1, iii, iii + 2, iii + 3, iii + 2, iii + 3, iii + 1);
+                        }
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(vec);
+                this.end(indices);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    s = arguments[4],
+                    q = arguments[5];
+                
+                var vec = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii <= q; ii++){
+                        for (var k = 1; k >= 0; k--){
+                            var
+                                ss = (i + k) % q + .5,
+                                tt = ii % q,
+                                
+                                sss = Math.sin(ss / q * Math.PI * 2),
+                                ssc = Math.cos(ss / q * Math.PI * 2),
+                                
+                                tts = Math.sin(tt / q * Math.PI * 2),
+                                ttc = Math.cos(tt / q * Math.PI * 2);
+                            
+                            vec.push(
+                                x + (1 + ssc * s) * ttc * r,
+                                y + (1 + ssc * s) * tts * r,
+                                z + sss * s * r
+                            );
+                        }
+                        
+                        if (ii < q){
+                            var iii = ii * 2 + i * (q + 1) * 2;
+                            
+                            indices.push(iii, iii + 1, iii, iii + 2, iii + 3, iii + 2, iii + 3, iii + 1);
+                        }
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(vec);
+                this.end(indices);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    s = arguments[4],
+                    vec = arguments[5]
+                    q = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 0, 1));
+                
+                var vec = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii <= q; ii++){
+                        for (var k = 1; k >= 0; k--){
+                            var
+                                ss = (i + k) % q + .5,
+                                tt = ii % q,
+                                
+                                sss = Math.sin(ss / q * Math.PI * 2),
+                                ssc = Math.cos(ss / q * Math.PI * 2),
+                                
+                                tts = Math.sin(tt / q * Math.PI * 2),
+                                ttc = Math.cos(tt / q * Math.PI * 2);
+                            
+                            vec.push(Tessellator.vec3(
+                                x + (1 + ssc * s) * ttc * r,
+                                y + (1 + ssc * s) * tts * r,
+                                z + sss * s * r).multiply(mat)
+                            );
+                        }
+                        
+                        if (ii < q){
+                            var iii = ii * 2 + i * (q + 1) * 2;
+                            
+                            indices.push(iii, iii + 1, iii, iii + 2, iii + 3, iii + 2, iii + 3, iii + 1);
+                        }
+                    }
+                }
+                
+                this.start(Tessellator.LINE);
+                this.setVertex(vec);
+                this.end(indices);
+            }
+        }
+        
+        Tessellator.Model.prototype.fillTorus = function (){
+            if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    s = arguments[4],
+                    q = Math.max(32, r * s * 32);
+                
+                var vec = new Tessellator.Array();
+                var nor = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii <= q; ii++){
+                        for (var k = 1; k >= 0; k--){
+                            var
+                                ss = (i + k) % q + .5,
+                                tt = ii % q,
+                                
+                                sss = Math.sin(ss / q * Math.PI * 2),
+                                ssc = Math.cos(ss / q * Math.PI * 2),
+                                
+                                tts = Math.sin(tt / q * Math.PI * 2),
+                                ttc = Math.cos(tt / q * Math.PI * 2);
+                            
+                            nor.push(ssc * ttc, ssc * tts, sss);
+                            
+                            vec.push(
+                                x + (1 + ssc * s) * ttc * r,
+                                y + (1 + ssc * s) * tts * r,
+                                z + sss * s * r
+                            );
+                            
+                            tex.push(
+                                (i + k) / q,
+                                tt / q
+                            );
+                        }
+                        
+                        if (ii < q){
+                            var iii = ii * 2 + i * (q + 1) * 2;
+                            
+                            indices.push(iii + 1, iii + 3, iii + 2, iii + 1, iii + 2, iii);
+                        }
+                    }
+                }
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(nor);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vec);
+                this.end(indices);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    s = arguments[4],
+                    q = arguments[5];
+                
+                var vec = new Tessellator.Array();
+                var nor = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii <= q; ii++){
+                        for (var k = 1; k >= 0; k--){
+                            var
+                                ss = (i + k) % q + .5,
+                                tt = ii % q,
+                                
+                                sss = Math.sin(ss / q * Math.PI * 2),
+                                ssc = Math.cos(ss / q * Math.PI * 2),
+                                
+                                tts = Math.sin(tt / q * Math.PI * 2),
+                                ttc = Math.cos(tt / q * Math.PI * 2);
+                            
+                            nor.push(ssc * ttc, ssc * tts, sss);
+                            
+                            vec.push(
+                                x + (1 + ssc * s) * ttc * r,
+                                y + (1 + ssc * s) * tts * r,
+                                z + sss * s * r
+                            );
+                            
+                            tex.push(
+                                (i + k) / q,
+                                tt / q
+                            );
+                        }
+                        
+                        if (ii < q){
+                            var iii = ii * 2 + i * (q + 1) * 2;
+                            
+                            indices.push(iii + 1, iii + 3, iii + 2, iii + 1, iii + 2, iii);
+                        }
+                    }
+                }
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(nor);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vec);
+                this.end(indices);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    s = arguments[4],
+                    vec = arguments[5],
+                    q = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 0, 1));
+                
+                var vec = new Tessellator.Array();
+                var nor = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii <= q; ii++){
+                        for (var k = 1; k >= 0; k--){
+                            var
+                                ss = (i + k) % q + .5,
+                                tt = ii % q,
+                                
+                                sss = Math.sin(ss / q * Math.PI * 2),
+                                ssc = Math.cos(ss / q * Math.PI * 2),
+                                
+                                tts = Math.sin(tt / q * Math.PI * 2),
+                                ttc = Math.cos(tt / q * Math.PI * 2);
+                            
+                            nor.push(Tessellator.vec3(ssc * ttc, ssc * tts, sss).multiply(mat));
+                            
+                            vec.push(Tessellator.vec3(
+                                x + (1 + ssc * s) * ttc * r,
+                                y + (1 + ssc * s) * tts * r,
+                                z + sss * s * r).multiply(mat)
+                            );
+                            
+                            tex.push(
+                                (i + k) / q,
+                                tt / q
+                            );
+                        }
+                        
+                        if (ii < q){
+                            var iii = ii * 2 + i * (q + 1) * 2;
+                            
+                            indices.push(iii + 1, iii + 3, iii + 2, iii + 1, iii + 2, iii);
+                        }
+                    }
+                }
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(nor);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vec);
+                this.end(indices);
+            }
+        }
+        
+        Tessellator.Model.prototype.drawInverseTorus = Tessellator.Model.prototype.drawTorus;
+        
+        Tessellator.Model.prototype.fillInverseTorus = function (){
+            if (arguments.length === 5){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    s = arguments[4],
+                    q = Math.max(32, r * s * 32);
+                
+                var vec = new Tessellator.Array();
+                var nor = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii <= q; ii++){
+                        for (var k = 1; k >= 0; k--){
+                            var
+                                ss = (i + k) % q + .5,
+                                tt = ii % q,
+                                
+                                sss = Math.sin(ss / q * Math.PI * 2),
+                                ssc = Math.cos(ss / q * Math.PI * 2),
+                                
+                                tts = Math.sin(tt / q * Math.PI * 2),
+                                ttc = Math.cos(tt / q * Math.PI * 2);
+                            
+                            nor.push(-ssc * ttc, -ssc * tts, -sss);
+                            
+                            vec.push(
+                                x + (1 + ssc * s) * ttc * r,
+                                y + (1 + ssc * s) * tts * r,
+                                z + sss * s * r
+                            );
+                            
+                            tex.push(
+                                (i + k) / q,
+                                tt / q
+                            );
+                        }
+                        
+                        if (ii < q){
+                            var iii = ii * 2 + i * (q + 1) * 2;
+                            
+                            indices.push(iii + 3, iii + 1, iii + 2, iii + 2, iii + 1, iii);
+                        }
+                    }
+                }
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(nor);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vec);
+                this.end(indices);
+            }else if (arguments.length === 6){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    s = arguments[4],
+                    q = arguments[5];
+                
+                var vec = new Tessellator.Array();
+                var nor = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii <= q; ii++){
+                        for (var k = 1; k >= 0; k--){
+                            var
+                                ss = (i + k) % q + .5,
+                                tt = ii % q,
+                                
+                                sss = Math.sin(ss / q * Math.PI * 2),
+                                ssc = Math.cos(ss / q * Math.PI * 2),
+                                
+                                tts = Math.sin(tt / q * Math.PI * 2),
+                                ttc = Math.cos(tt / q * Math.PI * 2);
+                            
+                            nor.push(-ssc * ttc, -ssc * tts, -sss);
+                            
+                            vec.push(
+                                x + (1 + ssc * s) * ttc * r,
+                                y + (1 + ssc * s) * tts * r,
+                                z + sss * s * r
+                            );
+                            
+                            tex.push(
+                                (i + k) / q,
+                                tt / q
+                            );
+                        }
+                        
+                        if (ii < q){
+                            var iii = ii * 2 + i * (q + 1) * 2;
+                            
+                            indices.push(iii + 3, iii + 1, iii + 2, iii + 2, iii + 1, iii);
+                        }
+                    }
+                }
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(nor);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vec);
+                this.end(indices);
+            }else if (arguments.length === 7){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2],
+                    r = arguments[3],
+                    s = arguments[4],
+                    vec = arguments[5],
+                    q = arguments[6];
+                
+                var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 0, 1));
+                
+                var vec = new Tessellator.Array();
+                var nor = new Tessellator.Array();
+                var tex = new Tessellator.Array();
+                var indices = [];
+                
+                for (var i = 0; i < q; i++){
+                    for (var ii = 0; ii <= q; ii++){
+                        for (var k = 1; k >= 0; k--){
+                            var
+                                ss = (i + k) % q + .5,
+                                tt = ii % q,
+                                
+                                sss = Math.sin(ss / q * Math.PI * 2),
+                                ssc = Math.cos(ss / q * Math.PI * 2),
+                                
+                                tts = Math.sin(tt / q * Math.PI * 2),
+                                ttc = Math.cos(tt / q * Math.PI * 2);
+                            
+                            nor.push(Tessellator.vec3(-ssc * ttc, -ssc * tts, -sss).multiply(mat));
+                            
+                            vec.push(Tessellator.vec3(
+                                x + (1 + ssc * s) * ttc * r,
+                                y + (1 + ssc * s) * tts * r,
+                                z + sss * s * r).multiply(mat)
+                            );
+                            
+                            tex.push(
+                                (i + k) / q,
+                                tt / q
+                            );
+                        }
+                        
+                        if (ii < q){
+                            var iii = ii * 2 + i * (q + 1) * 2;
+                            
+                            indices.push(iii + 3, iii + 1, iii + 2, iii + 2, iii + 1, iii);
+                        }
+                    }
+                }
+                
+                this.start(Tessellator.TEXTURE);
+                this.setVertex(tex);
+                this.end();
+                
+                this.start(Tessellator.NORMAL);
+                this.setVertex(nor);
+                this.end();
+                
+                this.start(Tessellator.TRIANGLE);
+                this.setVertex(vec);
+                this.end(indices);
+            }
+        }
+        
+        Tessellator.Model.prototype.plotPoint = function (){
+            if (arguments.length === 2){
+                var
+                    x = arguments[0],
+                    y = arguments[1];
+                
+                this.start(Tessellator.POINT);
+                this.setVertex(x, y, 0);
+                this.end();
+            }else if (arguments.length === 3){
+                var
+                    x = arguments[0],
+                    y = arguments[1],
+                    z = arguments[2];
+                
+                this.start(Tessellator.POINT);
+                this.setVertex(x, y, z);
+                this.end();
+            }
         }
     }
     { //translate
@@ -8656,6 +11790,10 @@
         Tessellator.Initializer.setDefault("color", function () {
             return Tessellator.DEFAULT_COLOR;
         });
+        
+        Tessellator.Initializer.setDefault("color255", function () {
+            return Tessellator.DEFAULT_COLOR.clone().multiply(255);
+        });
     
         Tessellator.Model.prototype.setColor = function (){
             return this.add(new Tessellator.ColorSet(Tessellator.getColor(arguments)));
@@ -8934,10 +12072,61 @@
                 interpreter.flush();
                 
                 interpreter.model.push(this.shape);
+            }else if (this.shape.type === Tessellator.POINT){
+                interpreter.flush();
+                
+                if (this.indices){
+                    this.shape.indices.push(this.indices);
+                }
+                
+                interpreter.model.push(this.shape);
             }else if (this.shape.type === Tessellator.LINE){
                 interpreter.flush();
                 
+                if (this.indices){
+                    this.shape.indices.push(this.indices);
+                }
+                
                 interpreter.model.push(this.shape);
+                
+                if (interpreter.get("lighting")){
+                    if (interpreter.normals){
+                        this.shape.normals.push(interpreter.normals);
+                        
+                        intrepreter.normals = null;
+                    }else{
+                        var vcache = this.shape.vertices;
+                        
+                        if (this.indices){
+                            var norm = new Float32Array(vcache.length);
+                            
+                            for (var i = 0; i < this.indices.length; i += 2){
+                                var i1 = this.shape.indices.get(i + 0) * 3;
+                                var i2 = this.shape.indices.get(i + 1) * 3;
+                                
+                                var normal = Tessellator.vec3(
+                                    vcache.get(i1 + 0) - vcache.get(i2 + 0),
+                                    vcache.get(i1 + 1) - vcache.get(i2 + 1),
+                                    vcache.get(i1 + 2) - vcache.get(i2 + 2)
+                                ).normalize();
+                                
+                                norm.set(normal, i1);
+                                norm.set(normal, i2);
+                            }
+                            
+                            this.shape.normals.push(norm);
+                        }else for (var i = 0; i < vcache.length; i += 6){
+                            var normal = Tessellator.vec3(
+                                vcache.get(i + 0) - vcache.get(i + 3),
+                                vcache.get(i + 1) - vcache.get(i + 4),
+                                vcache.get(i + 2) - vcache.get(i + 5)
+                            ).normalize();
+                            
+                            this.shape.normals.push(normal);
+                            this.shape.normals.push(normal);
+                        }
+                    }
+                }
             }else{
                 var vertexIndexes = this.shape.indices;
                 
@@ -9030,8 +12219,6 @@
                 }else if (this.shape.type === Tessellator.TRIANGLE){
                     var k = this.shape.vertices.length;
                     
-                    var colorOff = this.shape.colors.length / (4 * 3);
-                    
                     if (k % 9 !== 0){
                         throw "vector length is invalid for triangles!";
                     }else{
@@ -9045,23 +12232,19 @@
                             (i * 3) + vertexOffset + 2
                         ]);
                         
-                        if (colorOff <= i && textureBounds){
-                            var bounds;
-                            
-                            if (textureBounds.defaultBounds){
-                                bounds = [
-                                                          0,                       0,
-                                    textureBounds.bounds[0],                       0,
-                                    textureBounds.bounds[1], textureBounds.bounds[1],
-                                ];
-                            }else{
-                                bounds = textureBounds.bounds.subarray((i - colorOff) * 6, (k - colorOff) * 6);
-                            }
-                            
-                            this.shape.colors.push(bounds);
-                            
-                            colorOff = this.shape.colors.size / (4 * 3);
+                        var bounds;
+                        
+                        if (textureBounds.defaultBounds){
+                            bounds = [
+                                                      0,                       0,
+                                textureBounds.bounds[0],                       0,
+                                textureBounds.bounds[1], textureBounds.bounds[1],
+                            ];
+                        }else{
+                            bounds = textureBounds.bounds.subarray(i * 6, (i + 1) * 6);
                         }
+                        
+                        this.shape.colors.push(bounds);
                     }
                 }else if (this.shape.type === Tessellator.TRIANGLE_STRIP){
                     var k = this.shape.vertices.length / 3;
@@ -10470,6 +13653,10 @@
     }
     
     Tessellator.Object.prototype.resetIndices = function (type){
+        if (type === Uint32Array && !this.tessellator.extensions.get("OES_element_index_uint")){
+            throw "Usigned Integer indices are not supported.";
+        }
+        
         if (this.indices){
             this.indices.buffer.dispose(this.tessellator);
         }
