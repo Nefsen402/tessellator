@@ -1,0 +1,184 @@
+<html>
+	<body style="margin:0px">
+		<canvas style="background:black;width:100%;height:100%" id = "gl"></canvas>
+	</body>
+	
+	<head>
+		<title>
+			Bouncing balls
+		</title>
+		
+		<script src = "../Tessellator.js"></script>
+		
+		<script>
+			tessellator = new Tessellator(document.getElementById("gl"));
+			
+			shader0 = new Tessellator.ModelViewRenderer(tessellator.loadShaderProgramFromCode(Tessellator.MODEL_VIEW_VERTEX_LIGHTING_VERTEX_SHADER, Tessellator.MODEL_VIEW_VERTEX_LIGHTING_FRAGMENT_SHADER));
+			shader1 = new Tessellator.ModelViewNoLightingRenderer(tessellator.loadShaderProgramFromCode(Tessellator.MODEL_VIEW_VERTEX_SHADER, Tessellator.MODEL_VIEW_FRAGMENT_SHADER));
+			
+			model = tessellator.createMatrix();
+			
+			model.clear();
+			model.setView(new Tessellator.PerspectiveView());
+			
+			model.enable(Tessellator.LIGHTING);
+			model.setColor(0.2, 0.2, 0.2);
+			model.setAmbientLight();
+			
+			model.translate(0, 0, -20);
+			model.rotateDeg(-25, 0, 1, 0);
+			model.rotateDeg(30, 1, 0, 0);
+			model.translate(0, -3, 0);
+			
+			model.setColor("gray");
+			
+			model.push();
+				model.rotateDeg(-90, 1, 0, 0);
+				model.translate(0, 0, -5);
+				
+				model.fillGrid(-5, -5, 10, 10);
+				
+				model.translate(0, 0, 10);
+				
+				model.fillGrid(-5, -5, 10, 10);
+				
+				model.push();
+					balls = model.createMatrix();
+					balls.render = true;
+					balls.model = [];
+					
+					pointer = model.translate(0, 0, 0.5);
+					     
+					model.setColor("red");
+					model.setPointLight(0, 0, 0, 10);
+					
+					model.disable(Tessellator.NORMAL);
+					model.fillPrism(0, 0, 0, 0.25);
+					model.enable(Tessellator.NORMAL);
+				model.pop();
+			model.pop();
+			
+			model.update();
+			
+			//tessellator.renderModel(model);
+			//tessellator.onTextureLoaded = tessellator.onresize = function (){
+			//	tessellator.renderModel(model);
+			//}
+			
+			renderLoop = tessellator.createRenderLoop(model, shader0);
+			
+			time = 0;
+			
+			loop();
+			function loop (){
+				time++;
+				
+				if (window.up){
+					pointer.pos[1] += 0.1;
+				}
+				
+				if (window.down){
+					pointer.pos[1] -= 0.1;
+				}
+				
+				if (window.right){
+					pointer.pos[0] += 0.1;
+				}
+				
+				if (window.left){
+					pointer.pos[0] -= 0.1;
+				}
+				
+				for (var i = 0; i < balls.model.length; i++){
+					var mod = balls.model[i];
+					
+					mod.age++;
+					
+					mod.speedY += 0.1;
+					
+					mod.model[0].pos[1] += mod.speedX;
+					mod.model[0].pos[2] -= mod.speedY;
+					mod.model[0].pos[0] += mod.speedZ;
+					
+					if (mod.age >= 30){
+						balls.model.splice(i, i + 1);
+					}
+				}
+				
+				if (time % 2 == 0 && window.space){
+					var model = tessellator.createMatrix();
+					model.translate(pointer.pos.clone());
+					
+					model.age = 0;
+					model.speedX = (Math.random() - 0.5) * 0.5;
+					model.speedY = -Math.random();
+					model.speedZ = (Math.random() - 0.5) * 0.5;
+					
+					model.setColor(Math.random(), Math.random(), Math.random());
+					model.disable(Tessellator.NORMAL);
+					model.fillPrism(0, 0, 0, 0.25);
+					model.disable(Tessellator.NORMAL);
+					model.setPointLight(0, 0, 0, 10);
+					
+					balls.model.push(model.finish());
+				}
+				
+				
+				
+				setTimeout(loop, 30);
+			}
+			
+			document.onkeydown = function (e){
+				if (e.keyCode == 38){
+					//up
+					
+					up = true;
+				}else if (e.keyCode == 40){
+					//down
+					
+					down = true;
+				}else if (e.keyCode == 37){
+					//left
+					
+					left = true;
+				}else if (e.keyCode == 39){
+					//right
+					
+					right = true;
+				}else if (e.keyCode == 32){
+					space = true;
+				}else if (e.keyCode == 69){
+					if (renderLoop.renderer == shader0){
+						renderLoop.setRenderer(shader1);
+					}else{
+						renderLoop.setRenderer(shader0);
+					}
+				}
+			}
+			
+			document.onkeyup = function (e){
+				if (e.keyCode == 38){
+					//up
+					
+					up = false;
+				}else if (e.keyCode == 40){
+					//down
+					
+					down = false;
+				}else if (e.keyCode == 37){
+					//left
+					
+					left = false;
+				}else if (e.keyCode == 39){
+					//right
+					
+					right = false;
+				}else if (e.keyCode == 32){
+					space = false;
+				}
+			}
+		</script>
+	</head>
+	
+	
+</html>

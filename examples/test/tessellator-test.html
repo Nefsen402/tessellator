@@ -1,0 +1,98 @@
+<!DOCKTYPE HTML>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		
+		<script type="text/javascript" src="../../Tessellator.js"></script>
+		
+		<title>
+			Tessellator
+		</title>
+	</head>
+	<body style="margin:0px;">
+		<tessellator-webgl args="'antialias':false" style="background: black;width:100%;height:100%">
+			<script type="run" src="tessellator-test.js"></script>
+		
+			<script type = "shader/fragment" src="fragmentShader.glsl"></script>
+			<script type = "shader/vertex" src="vertexShader.glsl"></script>
+			
+			<script type = "shader/pixel" id = "shader">
+				precision mediump float;
+				
+				varying vec2 texturePos;
+				
+				uniform int wwidth;
+				uniform int wheight;
+				
+				uniform int time;
+				uniform sampler2D sampler;
+				
+				float fadePeriod = 6.0;
+				
+				void main (void){
+					vec2 pos = texturePos;
+					
+					float r = texture2D(sampler, pos + vec2(0.01, 0)).x;
+					float g = texture2D(sampler, pos).y;
+					float b = texture2D(sampler, pos + vec2(-0.01, 0)).z;
+					
+					float brightness = (mod(gl_FragCoord.y + (float(time) / 40.0), fadePeriod) / fadePeriod) * 2.0;
+					
+					if (brightness > 1.0){
+						brightness = 1.0 - (brightness - 1.0);
+					}
+					
+					brightness = 1.0 - (brightness * brightness);
+					
+					gl_FragColor = vec4(r * brightness, g * brightness, b * brightness, 1);
+				}
+			</script>
+			
+			<!--<script id="shader-fs" type="x-shader/x-fragment">
+				precision lowp float;
+				
+				uniform int wwidth;
+				uniform int wheight;
+				
+				uniform float nearView;
+				uniform float farView;
+				
+				varying vec4 vecp;
+				varying lowp float hasNormal;
+				
+				void main(void) {
+					if (hasNormal >= 0.5){
+						float depth = 1.0 - ((vecp.z - nearView) / (farView - nearView));
+						
+						gl_FragColor = vec4(depth, depth, depth, 1);
+					}else{
+						discard;
+					}
+				}
+			</script>
+			
+			<script id="shader-vs" type="x-shader/x-vertex">
+				attribute vec3 position;
+				attribute vec3 normal;
+				
+				uniform mat4 MVMatrix;
+				uniform mat4 PMatrix;
+				
+				varying vec4 vecp;
+				varying lowp float hasNormal;
+				
+				void main(void) {
+					vecp = PMatrix * MVMatrix * vec4(position, 1.0);
+					
+					if (normal.x == 0.0 && normal.y == 0.0 && normal.z == 0.0){
+						hasNormal = 0.0;
+					}else{
+						hasNormal = 1.0;
+					}
+					
+					gl_Position = vecp;
+				}
+			</script>-->
+		</tessellator-webgl>
+	</body>
+</html>
