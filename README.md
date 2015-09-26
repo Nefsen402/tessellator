@@ -2,13 +2,13 @@
 
 Tessellator is a rendering engine for WebGL. It's goal is to make WebGL less verbose and easier to use. Similar to THREE.js, this is supposed to simplfy the process of making a webgl program/game/animation while still having options for vary advanced users.
 
-Here is a basic spinning cube the most basic of the basic. This one happenes to be animated without setting up a loop. How did I do it? Tessellator adds many class and tries to borrow from GLSL and object oriented pragramming languages so the programmer feels right at home. One thing I added were Vectors like you have in glsl. Calling
+Here is a basic spinning cube, the most basic of the basic. This one happenes to be animated without setting up a loop. How did I do it? Tessellator adds many class and tries to borrow from GLSL and object oriented pragramming languages so the programmer feels right at home. One thing I added were Vectors like you have in glsl. Calling
 
 ```javascript
     Tessellator.vec4(Tessellator.vec2(1), Tessellator.float(5), -7)
 ```
 
-will create a vector with the values (x, y, z, w) (1, 1, 5, -7). Animation is one of those things that I think other librareis really do poorly on. You need to create a loop (preferably every frame) and you need to make your animation goes at the same rate despite the FPS. Unfortunanly most don't want to fool around with that so I added vector tweens. These update based on the system time and never rely on FPS. Here is a vector tween example:
+will create a vector with the values (x, y, z, w) (1, 1, 5, -7). Animation is one of those things that I think other librareis really do poorly on. You need to create a loop (preferably every frame) and you need to make your animation go at the same rate despite the FPS. Unfortunanly most don't want to fool around with that so I added vector tweens. These update based on the system time and never rely on FPS. Here is a vector tween example:
 
 ```javascript
    var vec = Tessellator.vec3(); // inits a vec to (0, 0, 0)
@@ -30,7 +30,7 @@ This speeds things up a lot.
 
 ### Example ###
 
-This is a example of the Tessellator in action. It creates a white wire frame cube spinning on a black background
+This is a example of the Tessellator in action. It creates a white wire frame cube spinning on a black background.
 
 ```html
 <html>
@@ -62,7 +62,7 @@ This is a example of the Tessellator in action. It creates a white wire frame cu
         model.rotate(rotation, axis); //rotates the prism with our vectors with tweens
         
         model.setColor("white"); //sets the color of the objects being created with the model.
-        model.drawPrism(0, 0, 0, 1); //draws a prism (or as others like to call a wire frame). fillPrism will make a solid cube.
+        model.drawCube(0, 0, 0, 1); //draws a prism (or as others like to call a wire frame). fillCube will make a solid cube.
         model.finish(); //finish the model. Tell the renderer that this is ready to be rendered.
         
         var renderer = new Tessellator.ModelRenderer(model); //creates a renderer that will render our model
