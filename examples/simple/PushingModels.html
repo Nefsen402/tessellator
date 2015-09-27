@@ -1,0 +1,75 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    <script>
+        /**
+        * This example directly extends off of the cube.html example
+        * 
+        * I will not re-explain things
+        */
+        
+        var tessellator = new Tessellator("gl");
+        
+        var rotation = Tessellator.float();
+        rotation.createTween().dir(Math.PI / 1000);
+        
+        var axis = Tessellator.vec3(0, 1, 0);
+        axis.createTween().dir(Tessellator.vec3(0.6, 0.4, 1));
+
+        
+        var model = tessellator.createModel();
+        model.clear("black");
+        model.setView(new Tessellator.PerspectiveView());
+        
+        //the problem here today is what if we want to render two cubes rotating seperate from each-other.
+        //if we can translate the cube to the side, then rotate it, if we have another cube, an unexperinced
+        //programmer would just translate it back to the place of the screen they wanted to render to second cube at
+        //the problem with this 'solution' is that we will be translating after the rotation. This effects things
+        //in the ways you probably don'n want.
+        
+        //pushing and poping the model lets us restore a state the model was last at before pushing. It is not only for
+        //reseting the movement maxtrix (that is what the translate/rotate/scale methods do) but it will restore things
+        //like the set color, bound texture, and views
+        
+        model.translate(0, 0, -6);
+        //we want to tanslate the objects back from the eye so we can see them.
+        //we want to apply this to both objects so we put this before pushing the model
+        
+        //just for deminstration, we will set the color blue for our default color
+        model.setColor("blue");
+        
+        //we will save the model's state
+        model.push();
+        
+        //we transale the cube to the left and rotate it
+        //remember, these change the state of the model
+        model.translate(-2, 0, 0);
+        model.rotate(rotation, axis);
+        
+        model.setColor("red");
+        model.drawCube(0, 0, 0, 1);
+        
+        //we will restore the state the model was in when we called model.push()
+        model.pop();
+        
+        //render our second cube to the right
+        model.push();
+        
+        model.translate(2, 0, 0);
+        model.rotate(rotation, axis);
+        
+        //Here is a question: Why is this cube rendering blue even though we set the color to red for
+        //the previous cube?
+        model.drawCube(0, 0, 0, 1);
+        
+        model.pop();
+        
+        model.finish();
+        
+        var renderLoop = new Tessellator.RenderLoop(new Tessellator.ModelRenderer(model));
+    </script>
+</html>

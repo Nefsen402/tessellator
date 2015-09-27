@@ -1,0 +1,51 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    <script>
+        var tessellator = new Tessellator("gl");
+        
+        var rotation = Tessellator.float();
+        var rotationTween = rotation.createTween();
+        rotationTween.dir(Math.PI / 1000);
+        
+        var axis = Tessellator.vec3(0, 1, 0);
+        var axisTween = axis.createTween();
+        axisTween.dir(Tessellator.vec3(0.6, 0.4, 1));
+        
+        
+        var model = tessellator.createModel();
+        model.clear("black");
+        model.setView(new Tessellator.PerspectiveView());
+        
+        //lighting in the tessellator is very simple.
+        //the lighing model is party inspired by OpenGL.
+        //to enable lighting, in the model call enable and pass
+        //it Tessellator.LIGHTING
+        model.enable(Tessellator.LIGHTING);
+        
+        //at this point lighting is ready and things rendered after this point will be lit.
+        //unfortunanly, that is not true, the scene is going to be completely black because we have no lights!
+        
+        //notice how we are translating things away from the eye later, not now, meaning anything rendererd here
+        //will be right at the eye. We can also put a light here.
+        //we are going to put a point light at the eye so it looks like we are holding a flash light and
+        //pointing it at our objects.
+        model.setPointLight(0, 0, 0);
+        //the arguments are simple: the coordinates of the light.
+        
+        model.translate(0, 0, -6);
+        model.rotate(rotation, axis);
+        
+        model.setColor("white");
+        model.fillCube(0, 0, 0, 1);
+        model.finish();
+        
+        var renderer = new Tessellator.ModelRenderer(model);
+        
+        var renderLoop = new Tessellator.RenderLoop(renderer);
+    </script>
+</html>

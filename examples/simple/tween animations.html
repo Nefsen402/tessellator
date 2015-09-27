@@ -1,0 +1,102 @@
+<html>
+    <body style="margin:0px;">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    <script>
+        var tessellator = new Tessellator("gl");
+        
+        //with the most basic cube, we had animation, thanks to tweens.
+        //tweens are so much more powerful then just basic linear movements.
+        
+        //you can combine tween movements making them play one after another.
+        //you can have a object move back and fourth with two .dir calls and
+        //a .loop call to make it all loop.
+        
+        var model = tessellator.createModel();
+        
+        model.clear(Tessellator.COLOR_BLACK);
+        model.setView(new Tessellator.PerspectiveView(45 / 180 * Math.PI * 2, 200, 0.1));
+        model.setColor("white");
+        
+        model.push();
+        
+        var lightRotation = Tessellator.float();
+        lightRotation.createTween().dir(Tessellator.float(0.005))
+        
+        model.translate(0, 0, -6);
+        model.rotate(lightRotation, Tessellator.vec3(0, 1, 0));
+        
+        //since lights are effectied by the movement matrix, we can make rotating lights
+        //we also happen to put some some spheres that are rendered befere enableing the lighting
+        //so these spheres will seem to be the lights themselves
+        model.fillSphere(0, 0, -3, 0.1, 20);
+        model.setPointLight(0, 0, -3, 50);
+        
+        model.fillSphere(0, 0, 3, 0.1, 20);
+        model.setPointLight(0, 0, 3, 50);
+        model.pop();
+        
+        model.enable(Tessellator.LIGHTING);
+        
+        model.push();
+        
+        //here is a example of a crazy tween. basically,
+        //it moves in a square motion but with rounded edjes
+        //thanks to the rad. That function rotates around a point.
+        //One more note: .loop() loops the tween over and over again
+        model.translate(-2, -2, -6).pos.createTween()
+        .set(Tessellator.vec3(-1, -1, -6))
+        .rad(0.25, 0.25, Tessellator.vec3(-1, 0, 0), Tessellator.vec3(0, 1, 0), 200)
+        .to(Tessellator.vec3(1, -2, -6), 300)
+        .set(Tessellator.vec3(1, -1, -6))
+        .rad(0.5, 0.25, Tessellator.vec3(-1, 0, 0), Tessellator.vec3(0, 1, 0), 200)
+        .to(Tessellator.vec3(2, 1, -6), 300)
+        .set(Tessellator.vec3(1, 1, -6))
+        .rad(0.75, 0.25, Tessellator.vec3(-1, 0, 0), Tessellator.vec3(0, 1, 0), 200)
+        .to(Tessellator.vec3(-1, 2, -6), 300)
+        .set(Tessellator.vec3(-1, 1, -6))
+        .rad(0, 0.25, Tessellator.vec3(-1, 0, 0), Tessellator.vec3(0, 1, 0), 200)
+        .to(Tessellator.vec3(-2, -1, -6), 300).loop();
+        
+        
+        model.fillCube(0, 0, 0, 1);
+        model.pop();
+        
+        model.push();
+        model.setColor("red")
+        
+        var deg = Tessellator.float();
+        deg.createTween().dir(Tessellator.float(Math.PI * 2), 1000).delay(500).loop();
+        model.rotate(deg, 0, 0, 1);
+        model.translate(0, -2, -10)
+        model.fillCube(0, 0, 0, 1);
+        
+        model.pop();
+        
+        model.push();
+        model.setColor("blue")
+        
+        
+        var deg = Tessellator.vec3(0, 0, -15);
+        deg.createTween().rad(0, 1, Tessellator.vec3(-3, 0, 0), Tessellator.vec3(0, 3, 0));
+        model.translate(deg)
+        model.fillCube(0, 0, 0, 1);
+        
+        model.pop();
+        
+        model.push();
+        model.setColor("cyan");
+        
+        var deg = Tessellator.vec3(0, 0, -7);
+        deg.createTween().sin(Tessellator.vec3(0, 0, 1), 1);
+        model.translate(deg)
+        model.fillCube(0, 0, 0, 1);
+        model.pop();
+        
+        model.finish();
+        tessellator.createRenderLoop(new Tessellator.ModelRenderer(model));
+    </script>
+</html>
