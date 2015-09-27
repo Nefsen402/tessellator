@@ -160,21 +160,10 @@ Tessellator.End.prototype.init = function (interpreter){
         }else if (this.shape.type === Tessellator.QUAD){
             var k = this.shape.vertices.length;
             
-            var colorOff = this.shape.colors ? this.shape.colors.length / (4 * 4) : 0;
-            var calculateBounds = false;
-            
             if (k % 12 !== 0){
                 throw "invalid number of vertices for quad draw!";
             }else{
                 k /= 3 * 4;
-            }
-            
-            if (textureBounds){
-                if (!textureBounds.defaultBounds && this.shape.vertices.length / 3 === textureBounds.bounds.length / 2){
-                    this.shape.colors.push(textureBounds.bounds);
-                }else{
-                    calculateBounds = true;
-                }
             }
             
             for (var i = 0; i < k; i++){
@@ -188,7 +177,7 @@ Tessellator.End.prototype.init = function (interpreter){
                     3 + i * 4 + vertexOffset,
                 ]);
                 
-                if (colorOff <= i && calculateBounds){
+                if (textureBounds){
                     var bounds;
                     
                     if (textureBounds.defaultBounds){
@@ -199,16 +188,10 @@ Tessellator.End.prototype.init = function (interpreter){
                                                   0, textureBounds.bounds[1],
                         ];
                     }else{
-                        bounds = textureBounds.bounds.subarray((i - colorOff) * 8, Math.min(textureBounds.bounds.length, (k - colorOff) * 8));
+                        bounds = textureBounds.bounds.subarray(i * 8, (i + 1) * 8)
                     }
                     
                     this.shape.colors.push(bounds);
-                    
-                    if (interpreter.get("mode") === Tessellator.COLOR){
-                        colorOff = this.shape.colors.length / (4 * 4);
-                    }else{
-                        colorOff = this.shape.colors.length / (4 * 2);
-                    }
                 }
             }
         }else if (this.shape.type === Tessellator.TRIANGLE){
@@ -227,19 +210,21 @@ Tessellator.End.prototype.init = function (interpreter){
                     (i * 3) + vertexOffset + 2
                 ]);
                 
-                var bounds;
-                
-                if (textureBounds.defaultBounds){
-                    bounds = [
-                                              0,                       0,
-                        textureBounds.bounds[0],                       0,
-                        textureBounds.bounds[1], textureBounds.bounds[1],
-                    ];
-                }else{
-                    bounds = textureBounds.bounds.subarray(i * 6, (i + 1) * 6);
+                if (textureBounds){
+                    var bounds;
+                    
+                    if (textureBounds.defaultBounds){
+                        bounds = [
+                                                  0,                       0,
+                            textureBounds.bounds[0],                       0,
+                            textureBounds.bounds[1], textureBounds.bounds[1],
+                        ];
+                    }else{
+                        bounds = textureBounds.bounds.subarray(i * 6, (i + 1) * 6);
+                    }
+                    
+                    this.shape.colors.push(bounds);
                 }
-                
-                this.shape.colors.push(bounds);
             }
         }else if (this.shape.type === Tessellator.TRIANGLE_STRIP){
             var k = this.shape.vertices.length / 3;
