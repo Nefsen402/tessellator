@@ -73,31 +73,27 @@ Tessellator.mat4.prototype = Object.create(Float32Array.prototype);
 Tessellator.mat4.prototype.constructor = Tessellator.mat4;
 
 Tessellator.mat4.prototype.random = function (scale){
-    if (scale === undefined){
-        scale = Tessellator.float(1);
-    }else if (scale.tween){
-        scale.tween.update();
-    }
+    scale = Tessellator.float.forValue(scale);
     
-    this[ 0] = Math.random() * scale[0];
-    this[ 1] = Math.random() * scale[0];
-    this[ 2] = Math.random() * scale[0];
-    this[ 3] = Math.random() * scale[0];
+    this[ 0] = (Math.random() * 2 - 1) * scale;
+    this[ 1] = (Math.random() * 2 - 1) * scale;
+    this[ 2] = (Math.random() * 2 - 1) * scale;
+    this[ 3] = (Math.random() * 2 - 1) * scale;
     
-    this[ 4] = Math.random() * scale[0];
-    this[ 5] = Math.random() * scale[0];
-    this[ 6] = Math.random() * scale[0];
-    this[ 7] = Math.random() * scale[0];
+    this[ 4] = (Math.random() * 2 - 1) * scale;
+    this[ 5] = (Math.random() * 2 - 1) * scale;
+    this[ 6] = (Math.random() * 2 - 1) * scale;
+    this[ 7] = (Math.random() * 2 - 1) * scale;
     
-    this[ 8] = Math.random() * scale[0];
-    this[ 9] = Math.random() * scale[0];
-    this[10] = Math.random() * scale[0];
-    this[11] = Math.random() * scale[0];
+    this[ 8] = (Math.random() * 2 - 1) * scale;
+    this[ 9] = (Math.random() * 2 - 1) * scale;
+    this[10] = (Math.random() * 2 - 1) * scale;
+    this[11] = (Math.random() * 2 - 1) * scale;
     
-    this[12] = Math.random() * scale[0];
-    this[13] = Math.random() * scale[0];
-    this[14] = Math.random() * scale[0];
-    this[15] = Math.random() * scale[0];
+    this[12] = (Math.random() * 2 - 1) * scale;
+    this[13] = (Math.random() * 2 - 1) * scale;
+    this[14] = (Math.random() * 2 - 1) * scale;
+    this[15] = (Math.random() * 2 - 1) * scale;
     
     return this;
 }

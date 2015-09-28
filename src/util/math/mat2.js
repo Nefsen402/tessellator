@@ -133,6 +133,15 @@ Tessellator.mat2.prototype.multiply = function (mat){
     return this;
 }
 
+Tessellator.mat2.prototype.random = function (scale){
+    scale = Tessellator.float.forValue(scale);
+    
+    this[0] = (Math.random() * 2 - 1) * scale;
+    this[1] = (Math.random() * 2 - 1) * scale;
+    this[2] = (Math.random() * 2 - 1) * scale;
+    this[3] = (Math.random() * 2 - 1) * scale;
+}
+
 Tessellator.mat2.prototype.rotate = function (rad){
     if (rad.length){
         if (rad.tween) rad.tween.update();

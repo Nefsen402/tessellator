@@ -505,13 +505,13 @@ Tessellator.vec3.prototype.random = function (scale){
     }
     
     if (scale.length){
-        this[0] = Math.random() * scale[0];
-        this[1] = Math.random() * scale[1];
-        this[2] = Math.random() * scale[2];
+        this[0] = (Math.random() * 2 - 1) * scale[0];
+        this[1] = (Math.random() * 2 - 1) * scale[1];
+        this[2] = (Math.random() * 2 - 1) * scale[2];
     }else{
-        this[0] = Math.random() * scale;
-        this[1] = Math.random() * scale;
-        this[2] = Math.random() * scale;
+        this[0] = (Math.random() * 2 - 1) * scale;
+        this[1] = (Math.random() * 2 - 1) * scale;
+        this[2] = (Math.random() * 2 - 1) * scale;
     }
     
     return this;

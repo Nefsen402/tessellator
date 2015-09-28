@@ -282,7 +282,7 @@ Tessellator.float.prototype.random = function (scale){
         scale = Tessellator.float.forValue(scale);
     }
     
-    this[0] = Math.random() * scale;
+    this[0] = (Math.random() * 2 - 1) * scale;
     
     return this;
 }

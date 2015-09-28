@@ -282,6 +282,20 @@ Tessellator.mat3.prototype.translate = function (vec){
     return this;
 }
 
+Tessellator.mat3.prototype.random = function (scale){
+    scale = Tessellator.float.forValue(scale);
+    
+    this[0] = (Math.random() * 2 - 1) * scale;
+    this[1] = (Math.random() * 2 - 1) * scale;
+    this[2] = (Math.random() * 2 - 1) * scale;
+    this[3] = (Math.random() * 2 - 1) * scale;
+    this[4] = (Math.random() * 2 - 1) * scale;
+    this[5] = (Math.random() * 2 - 1) * scale;
+    this[6] = (Math.random() * 2 - 1) * scale;
+    this[7] = (Math.random() * 2 - 1) * scale;
+    this[8] = (Math.random() * 2 - 1) * scale;
+}
+
 Tessellator.mat3.prototype.scale = function (vec){
     if (vec.tween){
         vec.tween.update();
