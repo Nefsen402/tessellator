@@ -809,16 +809,16 @@ Tessellator.vec4.prototype.random = function (scale){
     }
     
     if (scale.length){
-        this[0] = Math.random() * scale[0];
-        this[1] = Math.random() * scale[1];
-        this[2] = Math.random() * scale[2];
-        this[3] = Math.random() * scale[3];
+        this[0] = (Math.random() * 2 - 1) * scale[0];
+        this[1] = (Math.random() * 2 - 1) * scale[1];
+        this[2] = (Math.random() * 2 - 1) * scale[2];
+        this[3] = (Math.random() * 2 - 1) * scale[3];
 
     }else{
-        this[0] = Math.random() * scale;
-        this[1] = Math.random() * scale;
-        this[2] = Math.random() * scale;
-        this[3] = Math.random() * scale;
+        this[0] = (Math.random() * 2 - 1) * scale;
+        this[1] = (Math.random() * 2 - 1) * scale;
+        this[2] = (Math.random() * 2 - 1) * scale;
+        this[3] = (Math.random() * 2 - 1) * scale;
     }
     
     return this;
@@ -1361,13 +1361,13 @@ Tessellator.vec3.prototype.random = function (scale){
     }
     
     if (scale.length){
-        this[0] = Math.random() * scale[0];
-        this[1] = Math.random() * scale[1];
-        this[2] = Math.random() * scale[2];
+        this[0] = (Math.random() * 2 - 1) * scale[0];
+        this[1] = (Math.random() * 2 - 1) * scale[1];
+        this[2] = (Math.random() * 2 - 1) * scale[2];
     }else{
-        this[0] = Math.random() * scale;
-        this[1] = Math.random() * scale;
-        this[2] = Math.random() * scale;
+        this[0] = (Math.random() * 2 - 1) * scale;
+        this[1] = (Math.random() * 2 - 1) * scale;
+        this[2] = (Math.random() * 2 - 1) * scale;
     }
     
     return this;
@@ -1836,11 +1836,11 @@ Tessellator.vec2.prototype.random = function (scale){
     }
     
     if (scale.length){
-        this[0] = Math.random() * scale[0];
-        this[1] = Math.random() * scale[1];
+        this[0] = (Math.random() * 2 - 1) * scale[0];
+        this[1] = (Math.random() * 2 - 1) * scale[1];
     }else{
-        this[0] = Math.random() * scale;
-        this[1] = Math.random() * scale;
+        this[0] = (Math.random() * 2 - 1) * scale;
+        this[1] = (Math.random() * 2 - 1) * scale;
     }
     
     return this;
@@ -2154,7 +2154,7 @@ Tessellator.float.prototype.random = function (scale){
         scale = Tessellator.float.forValue(scale);
     }
     
-    this[0] = Math.random() * scale;
+    this[0] = (Math.random() * 2 - 1) * scale;
     
     return this;
 }
@@ -2645,31 +2645,27 @@ Tessellator.mat4.prototype = Object.create(Float32Array.prototype);
 Tessellator.mat4.prototype.constructor = Tessellator.mat4;
 
 Tessellator.mat4.prototype.random = function (scale){
-    if (scale === undefined){
-        scale = Tessellator.float(1);
-    }else if (scale.tween){
-        scale.tween.update();
-    }
+    scale = Tessellator.float.forValue(scale);
     
-    this[ 0] = Math.random() * scale[0];
-    this[ 1] = Math.random() * scale[0];
-    this[ 2] = Math.random() * scale[0];
-    this[ 3] = Math.random() * scale[0];
+    this[ 0] = (Math.random() * 2 - 1) * scale;
+    this[ 1] = (Math.random() * 2 - 1) * scale;
+    this[ 2] = (Math.random() * 2 - 1) * scale;
+    this[ 3] = (Math.random() * 2 - 1) * scale;
     
-    this[ 4] = Math.random() * scale[0];
-    this[ 5] = Math.random() * scale[0];
-    this[ 6] = Math.random() * scale[0];
-    this[ 7] = Math.random() * scale[0];
+    this[ 4] = (Math.random() * 2 - 1) * scale;
+    this[ 5] = (Math.random() * 2 - 1) * scale;
+    this[ 6] = (Math.random() * 2 - 1) * scale;
+    this[ 7] = (Math.random() * 2 - 1) * scale;
     
-    this[ 8] = Math.random() * scale[0];
-    this[ 9] = Math.random() * scale[0];
-    this[10] = Math.random() * scale[0];
-    this[11] = Math.random() * scale[0];
+    this[ 8] = (Math.random() * 2 - 1) * scale;
+    this[ 9] = (Math.random() * 2 - 1) * scale;
+    this[10] = (Math.random() * 2 - 1) * scale;
+    this[11] = (Math.random() * 2 - 1) * scale;
     
-    this[12] = Math.random() * scale[0];
-    this[13] = Math.random() * scale[0];
-    this[14] = Math.random() * scale[0];
-    this[15] = Math.random() * scale[0];
+    this[12] = (Math.random() * 2 - 1) * scale;
+    this[13] = (Math.random() * 2 - 1) * scale;
+    this[14] = (Math.random() * 2 - 1) * scale;
+    this[15] = (Math.random() * 2 - 1) * scale;
     
     return this;
 }
@@ -3544,6 +3540,20 @@ Tessellator.mat3.prototype.translate = function (vec){
     return this;
 }
 
+Tessellator.mat3.prototype.random = function (scale){
+    scale = Tessellator.float.forValue(scale);
+    
+    this[0] = (Math.random() * 2 - 1) * scale;
+    this[1] = (Math.random() * 2 - 1) * scale;
+    this[2] = (Math.random() * 2 - 1) * scale;
+    this[3] = (Math.random() * 2 - 1) * scale;
+    this[4] = (Math.random() * 2 - 1) * scale;
+    this[5] = (Math.random() * 2 - 1) * scale;
+    this[6] = (Math.random() * 2 - 1) * scale;
+    this[7] = (Math.random() * 2 - 1) * scale;
+    this[8] = (Math.random() * 2 - 1) * scale;
+}
+
 Tessellator.mat3.prototype.scale = function (vec){
     if (vec.tween){
         vec.tween.update();
@@ -3846,6 +3856,15 @@ Tessellator.mat2.prototype.multiply = function (mat){
     this[3] = a1 * b2 + a3 * b3;
 
     return this;
+}
+
+Tessellator.mat2.prototype.random = function (scale){
+    scale = Tessellator.float.forValue(scale);
+    
+    this[0] = (Math.random() * 2 - 1) * scale;
+    this[1] = (Math.random() * 2 - 1) * scale;
+    this[2] = (Math.random() * 2 - 1) * scale;
+    this[3] = (Math.random() * 2 - 1) * scale;
 }
 
 Tessellator.mat2.prototype.rotate = function (rad){
@@ -4413,16 +4432,16 @@ Tessellator.vec4.prototype.random = function (scale){
     }
     
     if (scale.length){
-        this[0] = Math.random() * scale[0];
-        this[1] = Math.random() * scale[1];
-        this[2] = Math.random() * scale[2];
-        this[3] = Math.random() * scale[3];
+        this[0] = (Math.random() * 2 - 1) * scale[0];
+        this[1] = (Math.random() * 2 - 1) * scale[1];
+        this[2] = (Math.random() * 2 - 1) * scale[2];
+        this[3] = (Math.random() * 2 - 1) * scale[3];
 
     }else{
-        this[0] = Math.random() * scale;
-        this[1] = Math.random() * scale;
-        this[2] = Math.random() * scale;
-        this[3] = Math.random() * scale;
+        this[0] = (Math.random() * 2 - 1) * scale;
+        this[1] = (Math.random() * 2 - 1) * scale;
+        this[2] = (Math.random() * 2 - 1) * scale;
+        this[3] = (Math.random() * 2 - 1) * scale;
     }
     
     return this;
@@ -12002,6 +12021,119 @@ Tessellator.Model.prototype.countRenderItems = function (){
     }
     
     return count;
+}/**
+ * Copyright (c) 2015, Alexander Orzechowski.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+
+/**
+ * Currently in beta stage. Changes can and will be made to the core mechanic
+ * making this not backwards compatible.
+ * 
+ * Github: https://github.com/Need4Speed402/tessellator
+ */
+
+
+//strict mode can be used with this.
+"use strict";
+
+Tessellator.ModelQueue = function (){
+    this.render = true;
+    this.model = [];
+    this.length = 0;
+}
+
+Tessellator.ModelQueue.prototype.apply = function (matrix, mod, renderer){
+    renderer.render(matrix, this);
+}
+
+Tessellator.ModelQueue.finish = function (){}
+
+Tessellator.ModelQueue.prototype.destroy = function (i){
+    if (isNaN(i)){
+        i = this.model.indexOf(i);
+    }
+    
+    this.model.splice(i, 1);
+    this.length--;
+}
+
+Tessellator.ModelQueue.prototype.remove = function (i){
+    if (isNaN(i)){
+        i = this.model.indexOf(i);
+    }
+    
+    this.model[i] = {realModel: this.model[i]};
+}
+
+Tessellator.ModelQueue.prototype.readd = function (i){
+    if (isNaN(i)){
+        for (var ii = 0; ii < this.model.length; ii++){
+            if (this.model[ii].realModel === i){
+                i = ii;
+                
+                break;
+            }
+        }
+        
+        if (isNaN(i)){
+            return;
+        }
+    }
+    
+    if (this.model[i].realModel){
+        this.model[i] = this.model[i].realModel;
+    }
+}
+
+Tessellator.ModelQueue.prototype.readdFirst = function (){
+    for (var i = 0; i < this.model.length; i++){
+        if (this.model[i].realModel){
+            this.model[i] = this.model[i].realModel;
+            
+            break;
+        }
+    }
+}
+
+Tessellator.ModelQueue.prototype.readdLast = function (){
+    for (var i = this.model.length - 1; i >= 0; i--){
+        if (this.model[i].realModel){
+            this.model[i] = this.model[i].realModel;
+            
+            break;
+        }
+    }
+}
+
+Tessellator.ModelQueue.prototype.get = function (i){
+    return this.model[i];
+}
+
+Tessellator.ModelQueue.prototype.add = function (mod){
+    if (mod.constructor !== Tessellator.Model){
+        throw "cannot add a non-model to a model queue";
+    }
+    
+    this.model.push.apply(this.model, arguments);
+    this.length += arguments.length;
 }/**
  * Copyright (c) 2015, Alexander Orzechowski.
  * 
