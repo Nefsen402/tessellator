@@ -1,0 +1,41 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    <script>
+        var tessellator = new Tessellator("gl");
+        
+        var rotation = Tessellator.float();
+        var rotationTween = rotation.createTween();
+        rotationTween.dir(Math.PI / 1000);
+        
+        var axis = Tessellator.vec3(0, 1, 0);
+        var axisTween = axis.createTween();
+        axisTween.dir(Tessellator.vec3(0.6, 0.4, 1));
+        
+        
+        var model = tessellator.createModel();
+        model.clear("black");
+        model.setView(new Tessellator.PerspectiveView());
+        
+        model.translate(0, 0, -6);
+        model.rotate(rotation, axis);
+        
+        model.setColor("red");
+        model.fillCube(0, 0, 0, 1);
+        
+        //I am disableing the depth test so that I can see the lines underneeth the cube.
+        model.disable(Tessellator.DEPTH_TEST);
+        
+        model.setColor("white");
+        model.drawCube(0, 0, 0, 1);
+        model.finish();
+        
+        var renderer = new Tessellator.ModelRenderer(model);
+        
+        var renderLoop = new Tessellator.RenderLoop(renderer);
+    </script>
+</html>
