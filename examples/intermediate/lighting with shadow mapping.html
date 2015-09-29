@@ -1,0 +1,24 @@
+<html>
+    <script src="/Tessellator.multifile" type="text/javascript"></script>
+    
+    <body style="margin:0px;background:black;">
+        <canvas style="width:100%;height:100%;" id="maincanvas"></canvas>
+    </body>
+    
+    <script type="text/javascript">
+        var tessellator = new Tessellator("maincanvas");
+        
+        var scene = tessellator.createModel();
+        scene.clear();
+        scene.fillCube(0, 0, 0, 1);
+        scene.finish();
+        
+        var model = tessellator.createModel();
+        model.setView(new Tessellator.PerspectiveView());
+        
+        model
+        
+        
+        new Tessellator.RenderLoop(new Tessellator.ModelRenderer(model));
+    </script>
+</html>

@@ -42,11 +42,11 @@ Tessellator.RadialCamera = function (view, radX, radY, lock){
 }
 
 Tessellator.RadialCamera.prototype.x = function (){
-    return this.radX.x();
+    return this.radX.x;
 }
 
 Tessellator.RadialCamera.prototype.y = function (){
-    return this.radY.x();
+    return this.radY.x;
 }
 
 Tessellator.RadialCamera.prototype.apply = function (render){
@@ -63,7 +63,7 @@ Tessellator.RadialCamera.prototype.applyLighting = function (matrix){
 
 Tessellator.RadialCamera.prototype.set = function (m){
     if (this.lock){
-        if (this.radY.x() < -Math.PI / 2 + 0.001){
+        if (this.radY.x < -Math.PI / 2 + 0.001){
             this.radY[0] = -Math.PI / 2 + 0.001;
         }else if (this.radY[0] > Math.PI / 2 - 0.001){
             this.radY[0] = Math.PI / 2 - 0.001;

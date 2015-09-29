@@ -1,0 +1,132 @@
+<script src="/Tessellator.multifile"></script>
+
+<script>
+    //this is a tutorial on tessllator vectors.
+    //there are different types of vectors. These are:
+    //Tessellator.float()
+    //Tessellator.vec2()
+    //Tessellator.vec3()
+    //Tessellator.vec4()
+    
+    //as you may guess, Tessellator.float() stores a single float value
+    //the vectors though, you may notice a pattern with how they are called.
+    //the name starts with 'vec' and ends with a number. This number is the amount of dimentions the
+    //vector can store. In other words, the amount of float values the vector can store.
+    
+    //a vec2 can store 2 float values.
+    //there are multiple ways of initializing a vector. The constructor is very linient
+    //Tessellator.vec2() = [0, 0]
+    //Tessellator.vec2(1) = [1, 1]
+    //Tessellator.vec2(15) = [15, 15]
+    //Tessellator.vec2(6, 8) = [6, 8]
+    //Tessellator.vec2(7, Tessellator.float(9)) = [7, 9]
+    
+    //with heigher dimentional vectors, more interesting things can happen.
+    //Tessellator.vec3(Tessellator.vec2(0, 4), 5) = [0, 4, 5]
+    //i used a vec2 in the vec3 constructor. As long as the values passed to the vector all add up to the vector size, it
+    //is going to be happy.
+    var vec = Tessellator.vec2();
+    
+    //vectors can have their values acessed exactly like a array, because it is a array. Seriously.
+    vec[0] = 10;
+    vec[1] = 100;
+    
+    console.log(vec.toString()) //this is going to give us [10, 100]
+    
+    //when I said i was serious about these things being arrays, i was not kidding.
+    //WebGLRenderingContext.uniform3f(Tessellator.vec3(5));
+    //this will work - crazy.
+    //this is no trickery, it is not a 'array-like object' this is real.
+    
+    //So how did I make this work? - simple. I made a standard Float32Array and replaced it's __proto__ object.
+    
+    //vectors have a lot of math functions in them
+    //you can add two vertors together easy.
+    
+    vec.add(Tessellator.vec2(50));
+    
+    console.log(vec.toString()); // you will get [60, 150]
+    
+    //like constructing vectors, these are often very linient.
+    vec.add(50); //this will work just as well.
+    
+    console.log(vec.toString()); // you will now get [90, 200]
+    
+    //there are a lot more of these functions. Like the basic ones (subtract, divide, abs) and some 3d vector math like cross products
+    //on 3d vectors. E.G., var crossProduct = Tessellator.vec3(0, 1, 0).cross(Tessellator.vec3(1, 0, 0)); this will return Tessellator.vec3(0, 0, 1);
+    
+    //if you want to look at all the functions avaliable and how it works, go to the src code. /src/util/math/* for all math related
+    //classes including vectors
+    
+    //now on to something called swizzleing. This is a very common practice when writing shaders.
+    //vectors in Tessellator support swizzleing to some extent.
+    
+    //with any vector, each has from 1 - 4 elements. so that means that it has x, y, z, and w for a 4 element vector.
+    //we are working with a 2d vector so it just has x and y. Lets try setting these properties.
+    
+    vec.x = 7;
+    vec.y = -4;
+    
+    //we should get vec2(7, -4);
+    console.log(vec.toString());
+    
+    //you can even use the '++' and '+=' operators and the similar
+    vec.x++;
+    vec.y -= -4;
+    
+    //we sould now get vec2(8, 0)
+    console.log(vec.toString())
+    
+    //and lastly you can get just lone values like x (we sould get 8)
+    console.log(vec.x)
+    
+    //now wrap your head around this!
+    //you can use multiple members and combine them.
+    
+    //using vec.xy will set the entire vector to 2.
+    vec.xy = 2;
+    
+    //side note: all of these are identical
+    vec.xy = 2;
+    vec.xy = Tessellator.vec2(2);
+    vec.xy = [2, 2];
+    vec.xy = {'0': 2, '1': 2, length: 2}
+    
+    
+    vec.xy = [4, 9];
+    //you can combine these in different ways.
+    console.log(vec.yx.toString()); //you sould get vec2(9, 4)
+    //one thing to keep in mind is that if you combine multiple members, you will get a vector to match that.
+    //otherwise, if you just ask for a single member you will get a standard javascipt number (I was contimplating useing Tessellator.float())
+    
+    console.log(vec);
+    
+    var vec = Tessellator.vec4(1, 2, 3, 4);
+    
+    //lets work with some more exiting vectors.
+    
+    //the vectors all support swizzleing and all the combinations too. (I used an algorithm to generate all the swizzle properties)
+    
+    //this is going to output vec4(1, 2, 4, 3)
+    console.log(vec.xywz)
+    
+    //NOTE:
+    //you can use a member multiple times
+    console.log(vec.xxxx); //this will output vec4(1, 1, 1, 1);
+    //and you can get sub-vectors from these numbers.
+    console.log(vec.xyz); //this will output vec3(1, 2, 3)
+    
+    //one concern with swizzleing is that it might be slow.
+    //definantly expenetially slower then calling vec[0] or whatever
+    
+    var time = Date.now();
+    var vec2 = Tessellator.vec4();
+    
+    for (var i = 0; i < 1000; i++){
+        vec2.add(vec.wzxy);
+    }
+    
+    //honestly, with my intel i7 4770 processor, results are not bad. ranges form 1 - 3ms to compute on average.
+    console.log(Date.now() - time);
+    console.log(vec2);
+</script>

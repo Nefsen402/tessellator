@@ -287,16 +287,26 @@ Tessellator.float.prototype.random = function (scale){
     return this;
 }
 
-Tessellator.float.prototype.x = function (){
-    if (this.tween) this.tween.update();
-    
-    return this[0];
-}
-
 Tessellator.float.prototype.createTween = function (){
     return this.tween = new Tessellator.Tween(this);
 }
 
 Tessellator.float.prototype.toString = function (){
     return "float(" + this[0] + ")";
+}
+
+if (Object.defineProperty){
+    Object.defineProperty(Tessellator.float.prototype, "x", {
+        get: function (){
+            if (this.tween) this.tween.update();
+            
+            return this[0];
+        },
+        
+        set: function (v){
+            if (this.tween) this.tween.cancel();
+            
+            this[0] = Tessellator.float.forValue(v);
+        }
+    })
 }

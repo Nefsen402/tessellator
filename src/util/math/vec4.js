@@ -518,30 +518,6 @@ Tessellator.vec4.prototype.random = function (scale){
     return this;
 }
 
-Tessellator.vec4.prototype.x = function (){
-    if (this.tween) this.tween.update();
-    
-    return this[0];
-}
-
-Tessellator.vec4.prototype.y = function (){
-    if (this.tween) this.tween.update();
-    
-    return this[1];
-}
-
-Tessellator.vec4.prototype.z = function (){
-    if (this.tween) this.tween.update();
-    
-    return this[2];
-}
-
-Tessellator.vec4.prototype.w = function (){
-    if (this.tween) this.tween.update();
-    
-    return this[3];
-}
-
 Tessellator.vec4.prototype.createTween = function (){
     return this.tween = new Tessellator.Tween(this);
 }
@@ -549,3 +525,109 @@ Tessellator.vec4.prototype.createTween = function (){
 Tessellator.vec4.prototype.toString = function (){
     return "vec4(" + this[0] + ", " + this[1] + ", " + this[2] + ", " + this[3] + ")";
 }
+
+if (Object.defineProperty) (function (){
+    var getSwizzle = function (vec, s){
+        if (vec.tween) vec.tween.update();
+        
+        var v;
+        
+        switch (s.length){
+            case 1:
+                switch (s.charAt(i)){
+                    case 'x': return vec[0];
+                    case 'y': return vec[1];
+                    case 'z': return vec[2];
+                    case 'w': return vec[3];
+                }
+            case 2: v = Tessellator.vec2(); break;
+            case 3: v = Tessellator.vec3(); break;
+            case 4: v = Tessellator.vec4(); break;
+        }
+        
+        for (var i = 0; i < s.length; i++){
+            switch (s.charAt(i)){
+                case 'x': v[i] = vec[0]; break;
+                case 'y': v[i] = vec[1]; break;
+                case 'z': v[i] = vec[2]; break;
+                case 'w': v[i] = vec[3]; break;
+            }
+        }
+        
+        return v;
+    }
+    
+    var setSwizzle = function (vec, s, v){
+        if (vec.tween) vec.tween.cancel();
+        
+        v = Tessellator.float.forValue(v);
+        
+        if (v.length){
+            for (var i = 0; i < s.length; i++){
+                switch (s.charAt(i)){
+                    case 'x': vec[0] = v[i]; break;
+                    case 'y': vec[1] = v[i]; break;
+                    case 'z': vec[2] = v[i]; break;
+                    case 'w': vec[3] = v[i]; break;
+                }
+            }
+        }else{
+            for (var i = 0; i < s.length; i++){
+                switch (s.charAt(i)){
+                    case 'x': vec[0] = v; break;
+                    case 'y': vec[1] = v; break;
+                    case 'z': vec[2] = v; break;
+                    case 'w': vec[3] = v; break;
+                }
+            }
+        }
+    }
+    
+    var t = [0, -1, -1, -1];
+    var c = {};
+    
+    main:while (true){
+        (function (){
+            var s = "";
+            
+            for (var i = 0; i < t.length; i++){
+                switch (t[i]){
+                    case 0: s += "x"; break;
+                    case 1: s += "y"; break;
+                    case 2: s += "z"; break;
+                    case 3: s += "w"; break;
+                }
+            }
+            
+            if (!c[s]){
+                Object.defineProperty(Tessellator.vec4.prototype, s, {
+                    get: function (){
+                        return getSwizzle(this, s);
+                    },
+                    
+                    set: function (v){
+                        setSwizzle(this, s, v);
+                    }
+                });
+                
+                c[s] = true;
+            }
+        })();
+        
+        t[t.length - 1]++;
+        
+        for (var i = t.length - 1; i >= 0; i--){
+            if (t[i] === 4){
+                t[i] = -1;
+                
+                if (i === 0){
+                    break main;
+                }
+                
+                t[i - 1]++;
+            }else{
+                break;
+            }
+        }
+    }
+})();
