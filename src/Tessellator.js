@@ -121,8 +121,8 @@ var Tessellator = function (canvas){
         self.originWidth = canvas.clientWidth;
         self.originHeight = canvas.clientHeight;
         
-        self.width = self.originWidth * self.resolutionScale.x();
-        self.height = self.originHeight * self.resolutionScale.y();
+        self.width = Math.floor(self.originWidth * self.resolutionScale.x);
+        self.height = Math.floor(self.originHeight * self.resolutionScale.y);
         
         if (self.renderCanvas){
             canvas.setAttribute("width", self.originWidth);

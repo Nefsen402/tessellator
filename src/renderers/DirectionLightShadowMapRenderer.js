@@ -31,30 +31,33 @@
 //strict mode can be used with this.
 "use strict";
 
-Tessellator.FillRenderer = function (renderer){
-    this.color = Tessellator.getColor(Array.prototype.slice.call(arguments, 1, arguments.length));
+Tessellator.DirectionalLightingShadowMapRenderer = function (shader, x, y, z, light){
+    this.super(shader);
     
-    if (renderer.constructor === Tessellator){
-        this.renderer = null;
-        this.super (tessellator.createPixelShader(Tessellator.PIXEL_SHADER_COLOR));
-    }else{
-        this.renderer = renderer;
-        this.super(renderer.tessellator.createPixelShader(Tessellator.PIXEL_SHADER_COLOR));
-    }
-    
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.light = light;
 }
 
-Tessellator.extend(Tessellator.FillRenderer, Tessellator.FullScreenRenderer);
+Tessellator.extend(Tessellator.DirectionalLightingShadowMapRenderer, Tessellator.ModelRenderer);
 
-Tessellator.FillRenderer.prototype.renderRaw = function (render, arg){
-    render.set("color", this.color);
+Tessellator.DirectionalLightingShadowMapRenderer.prototype.renderRaw = function (matrix, obj){
+    var
+        dx = 1 / (this.x * -2),
+        dy = 1 / (this.y * -2),
+        dz = 1 / (this.z / 10 - this.z * 2);
     
-    this.super.renderRaw(render);
+    matrix.set("pMatrix", Tessellator.mat4(
+        -2 * dx, 0, 0, 0,
+        0, -2 * dy, 0, 0,
+        0, 0, 2 * dz, 0,
+        0, 0, (this.z * 2 + this.z / 10) * dz, 1
+    ));
     
-    if (this.renderer){
-        var newrender = new Tessellator.RenderMatrix(this.renderer);
-        newrender.set("window", render.gets("window"));
-        
-        this.renderer.render(newrender, arg);
-    }
+    var mvmat = matrix.get("mvMatrix");
+    mvmat.translate(Tessellator.vec3(0, 0, (this.z * 2 + this.z / 10) / -2));
+    mvmat.rotateVec(this.light.vec, Tessellator.vec3(0, 1, 0));
+    
+    this.super.renderRaw(matrix, obj);
 }

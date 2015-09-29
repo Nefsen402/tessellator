@@ -41,7 +41,7 @@ Tessellator.DirectionalLight = function (){
     }else if (arguments.length === 3){
         this.vec = Tessellator.vec3(arguments);
     }else{
-        throw "invalid arguments in Tessellator.DirectionLight";
+        throw "invalid arguments in Tessellator.DirectionalLight";
     }
     
     this.type = Tessellator.LIGHTING_DIRECTIONAL;
@@ -62,6 +62,13 @@ Tessellator.DirectionalLight.prototype.set = function (lighting, index, matrix){
     lighting[4 + index] = vec[0];
     lighting[5 + index] = vec[1];
     lighting[6 + index] = vec[2];
+    
+    if (this.shadowMap){
+        lighting[12 + index] = 1;
+        lighting[13 + index] = this.shadowRenderer.x;
+        lighting[14 + index] = this.shadowRenderer.y;
+        lighting[15 + index] = this.shadowRenderer.z;
+    }
 }
 
 Tessellator.DirectionalLight.prototype.applyLighting = function (matrix, index, renderer){
@@ -73,5 +80,30 @@ Tessellator.DirectionalLight.prototype.applyLighting = function (matrix, index, 
 }
 
 Tessellator.DirectionalLight.prototype.init = function (interpreter){
+    this.tessellator = interpreter.tessellator;
     this.color = interpreter.get("color");
+    
+    if (this.shadowMap){
+        this.createShadow.apply(this, this.shadowMap);
+    }
+}
+
+Tessellator.DirectionalLight.prototype.apply = function (matrix){
+    if (this.shadowMap){
+        matrix.set("shadowMap", this.shadowMap);
+    }
+}
+
+
+Tessellator.DirectionalLight.prototype.createShadow = function (model, x, y, z, resolution){
+    if (this.tessellator){
+        this.shadowRenderer = new Tessellator.DirectionalLightingShadowMapRenderer(Tessellator.DEPTH_MAP_SHADER.create(tessellator), x, y, z, this);
+        
+        this.shadowMap = new Tessellator.TextureModel(this.tessellator, resolution * x / y, resolution * y / x, [
+            new Tessellator.TextureModel.AttachmentDepthTexture(),
+            new Tessellator.TextureModel.AttachmentRenderer(this.shadowRenderer, model)
+        ]);
+    }else{
+        this.shadowMap = [model, x, y, z, resolution];
+    }
 }

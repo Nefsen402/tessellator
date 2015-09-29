@@ -269,11 +269,8 @@ Tessellator.Program.prototype.dispose = function (){
 
 Tessellator.Program.prototype.bind = function (){
     if (this.tessellator.shader !== this){
-        if (this.tessellator.shader){
-            this.tessellator.shader.replaced(this);
-        }
-        
         this.tessellator.shader = this;
+        
         this.tessellator.GL.useProgram(this.shader);
         
         return true;
@@ -287,5 +284,3 @@ Tessellator.Program.prototype.set = function (){
 }
 
 Tessellator.Program.prototype.postSet = function (){}
-
-Tessellator.Program.prototype.replaced = function (){}
