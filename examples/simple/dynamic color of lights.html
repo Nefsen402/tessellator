@@ -1,0 +1,47 @@
+<html>
+	<body style="margin:0px;">
+		<center>
+			<canvas id="gl" style="width:100%;height:100%;"></canvas>
+		</center>
+	</body>
+	
+	<script src="../../build/Tessellator.js"></script>
+
+	<script>
+		var tessellator = new Tessellator("gl");
+		
+        var hsv = Tessellator.vec3(0,1,1).createTween().dir(Tessellator.vec3(0.0005, 0, 0)).getVec();
+        var rgba = Tessellator.vec4(1);
+        
+        //I'm using a custom tween here. The acual tween object can get passed to the function. That tween object
+        //has the vector in it. I'm just setting the xyz member to a rgb value converted from hsv.
+        rgba.createTween().add(function (tween){
+            tween.vec.xyz = Tessellator.vec3(1).mix(Tessellator.vec3(3, 2, 1).divide(3).add(hsv.x).fract().multiply(6).subtract(3).abs().subtract(1).clamp(0, 1), hsv.y).multiply(hsv.z);
+        });
+        
+		var model = tessellator.createModel();
+		model.clear(0x222222);
+		model.enable(Tessellator.LIGHTING);
+		model.setView(new Tessellator.PerspectiveView());
+		model.setColor(0x333333);
+		model.setAmbientLight();
+        
+        //you can dynamically change the color of LIGHTS not the geometry itself as it
+        //works of a totally seperate system.
+        //when I'm passing the color to the light, the color can have a tween attached to it.
+		model.setColor(rgba);
+        
+		model.setDirectionalLight(-1, 0.5, 2);
+		model.translate(0, 0, -2);
+		model.rotate(Math.PI / 5, Tessellator.vec3(1, 0, 0));
+		model.rotate(Tessellator.float().createTween().dir(0.001).getVec(), Tessellator.vec3(0, 1, 0));
+		model.setColor("light gray");
+		model.fillCube(0, 0, 0, 1);
+		model.setColor("gray");
+		model.drawCross(0, 0, 0, 10);
+		model.finish();
+		
+		
+		new Tessellator.RenderLoop(new Tessellator.ModelRenderer(model));
+	</script>
+</html>
