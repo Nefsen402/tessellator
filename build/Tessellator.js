@@ -6299,7 +6299,7 @@ Tessellator.RenderLoop.Item.prototype.render = function (){
     this.renderer.render(null, this.renderArg);
     
     if (this.maxFPS){
-        this.savedTime += 1000 / this.maxFPS.x() + this.expectedWait - ta;
+        this.savedTime += 1000 / this.maxFPS.x + this.expectedWait - ta;
         
         var comp = Math.max(0, Math.round(this.savedTime));
         
@@ -6521,11 +6521,15 @@ Tessellator.getColor = function (data){
         var arg = data[0];
         
         if (!isNaN(arg)){
-            var red = ((arg >> 16) & 0xFF) / 255;
-            var green = ((arg >> 8) & 0xFF) / 255;
-            var blue = ((arg >> 0) & 0xFF) / 255;
-            
-            color = Tessellator.vec4(red, green, blue, 1);
+            if (Math.floor(arg) !== arg){
+                color = Tessellator.vec4(arg, arg, arg, 1);
+            }else{
+                var red = ((arg >> 16) & 0xFF) / 255;
+                var green = ((arg >> 8) & 0xFF) / 255;
+                var blue = ((arg >> 0) & 0xFF) / 255;
+                
+                color = Tessellator.vec4(red, green, blue, 1);
+            }
         }else if (arg.constructor === Tessellator.vec4){
             color = arg;
         }else if (arg.constructor === Tessellator.vec3){
@@ -8194,10 +8198,7 @@ Tessellator.TextureDrawable.prototype.draw = function (arr, x, y, w, h){
 }
 
 Tessellator.TextureDrawable.prototype.setColor = function (){
-    var c = Tessellator.getColor(arguments).multiply(255);
-    this.color[0] = c[0];
-    this.color[1] = c[1];
-    this.color[2] = c[2];
+    this.color = Tessellator.getColor(arguments).multiply(255).xyz;
 }
 
 Tessellator.TextureDrawable.prototype.setPixel = function (x, y){
@@ -10066,6 +10067,7 @@ Tessellator.PIXEL_SHADER_GREEN_FILTER = new Tessellator.ShaderPreset(Tessellator
 Tessellator.PIXEL_SHADER_BLUE_FILTER = new Tessellator.ShaderPreset(Tessellator.FRAGMENT_SHADER, "precision lowp float;varying vec2 texturePos;uniform sampler2D sampler;void main(void){vec4 o=texture2D(sampler,texturePos);gl_FragColor=vec4(0,0,o.z,o.w);}");
 Tessellator.PIXEL_SHADER_QUALITY_FILTER = new Tessellator.ShaderPreset(Tessellator.FRAGMENT_SHADER, "precision lowp float;uniform float quality;varying vec2 texturePos;uniform sampler2D sampler;void main(void){vec4 o=texture2D(sampler,texturePos);gl_FragColor=vec4(floor(o.xyz*quality+0.5)/quality,o.w);}");
 Tessellator.PIXEL_SHADER_NOISE = new Tessellator.ShaderPreset(Tessellator.FRAGMENT_SHADER, "precision lowp float;uniform sampler2D sampler;uniform float time,intensity;uniform vec2 window;varying vec2 texturePos;float rand(vec2 co){return fract(sin(dot(co.xy,vec2(12.9898,78.233)))*43758.5453);}float rand(float m){return tan(rand(vec2(gl_FragCoord.x/window.x*cos(time)*3.243,gl_FragCoord.y/window.y/tan(time*5.9273)*.918)*m));}void main(void){vec4 c=texture2D(sampler,texturePos);gl_FragColor=c+(vec4(rand(1.+c.z),rand(1.72+c.x),rand(.829+c.y),1)*2.-1.)*intensity;}");
+Tessellator.PIXEL_SHADER_BWNOISE = new Tessellator.ShaderPreset(Tessellator.FRAGMENT_SHADER, "precision lowp float;uniform sampler2D sampler;uniform float time,intensity;uniform vec2 window;varying vec2 texturePos;float rand(vec2 co){return fract(sin(dot(co.xy,vec2(12.9898,78.233)))*43758.5453);}float rand(float m){return tan(rand(vec2(gl_FragCoord.x/window.x*cos(time)*3.243,gl_FragCoord.y/window.y/tan(time*5.9273)*.918)*m));}void main(void){vec4 c=texture2D(sampler,texturePos);gl_FragColor=c+(rand(1.+c.z)*2.-1.)*intensity;}");
 Tessellator.PIXEL_SHADER_TRANSLATE = new Tessellator.ShaderPreset(Tessellator.FRAGMENT_SHADER, "precision lowp float;varying vec2 texturePos;uniform mat2 translate;uniform sampler2D sampler;void main(void){gl_FragColor=texture2D(sampler,(texturePos*2.-1.)*translate/2.+.5);}");
 Tessellator.PIXEL_SHADER_DEPTH = new Tessellator.ShaderPreset(Tessellator.FRAGMENT_SHADER, "precision lowp float;varying vec2 texturePos;uniform sampler2D sampler;void main(void){gl_FragColor=texture2D(sampler,texturePos).xxxw;}");
 
@@ -19632,7 +19634,7 @@ Tessellator.PointLight.prototype.set = function (lighting, index, matrix){
     if (this.range){
         lighting[0 + index] = 4;
         
-        lighting[7 + index] = Math.abs(this.range.x());
+        lighting[7 + index] = Math.abs(this.range.x);
     }else{
         lighting[0 + index] = 3;
     }
@@ -19699,7 +19701,7 @@ Tessellator.SpecularLight.prototype.init = function (interpreter){
 }
 
 Tessellator.SpecularLight.prototype.apply = function (render){
-    render.set("specular", this.intensity.x());
+    render.set("specular", this.intensity.x);
 }/**
  * Copyright (c) 2015, Alexander Orzechowski.
  * 
@@ -19787,12 +19789,12 @@ Tessellator.SpotLight.prototype.set = function (lighting, index, matrix){
     if (!this.range){
         lighting[0 + index] = 5;
         
-        lighting[11 + index] = this.angle.x();
+        lighting[11 + index] = this.angle.x;
     }else{
         lighting[0 + index] = 6;
         
-        lighting[7 + index] = Math.abs(this.range.x());
-        lighting[11 + index] = this.angle.x();
+        lighting[7 + index] = Math.abs(this.range.x);
+        lighting[11 + index] = this.angle.x;
     }
 }
 
