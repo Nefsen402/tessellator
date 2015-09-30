@@ -1,0 +1,26 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    <script>
+        var tessellator = new Tessellator("gl");
+        
+        //this is just a demo that shows that you can render scenes without models.
+        //models is only for 3d stuff and more complicated 2d stuff.
+        
+        //the fill renderer can be used to fill a scene with a certain color
+        var fillRenderer = new Tessellator.FillRenderer(tessellator, 0.5);
+        
+        //this buffered renderer applies noise to the solid color the fill renderer produced.
+        var renderer = new Tessellator.BufferedRenderer(Tessellator.PIXEL_SHADER_NOISE, fillRenderer);
+        
+        renderer.setUniformSetter(function (matrix){
+            matrix.set("intensity", 1);
+        });
+        
+        var renderLoop = new Tessellator.RenderLoop(renderer);
+    </script>
+</html>
