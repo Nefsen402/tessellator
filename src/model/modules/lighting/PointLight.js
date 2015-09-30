@@ -77,7 +77,7 @@ Tessellator.PointLight.prototype.set = function (lighting, index, matrix){
     if (this.range){
         lighting[0 + index] = 4;
         
-        lighting[7 + index] = Math.abs(this.range.x());
+        lighting[7 + index] = Math.abs(this.range.x);
     }else{
         lighting[0 + index] = 3;
     }

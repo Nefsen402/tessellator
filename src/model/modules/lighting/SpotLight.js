@@ -85,12 +85,12 @@ Tessellator.SpotLight.prototype.set = function (lighting, index, matrix){
     if (!this.range){
         lighting[0 + index] = 5;
         
-        lighting[11 + index] = this.angle.x();
+        lighting[11 + index] = this.angle.x;
     }else{
         lighting[0 + index] = 6;
         
-        lighting[7 + index] = Math.abs(this.range.x());
-        lighting[11 + index] = this.angle.x();
+        lighting[7 + index] = Math.abs(this.range.x);
+        lighting[11 + index] = this.angle.x;
     }
 }
 

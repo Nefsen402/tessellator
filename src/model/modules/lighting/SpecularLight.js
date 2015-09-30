@@ -47,5 +47,5 @@ Tessellator.SpecularLight.prototype.init = function (interpreter){
 }
 
 Tessellator.SpecularLight.prototype.apply = function (render){
-    render.set("specular", this.intensity.x());
+    render.set("specular", this.intensity.x);
 }

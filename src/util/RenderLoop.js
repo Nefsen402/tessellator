@@ -181,7 +181,7 @@ Tessellator.RenderLoop.Item.prototype.render = function (){
     this.renderer.render(null, this.renderArg);
     
     if (this.maxFPS){
-        this.savedTime += 1000 / this.maxFPS.x() + this.expectedWait - ta;
+        this.savedTime += 1000 / this.maxFPS.x + this.expectedWait - ta;
         
         var comp = Math.max(0, Math.round(this.savedTime));
         

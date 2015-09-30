@@ -209,11 +209,15 @@ Tessellator.getColor = function (data){
         var arg = data[0];
         
         if (!isNaN(arg)){
-            var red = ((arg >> 16) & 0xFF) / 255;
-            var green = ((arg >> 8) & 0xFF) / 255;
-            var blue = ((arg >> 0) & 0xFF) / 255;
-            
-            color = Tessellator.vec4(red, green, blue, 1);
+            if (Math.floor(arg) !== arg){
+                color = Tessellator.vec4(arg, arg, arg, 1);
+            }else{
+                var red = ((arg >> 16) & 0xFF) / 255;
+                var green = ((arg >> 8) & 0xFF) / 255;
+                var blue = ((arg >> 0) & 0xFF) / 255;
+                
+                color = Tessellator.vec4(red, green, blue, 1);
+            }
         }else if (arg.constructor === Tessellator.vec4){
             color = arg;
         }else if (arg.constructor === Tessellator.vec3){

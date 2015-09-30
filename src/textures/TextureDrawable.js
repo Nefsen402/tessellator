@@ -52,10 +52,7 @@ Tessellator.TextureDrawable.prototype.draw = function (arr, x, y, w, h){
 }
 
 Tessellator.TextureDrawable.prototype.setColor = function (){
-    var c = Tessellator.getColor(arguments).multiply(255);
-    this.color[0] = c[0];
-    this.color[1] = c[1];
-    this.color[2] = c[2];
+    this.color = Tessellator.getColor(arguments).multiply(255).xyz;
 }
 
 Tessellator.TextureDrawable.prototype.setPixel = function (x, y){
