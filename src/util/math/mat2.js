@@ -134,7 +134,7 @@ Tessellator.mat2.prototype.multiply = function (mat){
 }
 
 Tessellator.mat2.prototype.random = function (scale){
-    scale = Tessellator.float.forValue(scale);
+    scale = Tessellator.float.forValue(scale || 1);
     
     this[0] = (Math.random() * 2 - 1) * scale;
     this[1] = (Math.random() * 2 - 1) * scale;

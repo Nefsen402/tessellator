@@ -202,6 +202,14 @@ Tessellator.float.prototype.inversesqrt = function (){
     return this;
 }
 
+Tessellator.float.prototype.pow = function (f){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.pow(this[0], Tessellator.float.forValue(f));
+    
+    return this;
+}
+
 Tessellator.float.prototype.round = function (){
     if (this.tween) this.tween.cancel();
     

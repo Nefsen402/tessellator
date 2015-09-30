@@ -73,7 +73,7 @@ Tessellator.mat4.prototype = Object.create(Float32Array.prototype);
 Tessellator.mat4.prototype.constructor = Tessellator.mat4;
 
 Tessellator.mat4.prototype.random = function (scale){
-    scale = Tessellator.float.forValue(scale);
+    scale = Tessellator.float.forValue(scale || 1);
     
     this[ 0] = (Math.random() * 2 - 1) * scale;
     this[ 1] = (Math.random() * 2 - 1) * scale;

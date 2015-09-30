@@ -88,7 +88,7 @@ Tessellator.vec3.prototype.copy = function (vec3){
     return this;
 }
 
-Tessellator.vec3.prototype.exp = function(vec){
+Tessellator.vec3.prototype.pow = function(vec){
     if (this.tween) this.tween.cancel();
     vec = Tessellator.float.forValue(vec);
     
