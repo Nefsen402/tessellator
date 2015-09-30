@@ -395,7 +395,7 @@ Tessellator.vec4.prototype.copy = function (vec4){
     return this;
 }
 
-Tessellator.vec4.prototype.exp = function(vec){
+Tessellator.vec4.prototype.pow = function(vec){
     if (this.tween) this.tween.cancel();
     vec = Tessellator.float.forValue(vec);
     
@@ -1026,7 +1026,7 @@ Tessellator.vec3.prototype.copy = function (vec3){
     return this;
 }
 
-Tessellator.vec3.prototype.exp = function(vec){
+Tessellator.vec3.prototype.pow = function(vec){
     if (this.tween) this.tween.cancel();
     vec = Tessellator.float.forValue(vec);
     
@@ -1681,7 +1681,7 @@ Tessellator.vec2.prototype.copy = function (vec2){
     return this;
 }
 
-Tessellator.vec2.prototype.exp = function(vec){
+Tessellator.vec2.prototype.pow = function(vec){
     if (this.tween) this.tween.cancel();
     if (vec.tween) vec.tween.update();
     
@@ -2340,6 +2340,14 @@ Tessellator.float.prototype.inversesqrt = function (){
     return this;
 }
 
+Tessellator.float.prototype.pow = function (f){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.pow(this[0], Tessellator.float.forValue(f));
+    
+    return this;
+}
+
 Tessellator.float.prototype.round = function (){
     if (this.tween) this.tween.cancel();
     
@@ -2921,7 +2929,7 @@ Tessellator.mat4.prototype = Object.create(Float32Array.prototype);
 Tessellator.mat4.prototype.constructor = Tessellator.mat4;
 
 Tessellator.mat4.prototype.random = function (scale){
-    scale = Tessellator.float.forValue(scale);
+    scale = Tessellator.float.forValue(scale || 1);
     
     this[ 0] = (Math.random() * 2 - 1) * scale;
     this[ 1] = (Math.random() * 2 - 1) * scale;
@@ -3817,7 +3825,7 @@ Tessellator.mat3.prototype.translate = function (vec){
 }
 
 Tessellator.mat3.prototype.random = function (scale){
-    scale = Tessellator.float.forValue(scale);
+    scale = Tessellator.float.forValue(scale || 1);
     
     this[0] = (Math.random() * 2 - 1) * scale;
     this[1] = (Math.random() * 2 - 1) * scale;
@@ -4135,7 +4143,7 @@ Tessellator.mat2.prototype.multiply = function (mat){
 }
 
 Tessellator.mat2.prototype.random = function (scale){
-    scale = Tessellator.float.forValue(scale);
+    scale = Tessellator.float.forValue(scale || 1);
     
     this[0] = (Math.random() * 2 - 1) * scale;
     this[1] = (Math.random() * 2 - 1) * scale;
@@ -4294,7 +4302,7 @@ Tessellator.vec4.prototype.copy = function (vec4){
     return this;
 }
 
-Tessellator.vec4.prototype.exp = function(vec){
+Tessellator.vec4.prototype.pow = function(vec){
     if (this.tween) this.tween.cancel();
     vec = Tessellator.float.forValue(vec);
     
