@@ -27,13 +27,9 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.prototype.createRenderLoop = function (){
     return Tessellator.new.apply(Tessellator.RenderLoop, arguments);
-}
+};
 
 Tessellator.RenderLoop = function (){
     if (arguments.length === 1 && arguments[0].constructor === Tessellator.RenderLoop.Item){
@@ -80,7 +76,7 @@ Tessellator.RenderLoop = function (){
     }
     
     this.start();
-}
+};
 
 Tessellator.RenderLoop.prototype.stop = function (){
     if (this.fpswait !== undefined){
@@ -97,7 +93,7 @@ Tessellator.RenderLoop.prototype.stop = function (){
     
     this.item.fps = 0;
     this.item.averageFps = 0;
-}
+};
 
 Tessellator.RenderLoop.prototype.start = function (){
     this.item.lastFrame = Date.now();
@@ -106,15 +102,15 @@ Tessellator.RenderLoop.prototype.start = function (){
     if (this.animationFrame === undefined){
         this.animationFrame = this.animate.call(window, this.renderLoop);
     }
-}
+};
 
 Tessellator.RenderLoop.prototype.getFPS = function (){
     return this.item.fps;
-}
+};
 
 Tessellator.RenderLoop.prototype.getAverageFPS = function (){
     return this.item.averageFps;
-}
+};
 
 Tessellator.RenderLoop.prototype.setFPS = function (fps){
     if (this.usingFallback && !fps){
@@ -122,19 +118,19 @@ Tessellator.RenderLoop.prototype.setFPS = function (fps){
     }
     
     this.item.setFPS(fps);
-}
+};
 
 Tessellator.RenderLoop.prototype.getRenderTime = function (){
     return this.item.renderTime;
-}
+};
 
 Tessellator.RenderLoop.prototype.setRenderer = function (renderer){
     this.item.renderer = renderer;
-}
+};
 
 Tessellator.RenderLoop.prototype.renderArg = function (arg){
     this.item.setRenderArg(arg);
-}
+};
 
 Tessellator.RenderLoop.Item = function (renderer, renderArg){
     this.frames = 0;
@@ -149,16 +145,16 @@ Tessellator.RenderLoop.Item = function (renderer, renderArg){
     
     this.renderer = arguments[0];
     this.renderArg = arguments[1];
-}
+};
 
 Tessellator.RenderLoop.Item.prototype.setFPS = function (fps){
     this.savedTime = 0;
     this.maxFPS = fps && !isNaN(fps) ? Tessellator.float(fps) : fps;
-}
+};
 
 Tessellator.RenderLoop.Item.prototype.setRenderArg = function (arg){
     this.renderArg = arg;
-}
+};
 
 Tessellator.RenderLoop.Item.prototype.render = function (){
     var time = Date.now();
@@ -192,4 +188,4 @@ Tessellator.RenderLoop.Item.prototype.render = function (){
     }else{
         return 0;
     }
-}
+};

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Array = function (){
     if (arguments.length === 2){
         this.buffer = new Float64Array(arguments[0]);
@@ -53,7 +49,11 @@ Tessellator.Array = function (){
     }
 }
 
-Tessellator.Array.clear = function (){
+Tessellator.Array.prototype.isEmpty = function (){
+    return this.length === 0;
+}
+
+Tessellator.Array.prototype.clear = function (){
     this.buffer = new Float64Array(this.incrementSize);
     this.length = 0;
 }
@@ -135,4 +135,29 @@ Tessellator.Array.prototype.combine = function (func){
     }
     
     return new (func || Float32Array)(this.buffer.subarray(0, this.length));
+}
+
+Tessellator.Array.prototype.iterator = function (start){
+    return new Tessellator.Array.Iterator(this, start);
+}
+
+Tessellator.Array.Iterator = function (array, start){
+    this.array = array;
+    this.index = start || 0;
+}
+
+Tessellator.Array.Iterator.prototype.hasNext = function (){
+    return this.index < this.array.length;
+}
+
+Tessellator.Array.Iterator.prototype.hasPrevious = function (){
+    return this.index > 0;
+}
+
+Tessellator.Array.Iterator.prototype.next = function (){
+    return this.array.buffer[this.index++];
+}
+
+Tessellator.Array.Iterator.prototype.previous = function (){
+    return this.array.buffer[this.index--];
 }

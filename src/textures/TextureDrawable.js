@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.prototype.createTextureDrawable = function (width, height, fliter){
     return new Tessellator.TextureDrawable(this, width, height, fliter)
 }

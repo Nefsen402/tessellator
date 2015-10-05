@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.ShaderSetDrawDependant = function (drawMode, shaders){
     if (drawMode.length !== shaders.length){
         throw "the length of the arrays does not match!";
@@ -82,8 +78,6 @@ Tessellator.ShaderSetDrawDependant.prototype.set = function (matrix, render, dra
             return this.shader.set();
         }
     }
-    
-    return false;
 }
 
 Tessellator.ShaderSetDrawDependant.prototype.postSet = function (){

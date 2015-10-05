@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.FragmentedArray = function (size){
     this.length = 0;
     
@@ -49,13 +45,17 @@ Tessellator.FragmentedArray = function (size){
         this.buffer = null;
         this.elements = 0;
     }
-}
+};
+
+Tessellator.FragmentedArray.prototype.isEmpty = function (){
+    return this.length === 0;
+};
 
 Tessellator.FragmentedArray.prototype.clear = function (){
     this.length = 0;
     this.buffer = null;
     this.elements = 0;
-}
+};
 
 Tessellator.FragmentedArray.prototype.instance = function (value, copies){
     var a = new Float32Array(copies);
@@ -65,7 +65,7 @@ Tessellator.FragmentedArray.prototype.instance = function (value, copies){
     }
     
     this.push(a);
-}
+};
 
 Tessellator.FragmentedArray.prototype.removeElement = function (index){
     this.length -= this.buffer[index].length;
@@ -74,30 +74,36 @@ Tessellator.FragmentedArray.prototype.removeElement = function (index){
     }
     
     this.elements--;
-}
+};
 
 Tessellator.FragmentedArray.prototype.push = function (arg){
-    if (!this.buffer){
-        this.buffer = new Array(this.incrementSize);
-    }else if (this.buffer.length === this.elements){
-        this.buffer.length += this.incrementSize;
+    if (arg.length){
+        if (!this.buffer){
+            this.buffer = new Array(this.incrementSize);
+        }else if (this.buffer.length === this.elements){
+            this.buffer.length += this.incrementSize;
+        }
+        
+        this.buffer[this.elements] = arg;
+        
+        this.length += arg.length;
+        this.elements++;
     }
-    
-    this.buffer[this.elements] = arg;
-    
-    this.length += arg.length;
-    this.elements++;
-}
+};
 
 Tessellator.FragmentedArray.prototype.offset = function (off){
     for (var i = 0; i < this.elements; i++){
         var e = this.buffer[i];
         
-        for (var ii = 0; ii < e.length; ii++){
-            e[ii] += off;
+        if (e.constructor === Tessellator.FragmentedArray || e.constructor === Tessellator.Array){
+            e.offset(off);
+        }else{
+            for (var i = 0, k = e.length; i < k; i++){
+                e[i] += off;
+            }
         }
     }
-}
+};
 
 Tessellator.FragmentedArray.prototype.get = function (index){
     if (index < 0 || index > this.length){
@@ -117,7 +123,7 @@ Tessellator.FragmentedArray.prototype.get = function (index){
     }else{
         return e[index - pos];
     }
-}
+};
 
 Tessellator.FragmentedArray.prototype.set = function (index, value){
     var i, pos = this.length;
@@ -133,7 +139,7 @@ Tessellator.FragmentedArray.prototype.set = function (index, value){
     }else{
         return e[index - pos] = value;
     }
-}
+};
 
 Tessellator.FragmentedArray.prototype.write = function (array, pos){
     for (var i = 0; i < this.elements; i++){
@@ -147,12 +153,12 @@ Tessellator.FragmentedArray.prototype.write = function (array, pos){
         
         pos += e.length;
     }
-}
+};
 
 Tessellator.FragmentedArray.prototype.compress = function (){
     this.buffer = [ this.combine() ];
     this.elements = 1;
-}
+};
 
 Tessellator.FragmentedArray.prototype.combine = function (func){
     var arr = new (func || Float32Array)(this.length);
@@ -160,4 +166,8 @@ Tessellator.FragmentedArray.prototype.combine = function (func){
     this.write(arr, 0);
     
     return arr;
-}
+};
+
+Tessellator.FragmentedArray.prototype.iterator = function (start){
+    return new Tessellator.Array.Iterator(this, start);
+};

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.TextureModelCubeMap = function (tessellator, size, model, pos, filter){
     this.super(tessellator, filter);
     

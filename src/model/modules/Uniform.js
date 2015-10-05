@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Model.prototype.setUniform = function (key, value){
     return this.add(new Tessellator.Model.UniformSetter(key, value));
 }

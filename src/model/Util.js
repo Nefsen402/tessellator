@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Model.prototype.drawRect = function (){
     if (arguments.length === 4){
         var
@@ -2539,13 +2535,9 @@ Tessellator.Model.prototype.fillOval = function (){
             }
         }
         
-        this.start(Tessellator.TEXTURE);
-        this.setVertex(tex);
-        this.end();
-        
-        this.start(Tessellator.TRIANGLE);
-        this.setVertex(ver);
-        this.end(indices);
+        this.setVertex(Tessellator.TEXTURE, tex);
+        this.setVertex(Tessellator.INDICES, indices);
+        this.setVertex(Tessellator.TRIANGLE, ver);
     }else if (arguments.length === 5){
         var
             x = arguments[0],
@@ -2929,8 +2921,8 @@ Tessellator.Model.prototype.fillFullCilinder = function (){
             q = Math.max(8, Math.ceil(r * 8));
         
         this.fillCilinder(x, y, z, r, h, q);
-        this.fillCircle(x, y, z - h / 2, r, Tessellator.vec3(0, -1, 0), q);
-        this.fillCircle(x, y, z - h / 2, r, Tessellator.vec3(0, 1, 0), q);
+        this.fillCircle(x, y + h / 2, z, r, Tessellator.vec3(0, -1, 0), q);
+        this.fillCircle(x, y + h / 2, z, r, Tessellator.vec3(0, 1, 0), q);
     }else if (arguments.length === 6){
         var
             x = arguments[0],
@@ -2941,8 +2933,8 @@ Tessellator.Model.prototype.fillFullCilinder = function (){
             q = arguments[5];
         
         this.fillCilinder(x, y, z, r, h, q);
-        this.fillCircle(x, y, z - h / 2, r, Tessellator.vec3(0, -1, 0), q);
-        this.fillCircle(x, y, z - h / 2, r, Tessellator.vec3(0, 1, 0), q);
+        this.fillCircle(x, y + h / 2, z, r, Tessellator.vec3(0, -1, 0), q);
+        this.fillCircle(x, y + h / 2, z, r, Tessellator.vec3(0, 1, 0), q);
     }else if (arguments.length === 7){
         var
             x = arguments[0],
@@ -3638,17 +3630,10 @@ Tessellator.Model.prototype.fillTorus = function (){
             }
         }
         
-        this.start(Tessellator.TEXTURE);
-        this.setVertex(tex);
-        this.end();
-        
-        this.start(Tessellator.NORMAL);
-        this.setVertex(nor);
-        this.end();
-        
-        this.start(Tessellator.TRIANGLE);
-        this.setVertex(vec);
-        this.end(indices);
+        this.setVertex(Tessellator.TEXTURE, tex);
+        this.setVertex(Tessellator.NORMAL, nor);
+        this.setVertex(Tessellator.INDICES, indices);
+        this.setVertex(Tessellator.TRIANGLE, vec);
     }else if (arguments.length === 6){
         var
             x = arguments[0],

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.DirectionalLightingShadowMapRenderer = function (shader, x, y, z, light){
     this.super(shader);
     
@@ -58,6 +54,7 @@ Tessellator.DirectionalLightingShadowMapRenderer.prototype.renderRaw = function 
     var mvmat = matrix.get("mvMatrix");
     mvmat.translate(Tessellator.vec3(0, 0, (this.z * 2 + this.z / 10) / -2));
     mvmat.rotateVec(this.light.vec, Tessellator.vec3(0, 1, 0));
+    //console.log(mvmat);
     
     this.super.renderRaw(matrix, obj);
 }

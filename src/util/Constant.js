@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Constant = function (name, value){
     this.name = name;
     this.gl = value;
@@ -38,15 +34,15 @@ Tessellator.Constant = function (name, value){
     Tessellator.Constant.VALUES[name] = this;
     Tessellator.Constant.VALUE_NAME[value] = name;
     Tessellator.Constant.NAME_VALUE[name] = value;
-}
+};
 
 Tessellator.Constant.prototype.toString = function () {
     return this.name;
-}
+};
 
 Tessellator.Constant.prototype.getValue = function () {
     return this.value;
-}
+};
 
 Tessellator.Constant.VALUES = {};
 Tessellator.Constant.NAME_VALUE = {};
@@ -65,7 +61,7 @@ Tessellator.Constant.create = function (name, value){
         
         return c;
     }
-}
+};
 
 { //webgl 1.0
     Tessellator.DEPTH_BUFFER_BIT = new Tessellator.Constant("DEPTH_BUFFER_BIT",  0x00000100);
@@ -751,12 +747,15 @@ Tessellator.Constant.create = function (name, value){
     Tessellator.POINT = Tessellator.Constant.create("POINTS");
     Tessellator.QUAD = Tessellator.Constant.create("QUAD");
     Tessellator.POLYGON = Tessellator.Constant.create("POLYGON");
+    Tessellator.QUAD_STRIP = Tessellator.Constant.create("QUAD_STRIP");
+    Tessellator.INDICES = Tessellator.Constant.create("INDICES");
     
     Tessellator.CENTER = Tessellator.Constant.create("CENTER", 0);
     Tessellator.RIGHT = Tessellator.Constant.create("RIGHT", 1);
     Tessellator.LEFT = Tessellator.Constant.create("LEFT", -1);
     Tessellator.TOP = Tessellator.Constant.create("TOP", 1);
     Tessellator.BOTTOM = Tessellator.Constant.create("BOTTOM", -1);
+    
     
     Tessellator.BLEND_DEFAULT = [Tessellator.SRC_ALPHA, Tessellator.ONE_MINUS_SRC_ALPHA];
     Tessellator.BLEND_INVERT = [Tessellator.ONE_MINUS_DST_COLOR, Tessellator.ZERO];

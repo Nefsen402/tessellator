@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Model.prototype.bindTexture = function (texture){
     return this.add(new Tessellator.TextureBind(texture));
 }

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.prototype.createTextureAtlas = function (){
     return Tessellator.new.apply(Tessellator.TextureAtlas, [this].concat(Array.prototype.slice.call(arguments)));
 }

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.prototype.createModelFromJSON = function (json, obj){
     if (!json){
         throw "json model must be given";
@@ -48,7 +44,7 @@ Tessellator.prototype.createModelFromJSON = function (json, obj){
     obj.upload();
     
     return obj;
-}
+};
 
 Tessellator.prototype.loadJSONModel = function (url, obj){
     if (!obj){
@@ -62,4 +58,4 @@ Tessellator.prototype.loadJSONModel = function (url, obj){
     });
     
     return obj;
-}
+};

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.float = function (){
     var array = new Float32Array(1);
     
@@ -57,7 +53,7 @@ Tessellator.float = function (){
     array.__proto__ = Tessellator.float.prototype;
     
     return array;
-}
+};
 
 Tessellator.float.forValue = function (value){
     if (value.length){
@@ -73,7 +69,7 @@ Tessellator.float.forValue = function (value){
     }else{
         return value;
     }
-}
+};
 
 Tessellator.float.prototype = Object.create(Float32Array.prototype);
 Tessellator.float.prototype.constructor = Tessellator.float;
@@ -84,17 +80,17 @@ Tessellator.float.prototype.clear = function (){
     this[0] = 0;
     
     return this;
-}
+};
 
 Tessellator.float.prototype.clone = function (){
     return Tessellator.float(this);
-}
+};
 
 Tessellator.float.prototype.copy = function (float){
     if (this.tween) this.tween.cancel();
     
     this[0] = Tessellator.float.forValue(float);
-}
+};
 
 Tessellator.float.prototype.multiply = function (float){
     if (this.tween) this.tween.cancel();
@@ -102,7 +98,7 @@ Tessellator.float.prototype.multiply = function (float){
     this[0] *= Tessellator.float.forValue(float);
     
     return this;
-}
+};
 
 Tessellator.float.prototype.add = function (float){
     if (this.tween) this.tween.cancel();
@@ -110,7 +106,7 @@ Tessellator.float.prototype.add = function (float){
     this[0] += Tessellator.float.forValue(float);
     
     return this;
-}
+};
 
 Tessellator.float.prototype.subtract = function (float) {
     if (this.tween) this.tween.cancel();
@@ -118,7 +114,7 @@ Tessellator.float.prototype.subtract = function (float) {
     this[0] -= Tessellator.float.forValue(float);
     
     return this;
-}
+};
 
 Tessellator.float.prototype.divide = function (float) {
     if (this.tween) this.tween.cancel();
@@ -126,7 +122,7 @@ Tessellator.float.prototype.divide = function (float) {
     this[0] /= Tessellator.float.forValue(float[0]);
     
     return this;
-}
+};
 
 Tessellator.float.prototype.sqrt = function (){
     if (this.tween) this.tween.cancel();
@@ -134,7 +130,7 @@ Tessellator.float.prototype.sqrt = function (){
     this[0] = Math.sqrt(this[0]);
     
     return this;
-}
+};
 
 Tessellator.float.prototype.square = function (){
     if (this.tween) this.tween.cancel();
@@ -142,7 +138,7 @@ Tessellator.float.prototype.square = function (){
     this[0] *= this[0];
     
     return this;
-}
+};
 
 Tessellator.float.prototype.cube = function (){
     if (this.tween) this.tween.cancel();
@@ -150,7 +146,7 @@ Tessellator.float.prototype.cube = function (){
     this[0] *= this[0] * this[0];
     
     return this;
-}
+};
 
 Tessellator.float.prototype.min = function (min){
     if (this.tween) this.tween.cancel();
@@ -159,7 +155,7 @@ Tessellator.float.prototype.min = function (min){
     this[0] = Math.min(min, this[0]);
     
     return this;
-}
+};
 
 Tessellator.float.prototype.max = function (min){
     if (this.tween) this.tween.cancel();
@@ -168,7 +164,7 @@ Tessellator.float.prototype.max = function (min){
     this[0] = Math.max(max, this[0]);
     
     return this;
-}
+};
 
 Tessellator.float.prototype.fract = function (){
     if (this.tween) this.tween.cancel();
@@ -176,7 +172,7 @@ Tessellator.float.prototype.fract = function (){
     this[0] = this[0] - Math.floor(this[0]);
     
     return this;
-}
+};
 
 Tessellator.float.prototype.negate = function (){
     if (this.tween) this.tween.cancel();
@@ -184,7 +180,7 @@ Tessellator.float.prototype.negate = function (){
     this[0] = -this[0];
     
     return this;
-}
+};
 
 Tessellator.float.prototype.invert = function (){
     if (this.tween) this.tween.cancel();
@@ -192,7 +188,7 @@ Tessellator.float.prototype.invert = function (){
     this[0] = 1 / this[0];
     
     return this;
-}
+};
 
 Tessellator.float.prototype.inversesqrt = function (){
     if (this.tween) this.tween.cancel();
@@ -200,7 +196,7 @@ Tessellator.float.prototype.inversesqrt = function (){
     this[0] = 1 / Math.sqrt(this[0]);
     
     return this;
-}
+};
 
 Tessellator.float.prototype.pow = function (f){
     if (this.tween) this.tween.cancel();
@@ -208,7 +204,7 @@ Tessellator.float.prototype.pow = function (f){
     this[0] = Math.pow(this[0], Tessellator.float.forValue(f));
     
     return this;
-}
+};
 
 Tessellator.float.prototype.round = function (){
     if (this.tween) this.tween.cancel();
@@ -216,7 +212,7 @@ Tessellator.float.prototype.round = function (){
     this[0] = Math.round(this[0]);
     
     return this;
-}
+};
 
 Tessellator.float.prototype.ceil = function (){
     if (this.tween) this.tween.cancel();
@@ -224,7 +220,7 @@ Tessellator.float.prototype.ceil = function (){
     this[0] = Math.ceil(this[0]);
     
     return this;
-}
+};
 
 Tessellator.float.abs = function (){
     if (this.tween) this.tween.cancel();
@@ -232,7 +228,7 @@ Tessellator.float.abs = function (){
     this[0] = Math.abs(this[0]);
     
     return this;
-}
+};
 
 Tessellator.float.mix = function (float, l){
     if (this.tween) this.tween.cancel();
@@ -243,7 +239,7 @@ Tessellator.float.mix = function (float, l){
     this[0] = this[0] * (1 - l) + float * l;
     
     return this;
-}
+};
 
 Tessellator.float.sign = function (){
     if (this.tween) this.tween.cancel();
@@ -251,7 +247,7 @@ Tessellator.float.sign = function (){
     this[0] = this[0] < 0 ? -1 : (this[0] > 0 ? 1 : this[0]);
     
     return this;
-}
+};
 
 Tessellator.float.step = function (edge){
     if (this.tween) this.tween.cancel();
@@ -260,7 +256,7 @@ Tessellator.float.step = function (edge){
     this[0] = this[0] < edge ? 0 : 1;
     
     return this;
-}
+};
 
 Tessellator.float.mod = function (float){
     if (this.tween) this.tween.cancel();
@@ -269,7 +265,7 @@ Tessellator.float.mod = function (float){
     this[0] = this[0] % float;
     
     return this;
-}
+};
 
 Tessellator.float.clamp = function (min, max){
     if (this.tween) this.tween.cancel();
@@ -279,7 +275,7 @@ Tessellator.float.clamp = function (min, max){
     this[0] = this[0] < min ? min : (this[0] > max ? max : this[0]);
     
     return this;
-}
+};
 
 Tessellator.float.prototype.random = function (scale){
     if (this.tween) this.tween.update();
@@ -293,28 +289,57 @@ Tessellator.float.prototype.random = function (scale){
     this[0] = (Math.random() * 2 - 1) * scale;
     
     return this;
-}
+};
 
 Tessellator.float.prototype.createTween = function (){
     return this.tween = new Tessellator.Tween(this);
-}
+};
 
 Tessellator.float.prototype.toString = function (){
     return "float(" + this[0] + ")";
-}
+};
 
-if (Object.defineProperty){
-    Object.defineProperty(Tessellator.float.prototype, "x", {
-        get: function (){
-            if (this.tween) this.tween.update();
-            
-            return this[0];
-        },
+if (Object.defineProperty) (function (){
+    var getSwizzle = function (vec, s){
+        if (vec.tween) vec.tween.update();
         
-        set: function (v){
-            if (this.tween) this.tween.cancel();
+        var k = s.length;
+        
+        if (k === 1){
+            return vec[0];
+        }else{
+            var v = new Float32Array(k);
             
-            this[0] = Tessellator.float.forValue(v);
+            for (var i = 0; i < k; i++){
+                v[i] = vec[0];
+            }
+            
+            if (k === 2){
+                v.__proto__ = Tessellator.vec2.prototype;
+            }else if (k === 3){
+                v.__proto__ = Tessellator.vec3.prototype;
+            }else if (k === 4){
+                v.__proto__ = Tessellator.vec4.prototype;
+            }
+            
+            return v;
         }
-    })
-}
+    }
+    
+    var setSwizzle = function (vec, s, v){
+        if (vec.tween) vec.tween.cancel();
+        
+        v = Tessellator.float.forValue(v);
+        
+        if (v.length){
+            vec[0] = v[v.length - 1];
+        }else{
+            vec[0] = v;
+        }
+    }
+    
+    Object.defineProperty(Tessellator.float.prototype,    "x", {get: function (){return getSwizzle(this,    "x");},set: function (v){setSwizzle(this,    "x", v);}});
+    Object.defineProperty(Tessellator.float.prototype,   "xx", {get: function (){return getSwizzle(this,   "xx");},set: function (v){setSwizzle(this,   "xx", v);}});
+    Object.defineProperty(Tessellator.float.prototype,  "xxx", {get: function (){return getSwizzle(this,  "xxx");},set: function (v){setSwizzle(this,  "xxx", v);}});
+    Object.defineProperty(Tessellator.float.prototype, "xxxx", {get: function (){return getSwizzle(this, "xxxx");},set: function (v){setSwizzle(this, "xxxx", v);}});
+})();

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Model.prototype.createFragment = function (){
     var model;
     
@@ -54,6 +50,6 @@ Tessellator.copyProto(Tessellator.Model.Fragment, Tessellator.Model);
 
 Tessellator.Model.Fragment.prototype.apply = function (matrix, mod, renderer){
     if (this.render){
-        renderer.render(matrix, this);
+        renderer.renderModel(matrix, this);
     }
 }

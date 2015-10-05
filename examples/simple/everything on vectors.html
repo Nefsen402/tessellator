@@ -1,6 +1,8 @@
 <script src="../../build/Tessellator.js"></script>
 
 <script>
+    console.log("w".charCodeAt(0))
+
     //this is a tutorial on tessllator vectors.
     //there are different types of vectors. These are:
     //Tessellator.float()
@@ -99,6 +101,12 @@
     //one thing to keep in mind is that if you combine multiple members, you will get a vector to match that.
     //otherwise, if you just ask for a single member you will get a standard javascipt number (I was contimplating useing Tessellator.float())
     
+    //you can even create bigger vectors from a smaller one.
+    console.log(vec.xyxy.toString());
+    console.log(Tessellator.vec3(5, 6, 7).xyyz.toString());
+    console.log(Tessellator.float(3).xxxx);
+    //these will return a vec4
+    
     console.log(vec);
     
     var vec = Tessellator.vec4(1, 2, 3, 4);
@@ -126,7 +134,7 @@
         vec2.add(vec.wzxy);
     }
     
-    //honestly, with my intel i7 4770 processor, results are not bad. ranges form 1 - 3ms to compute on average.
+    //honestly, with my intel i7 4770 processor, results are not bad. ranges from 1 - 2ms to compute on average.
     console.log(Date.now() - time);
     console.log(vec2);
 </script>

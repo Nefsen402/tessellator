@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Model.prototype.scaleTexture = function (){
     if (arguments.length == 1){
         return this.add(new Tessellator.TextureScale(arguments[0], arguments[0]));

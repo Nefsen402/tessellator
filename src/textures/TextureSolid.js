@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.prototype.createTextureSolid = function (){
     return new Tessellator.TextureSolid(this, Tessellator.getColor(arguments).multiply(255));
 }

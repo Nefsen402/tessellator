@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.BufferedRenderer = function (shader, renderer, res, bufferAttachments){
     if (shader.constructor === String){
         shader = renderer.tessellator.createPixelShader(shader);

@@ -1,0 +1,86 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    <script type="text/javascript">
+        var tessellator = new Tessellator("gl");
+        
+        var rotation = Tessellator.float();
+        rotation.createTween().dir(Math.PI / 1000);
+        
+        var axis = Tessellator.vec3(0, 1, 0);
+        axis.createTween().dir(Tessellator.vec3(0.6, 0.4, 1));
+        
+        var model = tessellator.createModel();
+        model.clear("black");
+        model.setView(new Tessellator.PerspectiveView());
+        model.translate(0, 0, -6);
+        model.setColor("white");
+        
+        model.enable(Tessellator.LIGHTING);
+        model.setDirectionalLight(0, 0, 1);
+        
+        //things were a little to big, so I scaled them down a bit
+        model.scale(0.75);
+        
+        model.push();
+            model.translate(2, 0, 0);
+            model.rotate(rotation, axis);
+            model.fillCube(0, 0, 0, 1);
+        model.pop();
+        
+        model.push();
+            model.translate(-2, 0, 0);
+            model.rotate(rotation, axis);
+            model.fillTetrahedron(0, 0, 0, 1);
+        model.pop();
+        
+        model.push();
+            model.rotate(rotation, axis);
+            model.fillPrism(0, 0, 0, 1);
+        model.pop();
+        
+        model.push();
+            model.translate(0, 2, 0);
+            model.rotate(rotation, axis);
+            model.fillFullCilinder(0, 0, 0, 0.5, 1);
+        model.pop();
+        
+        model.push();
+            model.translate(0, -2, 0);
+            model.rotate(rotation, axis);
+            model.fillTorus(0, 0, 0, 0.5, 0.5, 10);
+        model.pop();
+        
+        model.push();
+            model.translate(-2, -2, 0);
+            model.rotate(rotation, axis);
+            model.fillSphere(0, 0, 0, 0.75);
+        model.pop();
+        
+        model.push();
+            model.translate(2, -2, 0);
+            model.rotate(rotation, axis);
+            model.fillHemisphere(0, 0, 0, 0.75);
+        model.pop();
+        
+        model.push();
+            model.translate(-2, 2, 0);
+            model.rotate(rotation, axis);
+            model.fillCircle(0, 0, 0, 0.75);
+        model.pop();
+        
+        model.push();
+            model.translate(2, 2, 0);
+            model.rotate(rotation, axis);
+            model.fillRect(-.5, -.5, 1, 1);
+        model.pop();
+        
+        model.finish();
+        
+        var renderLoop = new Tessellator.RenderLoop(new Tessellator.ModelRenderer(model));
+    </script>
+</html>

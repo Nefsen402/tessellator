@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.prototype.createModelFromObj = function (text, obj){
     if (!text){
         throw "obj model must be given";
@@ -191,7 +187,7 @@ Tessellator.prototype.createModelFromObj = function (text, obj){
     obj.upload();
     
     return obj;
-}
+};
 
 Tessellator.prototype.loadObjModel = function (url, obj){
     if (!obj){
@@ -205,4 +201,4 @@ Tessellator.prototype.loadObjModel = function (url, obj){
     });
     
     return obj;
-}
+};

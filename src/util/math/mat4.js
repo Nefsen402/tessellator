@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.mat4 = function (){
     var array = new Float32Array(16);
     
@@ -153,7 +149,7 @@ Tessellator.mat4.prototype.copy = function (copy){
 }
 
 Tessellator.mat4.prototype.multiply = function (mat){
-    if (mat.constructor === Tessellator.mat4){
+    if (mat.length === 16){
         var
             x00 = this[ 0],
             x01 = this[ 1],
@@ -208,7 +204,7 @@ Tessellator.mat4.prototype.multiply = function (mat){
         this[13] = y30 * x01 + y31 * x11 + y32 * x21 + y33 * x31;
         this[14] = y30 * x02 + y31 * x12 + y32 * x22 + y33 * x32;
         this[15] = y30 * x03 + y31 * x13 + y32 * x23 + y33 * x33;
-    }else if (mat.constructor === Tessellator.mat3){
+    }else if (mat.length === 9){
         var
             x00 = this[ 0],
             x01 = this[ 1],
@@ -249,7 +245,7 @@ Tessellator.mat4.prototype.multiply = function (mat){
         this[ 9] = y20 * x01 + y21 * x11 + y22 * x21;
         this[10] = y20 * x02 + y21 * x12 + y22 * x22;
         this[11] = y20 * x03 + y21 * x13 + y22 * x23;
-    }else if (mat.constructor === Tessellator.mat2){
+    }else if (mat.length === 4){
         var
             x00 = this[ 0],
             x01 = this[ 1],
@@ -634,24 +630,30 @@ Tessellator.mat4.prototype.rotateVec = function (vec, up){
         x00 = this[ 0],
         x01 = this[ 1],
         x02 = this[ 2],
+        x03 = this[ 3],
         x10 = this[ 4],
         x11 = this[ 5],
         x12 = this[ 6],
+        x13 = this[ 7],
         x20 = this[ 8],
         x21 = this[ 9],
-        x22 = this[10];
+        x22 = this[10],
+        x23 = this[11];
     
     this[ 0] = x[0] * x00 + y[0] * x10 + z[0] * x20;
     this[ 1] = x[0] * x01 + y[0] * x11 + z[0] * x21;
     this[ 2] = x[0] * x02 + y[0] * x12 + z[0] * x22;
+    this[ 3] = x[0] * x03 + y[0] * x13 + z[0] * x23;
     
     this[ 4] = x[1] * x00 + y[1] * x10 + z[1] * x20;
     this[ 5] = x[1] * x01 + y[1] * x11 + z[1] * x21;
     this[ 6] = x[1] * x02 + y[1] * x12 + z[1] * x22;
+    this[ 7] = x[1] * x03 + y[1] * x13 + z[1] * x23;
     
     this[ 8] = x[2] * x00 + y[2] * x10 + z[2] * x20;
     this[ 9] = x[2] * x01 + y[2] * x11 + z[2] * x21;
     this[10] = x[2] * x02 + y[2] * x12 + z[2] * x22;
+    this[11] = x[2] * x03 + y[2] * x13 + z[2] * x23;
     
     return this;
 }

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.AtlasRenderer = function (tessellator){
     this.super(Tessellator.ATLAS_SHADER.create(tessellator));
 }

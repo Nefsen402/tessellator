@@ -27,8 +27,4 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Model.prototype.setView = Tessellator.Model.prototype.add;

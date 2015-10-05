@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Model.prototype.scale = function (){
     if (arguments.length === 1 && arguments[0].constructor === Tessellator.Scale){
         return this.add(arguments[0]);

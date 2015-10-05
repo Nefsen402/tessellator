@@ -27,35 +27,24 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.Model.prototype.disable = function (e){
-    return this.add(new Tessellator.Disable(e));
-}
-
-Tessellator.Disable = function (arg){
-    this.type = Tessellator.DISABLE;
-    this.arg = arg;
-}
-
-
-Tessellator.Disable.prototype.apply = function (render){
-    if (this.arg === Tessellator.LIGHTING){
-        render.set("lights", render.renderer.noLightingTexture);
-    }else{
-        render.disable(this.arg)
+Tessellator.Geometry.registerCustomGeometry(Tessellator.LINES, Tessellator.LINES, function (g, add, arg){
+    if (arg.get("textureBounds")){
+        throw "cannot bind a texture to Tessellator.LINES";
     }
-}
-
-
-Tessellator.Disable.prototype.init = function (interpreter){
-    if (this.arg === Tessellator.NORMAL){
-        interpreter.set("lighting", false);
-        
-        return null;
-    }else if (this.arg === Tessellator.COLOR){
-        interpreter.set("colorAttribEnabled", false);
-        
-        return null;
+    
+    if (g.indices.length){
+        if (add){
+            g.indices.offset(add.positions.length / 3);
+        }
     }else{
-        interpreter.flush();
+        var off = add ? add.positions.length / 3 : 0;
+        var k = g.positions.length / 3;
+        
+        for (var i = 0; i < k; i += 2){
+            g.indices.push([
+                i + 0 + off,
+                i + 1 + off
+            ]);
+        }
     }
-}
+});

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Initializer = function (tessellator, inheritFrom){
     this.tessellator = tessellator;
     
@@ -113,3 +109,5 @@ Tessellator.Initializer.prototype.finish = function (){
     
     return this.model;
 }
+
+Tessellator.Initializer.prototype.flush = function (){}

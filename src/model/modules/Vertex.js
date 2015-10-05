@@ -27,31 +27,21 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Initializer.setDefault ("draw", function (){
     return Tessellator.COLOR;
 });
 
-Tessellator.Initializer.prototype.flush = function (){
-    if (this.get("drawCache")){
-        var cache = this.getr("drawCache");
-        
-        this.model.push(cache);
-        
-        return cache;
-    }
-    
-    return null;
-}
-
-Tessellator.Model.prototype.setVertex = function(){
-    if (arguments.length === 1){
-        return this.add(new Tessellator.Vertex(arguments[0]));
+Tessellator.Model.prototype.setVertex = function (){
+    if (arguments.length === 1 && isNaN(arguments[0])){
+        this.add(new Tessellator.Vertex(arguments[0]));
     }else{
-        return this.add(new Tessellator.Vertex(arguments));
+        if (arguments.length === 2 && isNaN(arguments[1])){
+            this.start(arguments[0]);
+            this.add(new Tessellator.Vertex(arguments[1]));
+            this.end();
+        }else{
+            this.add(new Tessellator.Vertex(arguments));
+        }
     }
 }
 
@@ -61,49 +51,31 @@ Tessellator.Vertex = function (vertices){
     this.vertices = vertices;
 }
 
-
 Tessellator.Vertex.prototype.init = function (interpreter){
-    if (interpreter.shape === null){
-        throw "cannot add vertices to a non existing shape";
-    }
-    
-    if (interpreter.shape.type === Tessellator.TEXTURE){
-        if (this.vertices.length){
-            interpreter.shape.vertices.push(this.vertices);
+    if (this.vertices.length){
+        var geometry = interpreter.get("currentGeometry");
+        
+        if (!geometry){
+            throw "cannot add vertices to a non existing shape";
         }
-    }else if (interpreter.shape.type === Tessellator.NORMAL){
-        if (this.vertices.length){
-            interpreter.shape.vertices.push(this.vertices);
-        }
-    }else{
-        if (this.vertices.length){
+        
+        if (geometry.type === Tessellator.INDICES){
+            geometry.indices.push(this.vertices);
+        }else if (geometry.type === Tessellator.TEXTURE){
+            geometry.colors.push(this.vertices);
+        }else if (geometry.type === Tessellator.NORMAL){
+            geometry.normals.push(this.vertices);
+        }else{
             if (interpreter.get("colorAttribEnabled") && interpreter.get("draw") !== Tessellator.TEXTURE){
                 var k = this.vertices.length / 3;
                 var c = interpreter.get("color255");
                 
                 for (var i = 0; i < k; i++){
-                    interpreter.shape.colors.push(c);
+                    geometry.colors.push(c);
                 }
             }
             
-            if (interpreter.shape.matrix){
-                var ver = this.vertices;
-                var m = interpreter.shape.matrix;
-                
-                for (var i = 0, k = ver.length / 3; i < k; i++){
-                    var
-                        x = ver[i * 3 + 0],
-                        y = ver[i * 3 + 1],
-                        z = ver[i * 3 + 2];
-                    
-                    ver[i * 3 + 0] = m[ 0] * x + m[ 4] * y + m[ 8] * z + m[12];
-                    ver[i * 3 + 1] = m[ 1] * x + m[ 5] * y + m[ 9] * z + m[13];
-                    ver[i * 3 + 2] = m[ 2] * x + m[ 6] * y + m[10] * z + m[14];
-                }
-            }
-        
-            interpreter.shape.vertices.push(this.vertices);
-            interpreter.shape.items += k;
+            geometry.addPositions(this.vertices);
         }
     }
     

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.FillRenderer = function (renderer){
     this.color = Tessellator.getColor(Array.prototype.slice.call(arguments, 1, arguments.length));
     

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.TextureModel.AttachmentDepth = function (){}
 
 Tessellator.TextureModel.AttachmentDepth.prototype.setup = function (texture){

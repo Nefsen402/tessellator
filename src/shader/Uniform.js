@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Program.I1_UNIFY_FUNC = function (){
     this.shader.tessellator.GL.uniform1i(this.location, this.value);
 }

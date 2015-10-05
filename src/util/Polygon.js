@@ -27,13 +27,9 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Polygon = function (vertices){
     this.vertices = vertices;
-}
+};
 
 Tessellator.Polygon.prototype.getNormal = function (){
     var normal = Tessellator.vec3();
@@ -46,7 +42,7 @@ Tessellator.Polygon.prototype.getNormal = function (){
     }
     
     return normal.normalize();
-}
+};
 
 Tessellator.Polygon.prototype.convert2D = function (normal){
     if (!normal){
@@ -83,7 +79,7 @@ Tessellator.Polygon.prototype.convert2D = function (normal){
     }
     
     this.vertices = dPoly;
-}
+};
 
 Tessellator.Polygon.prototype.convertToTriangles = function (off){
     var poly = this.vertices;
@@ -147,4 +143,4 @@ Tessellator.Polygon.prototype.convertToTriangles = function (off){
     
     indices.push(avl[0] + off, avl[1] + off, avl[2] + off);
     return indices;
-}
+};

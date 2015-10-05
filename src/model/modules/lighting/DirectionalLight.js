@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Model.prototype.setDirectionalLight = function (){
     return this.add(Tessellator.new.apply(Tessellator.DirectionalLight, arguments));
 }
@@ -47,35 +43,37 @@ Tessellator.DirectionalLight = function (){
     this.type = Tessellator.LIGHTING_DIRECTIONAL;
     this.subtype = Tessellator.LIGHTING;
     
+    this.render = true;
 }
 
 Tessellator.DirectionalLight.prototype.set = function (lighting, index, matrix){
     if (this.color.tween) this.color.tween.update();
     
     lighting[0 + index] = 2;
-    lighting[1 + index] = this.color[0] * this.color[3];
-    lighting[2 + index] = this.color[1] * this.color[3];
-    lighting[3 + index] = this.color[2] * this.color[3];
-    
-    var vec = this.vec.clone().rotate(matrix).normalize();
-    
-    lighting[4 + index] = vec[0];
-    lighting[5 + index] = vec[1];
-    lighting[6 + index] = vec[2];
+    lighting.set(this.color.xyz.multiply(this.color.w), 1 + index);
+    lighting.set(this.vec.clone().rotate(matrix).normalize(), 4 + index);
     
     if (this.shadowMap){
         lighting[12 + index] = 1;
         lighting[13 + index] = this.shadowRenderer.x;
         lighting[14 + index] = this.shadowRenderer.y;
         lighting[15 + index] = this.shadowRenderer.z;
+        
+        var pos = Tessellator.vec3().multiply(matrix);
+        
+        lighting.set(pos, 8 + index);
+    }else{
+        lighting[12 + index] = 0;
     }
 }
 
 Tessellator.DirectionalLight.prototype.applyLighting = function (matrix, index, renderer){
-    this.set(renderer.lightingTexture.data, index[0] * 4 * 4, matrix);
-    
-    if (index[0]++ * 4 * 4 >= renderer.lightingTexture.data.length){
-        throw "too many lights!";
+    if (this.render){
+        this.set(renderer.lightingTexture.data, index[0] * 4 * 4, matrix);
+        
+        if (index[0]++ * 4 * 4 >= renderer.lightingTexture.data.length){
+            throw "too many lights!";
+        }
     }
 }
 
@@ -93,7 +91,6 @@ Tessellator.DirectionalLight.prototype.apply = function (matrix){
         matrix.set("shadowMap", this.shadowMap);
     }
 }
-
 
 Tessellator.DirectionalLight.prototype.createShadow = function (model, x, y, z, resolution){
     if (this.tessellator){

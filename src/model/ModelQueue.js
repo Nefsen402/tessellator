@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.ModelQueue = function (){
     this.render = true;
     this.model = [];
@@ -38,7 +34,7 @@ Tessellator.ModelQueue = function (){
 }
 
 Tessellator.ModelQueue.prototype.apply = function (matrix, mod, renderer){
-    renderer.render(matrix, this);
+    renderer.renderModel(matrix, this);
 }
 
 Tessellator.ModelQueue.finish = function (){}

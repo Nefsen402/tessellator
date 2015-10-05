@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Model.prototype.setFontSheet = function (fontSheet){
     return this.add (new Tessellator.FontSheet(fontSheet));
 }

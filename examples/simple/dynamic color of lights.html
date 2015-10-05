@@ -21,12 +21,12 @@
         
 		var model = tessellator.createModel();
 		model.clear(0x222222);
-		model.enable(Tessellator.LIGHTING);
 		model.setView(new Tessellator.PerspectiveView());
+		model.enable(Tessellator.LIGHTING);
 		model.setColor(0x333333);
 		model.setAmbientLight();
         
-        //you can dynamically change the color of LIGHTS not the geometry itself as it
+        //you can dynamically change the color of lights, not the geometry itself as it
         //works of a totally seperate system.
         //when I'm passing the color to the light, the color can have a tween attached to it.
 		model.setColor(rgba);

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.TextureData = function (tessellator, width, height, dataType, storeType, data, filter){
     this.super(tessellator);
     

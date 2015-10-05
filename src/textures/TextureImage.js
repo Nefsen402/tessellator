@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.prototype.loadTexture = function (src, filter){
     return new Tessellator.TextureImage(this, src, filter);
 }

@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.Model.prototype.clear = function (){
     this.add(new Tessellator.Clear(Tessellator.COLOR_BUFFER_BIT.gl | Tessellator.DEPTH_BUFFER_BIT.gl, Tessellator.getColor(arguments)));
 }

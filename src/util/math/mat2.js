@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.mat2 = function (){
     var array = new Float32Array(4);
     var pos = 0;
@@ -61,7 +57,7 @@ Tessellator.mat2 = function (){
     
     array.__proto__ = Tessellator.mat2.prototype;
     return array;
-}
+};
 
 Tessellator.mat2.prototype = Object.create(Float32Array.prototype);
 Tessellator.mat2.prototype.constructor = Tessellator.mat2;
@@ -80,7 +76,7 @@ Tessellator.mat2.prototype.identity = function (scale){
     this[3] = scale[0];
     
     return this;
-}
+};
 
 Tessellator.mat2.prototype.invert = function (){
     var
@@ -97,11 +93,11 @@ Tessellator.mat2.prototype.invert = function (){
     this[2] =  a0 / det;
     
     return this;
-}
+};
 
 Tessellator.mat2.prototype.determinant = function (){
     return this[0] * this[3] - this[2] * this[1];
-}
+};
 
 Tessellator.mat2.prototype.adjoint = function (){
     var a0 = this[0];
@@ -111,7 +107,7 @@ Tessellator.mat2.prototype.adjoint = function (){
     this[3] = a0;
     
     return this;
-}
+};
 
 Tessellator.mat2.prototype.multiply = function (mat){
     var
@@ -131,7 +127,7 @@ Tessellator.mat2.prototype.multiply = function (mat){
     this[3] = a1 * b2 + a3 * b3;
 
     return this;
-}
+};
 
 Tessellator.mat2.prototype.random = function (scale){
     scale = Tessellator.float.forValue(scale || 1);
@@ -140,7 +136,7 @@ Tessellator.mat2.prototype.random = function (scale){
     this[1] = (Math.random() * 2 - 1) * scale;
     this[2] = (Math.random() * 2 - 1) * scale;
     this[3] = (Math.random() * 2 - 1) * scale;
-}
+};
 
 Tessellator.mat2.prototype.rotate = function (rad){
     if (rad.length){
@@ -164,7 +160,7 @@ Tessellator.mat2.prototype.rotate = function (rad){
     this[3] = a1 * -s + a3 * c;
     
     return this;
-}
+};
 
 Tessellator.mat2.prototype.scale = function (s){
     if (s.tween){
@@ -177,17 +173,17 @@ Tessellator.mat2.prototype.scale = function (s){
     this[3] *= s[0];
     
     return this;
-}
+};
 
 Tessellator.mat2.prototype.copy = function (mat){
     this.set(mat);
     
     return this;
-}
+};
 
 Tessellator.mat2.prototype.clone = function (){
     return Tessellator.mat2(this);
-}
+};
 
 Tessellator.mat2.prototype.transpose = function (){
     var
@@ -198,8 +194,8 @@ Tessellator.mat2.prototype.transpose = function (){
     this[2] = x01;
     
     return this;
-}
+};
 
 Tessellator.mat2.prototype.toString = function (){
     return "mat2(" + this[0] + ", " + this[1] + ", " + this[2] + ", " + this[3] + ")";
-}
+};

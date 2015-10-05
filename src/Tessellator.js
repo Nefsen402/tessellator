@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 var Tessellator = function (canvas){
     if (!canvas){
         canvas = document.createElement("canvas");
@@ -138,13 +134,13 @@ var Tessellator = function (canvas){
         if (self.onresize){
             self.onresize(self.width, self.height);
         }
-    }
+    };
     
     this.canvasResize = function () {
         if (canvas.clientWidth !== self.originWidth || canvas.clientHeight !== self.originHeight){
             self.forceCanvasResize();
         }
-    }
+    };
     
     window.addEventListener("resize", this.canvasResize);
     
@@ -176,14 +172,13 @@ var Tessellator = function (canvas){
     
     this.resources.remove = function (resource){
         this.splice(this.indexOf(resource), 1);
-    }
+    };
     
     this.resources.push = function (resource){
         resource.RESOURCE_TRACK = this.total++;
         
         this[this.length] = resource;
-    }
-    
+    };
     
     for (var i = 0; i < Tessellator.createHandle.length; i++){
         Tessellator.createHandle[i].call(this);
@@ -218,7 +213,7 @@ Tessellator.prototype.dispose = function (){
    while (this.resources.length){
        this.resources[this.resources.length - 1].dispose();
    }
-}
+};
 
 Tessellator.prototype.setResolutionScale = function (scale){
     if (scale.constructor === Tessellator.vec2){
@@ -228,7 +223,7 @@ Tessellator.prototype.setResolutionScale = function (scale){
     }
     
     this.forceCanvasResize();
-}
+};
 
 Tessellator.prototype.printLowLevelAccess = function (func){
     var self = this;
@@ -259,7 +254,7 @@ Tessellator.prototype.printLowLevelAccess = function (func){
             }
         }
     }
-}
+};
 
 Tessellator.prototype.countLowLevelAccess = function (func){
     this.gledits = 0;
@@ -281,11 +276,11 @@ Tessellator.prototype.countLowLevelAccess = function (func){
             }
         }
     }
-}
+};
 
 Tessellator.prototype.getDataURL = function (){
     return this.canvas.toDataURL.apply(this.canvas, arguments);
-}
+};
 
 Tessellator.prototype.preRender = function (){
     this.frame++;
@@ -295,13 +290,13 @@ Tessellator.prototype.preRender = function (){
     if (this.TD){
         this.TD.clearRect(0, 0, this.originWidth, this.originHeight);
     }
-}
+};
 
 Tessellator.prototype.postRender = function (){
     if (this.TD){
         this.TD.drawImage(this.renderCanvas, 0, 0, this.originWidth, this.originHeight, 0, 0, this.width, this.height);
     }
-}
+};
 
 Tessellator.prototype.super_preRender = Tessellator.prototype.preRender;
 Tessellator.prototype.super_postRender = Tessellator.prototype.postRender;

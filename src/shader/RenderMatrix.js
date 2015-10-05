@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.RenderMatrix = function (renderer, parent){
     this.uniforms = {};
     this.enabled = {};

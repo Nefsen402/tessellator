@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.prototype.renderModel = function (model, renderer){
     model.renderModel(renderer);
 }
@@ -92,7 +88,7 @@ Tessellator.Model.prototype.apply = function (matrix, mod, renderer){
         if (this.renderer){
             this.renderer.render(copy, this);
         }else{
-            renderer.renderRaw(copy, this);
+            renderer.renderModel(copy, this);
         }
     }
 }

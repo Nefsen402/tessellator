@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 (function () {
     var Factory = function (constructor, args) {
         return constructor.apply(this, args);
@@ -90,11 +86,11 @@ Tessellator.prototype.glConst = function (c){
     }else{
         return c;
     }
-}
+};
 
 Tessellator.prototype.tessConst = function (c){
     return Tessellator.Constant.VALUE_NAME[c];
-}
+};
 
 Tessellator.Extensions = function (tessellator){
     this.extensions = {};
@@ -105,7 +101,7 @@ Tessellator.Extensions = function (tessellator){
     for (var i = 0; i < avaliable.length; i++){
         this.extensions[avaliable[i]] = undefined;
     }
-}
+};
 
 Tessellator.Extensions.prototype.get = function (key){
     var c = this.extensions[key];
@@ -123,9 +119,9 @@ Tessellator.Extensions.prototype.get = function (key){
     }
     
     return c;
-}
+};
 
-Tessellator.EMPTY_FUNC = function () {}
+Tessellator.EMPTY_FUNC = function () {};
 
 Tessellator.getSourceText = function(elem, notify){
     if (!elem){
@@ -149,7 +145,7 @@ Tessellator.getSourceText = function(elem, notify){
             return code.join("");
         }
     }
-}
+};
 
 Tessellator.getRemoteText = function(src, notify){
     if (!src){
@@ -178,7 +174,7 @@ Tessellator.getRemoteText = function(src, notify){
         
         return request.responseText;
     }
-}
+};
 
 Tessellator.getFirstDomFromType = function (dom, type){
     for (var i = 0, k = dom.childNodes.length; i < k; i++){
@@ -270,7 +266,7 @@ Tessellator.getColor = function (data){
     }
     
     return color;
-}
+};
 
 Tessellator.prototype.create3DTextureModel = function (texture, width, height, depth){
     var model = this.createModel();
@@ -377,7 +373,7 @@ Tessellator.prototype.create3DTextureModel = function (texture, width, height, d
     texture.addListener(builder);
     
     return model;
-}
+};
 
 Tessellator.getVendorIndependent = function (object, name){
     for (var o in object){
@@ -389,11 +385,11 @@ Tessellator.getVendorIndependent = function (object, name){
             }
         }
     }
-}
+};
 
 Tessellator.prototype.getPointerLock = function (){
     return Tessellator.getVendorIndependent(document, "pointerlockelement");
-}
+};
 
 Tessellator.prototype.hasPointerLock = function (){
     return this.pointerLock;
@@ -423,13 +419,13 @@ Tessellator.prototype.aquirePointerLock = function (){
         document.addEventListener("mozpointerlockchange", this.pointerLock.event);
         document.addEventListener("webkitpointerlockchange", this.pointerLock.event);
     }
-}
+};
 
 Tessellator.prototype.releasePointerLock = function (){
     if (this.pointerLock){
         this.pointerLock.event();
     }
-}
+};
 
 Tessellator.prototype.requestFullscreen = function (){
     if (Tessellator.getVendorIndependent(document, "fullscreenelement") !== tessellator.canvas){
@@ -463,14 +459,14 @@ Tessellator.prototype.requestFullscreen = function (){
         this.canvas.addEventListener("webkitfullscreenchange", this.fullscreen.event);
         this.canvas.addEventListener("mozfullscreenchange", this.fullscreen.event);
     }
-}
+};
 
 Tessellator.prototype.isFullscreen = function (){
     return this.fullscreen;
-}
+};
 
 Tessellator.prototype.exitFullscreen = function (){
     if (this.fullscreen){
         this.fullscreen.event();
     }
-}
+};

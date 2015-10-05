@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.prototype.createObject = function (){
     return Tessellator.new.apply(Tessellator.Object, [this].concat(arguments));
 }

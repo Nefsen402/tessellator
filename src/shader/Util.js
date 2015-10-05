@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.prototype.createShaderProgram = function (vertexShader, fragmentShader){
     if (vertexShader.constructor === Tessellator.ShaderPreset){
         if (vertexShader.type !== Tessellator.VERTEX_SHADER){

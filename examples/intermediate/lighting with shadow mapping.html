@@ -1,5 +1,5 @@
 <html>
-    <script src="../../build/Tessellator.js" type="text/javascript"></script>
+    <script src="/Tessellator.multifile" type="text/javascript"></script>
     
     <body style="margin:0px;background:black;">
         <canvas style="width:100%;height:100%;" id="maincanvas"></canvas>
@@ -10,8 +10,11 @@
         
         var scene = tessellator.createModel();
         scene.clear();
+        scene.push();
         scene.rotate(Tessellator.float().createTween().dir(0.001).getVec(), Tessellator.vec3(0, 1, 0));
-        scene.fillCube(0, 0, 0, 1);
+        scene.fillCube(-1, 0, 0, 1);
+        scene.fillCube(1, 0.3, 0, 1);
+        scene.pop();
         
         scene.translate(0, -1, 0);
         scene.fillRect(-10, -10, 20, 20, Tessellator.vec3(0, 1, 0));
@@ -22,10 +25,16 @@
         model.translate(0, 0, -6);
         model.enable(Tessellator.LIGHTING);
         
-        var light = model.setDirectionalLight(1, 1, 1);
-        light.createShadow(scene, 2, 2, 5, 1024);
+        var light = model.setDirectionalLight(1, 0, 0);
+        light.createShadow(scene, 2, 2, 2, 1024);
         
         model.add(scene);
+        
+        model.disable(Tessellator.LIGHTING);
+        model.setView(new Tessellator.StaticView(Tessellator.RIGHT, Tessellator.BOTTOM));
+        
+        model.bindTexture(light.shadowMap);
+        model.fillRect(-200, 0, 200, 200);
         model.finish();
         
         //new Tessellator.RenderLoop(new Tessellator.FullScreenTextureRenderer(tessellator.createPixelShader(Tessellator.PIXEL_SHADER_PASS), light.shadowMap));

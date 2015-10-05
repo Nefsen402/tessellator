@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.OrthographicView = function (){
     this.type = Tessellator.VIEW;
     this.args = arguments.length;

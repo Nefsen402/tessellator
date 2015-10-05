@@ -27,17 +27,13 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-
-//strict mode can be used with this.
-"use strict";
-
 Tessellator.QueuedRenderer = function (){
-    this.setQueue(arguments);
+    this.set(arguments);
 }
 
 Tessellator.extend(Tessellator.QueuedRenderer, Tessellator.RendererAbstract);
 
-Tessellator.QueuedRenderer.prototype.setQueue = function (){
+Tessellator.QueuedRenderer.prototype.set = function (){
     if (arguments.length === 1){
         if (arguments[0].length){
             this.queue = arguments[0];
@@ -53,6 +49,24 @@ Tessellator.QueuedRenderer.prototype.setQueue = function (){
             this.tessellator = this.queue[i].tessellator;
             break;
         }
+    }
+}
+
+Tessellator.QueuedRenderer.prototype.add = function (){
+    if (!this.queue){
+        this.set(arguments);
+    }else if (this.queue.constructor !== Array){
+        this.queue = Array.prototype.slice.call(this.queue);
+    }
+    
+    if (arguments.length === 1){
+        if (arguments[0].length){
+            this.queue.push.apply(this.queue, arguments[0]);
+        }else{
+            this.queue = this.queue.push(arguments[0]);
+        }
+    }else{
+        this.queue.push.apply(this.queue, arguments);
     }
 }
 
