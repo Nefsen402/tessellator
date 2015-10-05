@@ -98,7 +98,7 @@ Tessellator.Polygon.prototype.convertToTriangles = function (off){
         avl[i] = i;
     };
     
-    for (var i = 0; i < 3 * avl.length || avl.length >= 6; i++){
+    for (var i = 0; i < avl.length > 3; i++){
         var i0 = avl[(i + 0) % avl.length],
             i1 = avl[(i + 1) % avl.length],
             i2 = avl[(i + 2) % avl.length],
