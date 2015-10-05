@@ -32,23 +32,23 @@ Tessellator.Model.prototype.translateTexture = function (){
         return this.add(new Tessellator.TextureTranslate(arguments[0], arguments[0]));
     }else{
         return this.add(new Tessellator.TextureTranslate(arguments[0], arguments[1]));
-    }
-}
+    };
+};
 
 Tessellator.TextureTranslate = function (x, y) {
     this.type = Tessellator.TEXTURE_SCALE;
     
     this.x = x;
     this.y = y;
-}
+};
 
 Tessellator.TextureTranslate.prototype.init = function (interpreter){
     if (interpreter.get("textureBounds") && interpreter.get("textureBounds").bounds){
         for (var i = 0, k = interpreter.get("textureBounds").bounds.length / 2; i < k; i++){
             interpreter.get("textureBounds").bounds[i * 2] += this.x;
             interpreter.get("textureBounds").bounds[i * 2 + 1] += this.y;
-        }
-    }
+        };
+    };
     
     return null;
-}
+};

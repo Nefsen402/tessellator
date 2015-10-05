@@ -29,12 +29,12 @@
 
 Tessellator.prototype.createTextureAtlasAnimation = function (){
     return Tessellator.new.apply(Tessellator.TextureAtlasAnimation, [this].concat(Array.prototype.slice.call(arguments)));
-}
+};
 
 Tessellator.TextureAtlasAnimation = function (tessellator, src, animationRate, animation){
     if (!src){
         throw "no source!";
-    }
+    };
     
     this.tessellator = tessellator;
     
@@ -49,7 +49,7 @@ Tessellator.TextureAtlasAnimation = function (tessellator, src, animationRate, a
         
         if (src.width % this.size !== 0 || src.height & this.size !== 0){
             throw "texture not uniform size";
-        }
+        };
         
         this.frames = Math.max(src.width / this.size, src.height / this.size);
         
@@ -62,18 +62,18 @@ Tessellator.TextureAtlasAnimation = function (tessellator, src, animationRate, a
             
             if (src.width % self.size !== 0 || src.height & self.size !== 0){
                 throw "texture not uniform size";
-            }
+            };
             
             self.frames = Math.max(src.width / self.size, src.height / self.size);
             
             self.init();
         });
-    }
+    };
     
     if (!this.tessellator.shaderTextureAtlasAnimation){
         this.tessellator.shaderTextureAtlasAnimation = new Tessellator.AtlasAnimationRenderer(Tessellator.ATLAS_SHADER_ANIMATION.create(this.tessellator));
-    }
-}
+    };
+};
 
 Tessellator.copyProto(Tessellator.TextureAtlasAnimation, Tessellator.TextureModel);
 
@@ -86,7 +86,7 @@ Tessellator.TextureAtlasAnimation.prototype.init = function (){
     this.autoUpdate = false;
     
     this.super.configure(Tessellator.TEXTURE_2D);
-}
+};
 
 Tessellator.TextureAtlasAnimation.prototype.configure = function (target, matrix){
     if (this.isReady()){
@@ -96,14 +96,14 @@ Tessellator.TextureAtlasAnimation.prototype.configure = function (target, matrix
             frame = this.animation[Math.floor(this.time / this.animationRate) % this.animation.length];
         }else{
             frame = Math.floor(this.time / this.animationRate) % this.frames;
-        }
+        };
         
         if (frame !== this.frame){
             this.frame = frame;
             
             this.render(matrix);
-        }
+        };
         
         this.time++;
-    }
-}
+    };
+};

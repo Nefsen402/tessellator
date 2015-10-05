@@ -30,13 +30,13 @@
 Tessellator.TextureModel.AttachmentModel = function (model, renderer){
     this.model = model;
     this.renderer = renderer;
-}
+};
 
 Tessellator.TextureModel.AttachmentModel.prototype.configure = Tessellator.EMPTY_FUNC;
 
 Tessellator.TextureModel.AttachmentModel.prototype.setup = function (texture){
     texture.renderAttachment = this;
-}
+};
 
 Tessellator.TextureModel.AttachmentModel.prototype.render = function (texture, render){
     if (this.model){
@@ -48,20 +48,20 @@ Tessellator.TextureModel.AttachmentModel.prototype.render = function (texture, r
         
         if (render && render.dirty){
             render.dirty();
-        }
-    }
+        };
+    };
     
     return true;
-}
+};
 
 Tessellator.TextureModel.AttachmentModel.setModel = function (model){
     this.model = model;
-}
+};
 
 Tessellator.TextureModel.AttachmentModel.prototype.dispose = function (){
     if (this.model && this.model.disposable){
         this.model.dispose();
         
         this.model = null;
-    }
-}
+    };
+};

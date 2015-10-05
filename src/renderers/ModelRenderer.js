@@ -34,7 +34,7 @@ Tessellator.ModelRenderer = function (){
         if (arg.type === Tessellator.MODEL){
             if (!Tessellator.ModelRenderer.defaultShader){
                 Tessellator.ModelRenderer.defaultShader = Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_SHADER.create(arg.tessellator);
-            }
+            };
             
             this.super(Tessellator.ModelRenderer.defaultShader);
             
@@ -42,32 +42,32 @@ Tessellator.ModelRenderer = function (){
         }else if (arg.constructor === Tessellator){
             if (!Tessellator.ModelRenderer.defaultShader){
                 Tessellator.ModelRenderer.defaultShader = Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_SHADER.create(arg);
-            }
+            };
             
             this.super(Tessellator.ModelRenderer.defaultShader);
         }else{
             this.super(arg);
-        }
+        };
     }else if (arguments.length === 2){
         var arg = arguments[0];
         
         if (arg.constructor === Tessellator){
             if (!Tessellator.ModelRenderer.defaultShader){
                 Tessellator.ModelRenderer.defaultShader = Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_SHADER.create(arg);
-            }
+            };
             this.super(Tessellator.ModelRenderer.defaultShader);
         }else{
             this.super(arg);
-        }
+        };
         
         this.model = arguments[1];
     }else{
         this.super();
-    }
+    };
     
     this.noLightingTexture = new Tessellator.TextureData(this.tessellator, 1, 1, Tessellator.RGBA, Tessellator.UNSIGNED_BYTE, new Uint8Array([0, 255, 255, 255]));
     this.lightingTexture = new Tessellator.TextureData(this.tessellator, 4, 256, Tessellator.RGBA, Tessellator.FLOAT);
-}
+};
 
 Tessellator.extend(Tessellator.ModelRenderer, Tessellator.RendererAbstract);
 
@@ -86,12 +86,12 @@ Tessellator.ModelRenderer.prototype.setLighting = function (model, matrix, index
             
             if (action.applyLighting && action.applyLighting(matrix, index, this)){
                 lighting = true;
-            }
-        }
-    }
+            };
+        };
+    };
     
     return lighting;
-}
+};
 
 Tessellator.ModelRenderer.prototype.configure = function (matrix){
     this.shader.setInheriter("mvMatrix", Tessellator.Program.MV_MATRIX_UNIFY_FUNC);
@@ -103,25 +103,25 @@ Tessellator.ModelRenderer.prototype.configure = function (matrix){
     matrix.set("specular", 0);
     
     this.super.configure(matrix);
-}
+};
 
 Tessellator.ModelRenderer.prototype.init = function (matrix, model){
     model = model || this.model;
     
     if (!this.super.init(matrix, model) || !model.render){
         return false;
-    }
+    };
     
     if (this.setLighting(model)){
         this.lightingTexture.update();
-    }
+    };
     
     return true;
-}
+};
 
 Tessellator.ModelRenderer.prototype.renderRaw = function (matrix, model){
     this.renderModel(matrix, model || this.model);
-}
+};
 
 Tessellator.ModelRenderer.prototype.renderModel = function (matrix, model){
     if (model) for (var i = 0, k = model.model.length; i < k; i++){
@@ -129,6 +129,6 @@ Tessellator.ModelRenderer.prototype.renderModel = function (matrix, model){
         
         if (mod.apply){
             mod.apply(matrix, model, this);
-        }
-    }
-}
+        };
+    };
+};

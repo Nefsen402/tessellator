@@ -30,7 +30,7 @@
 Tessellator.ShaderSetDrawDependant = function (drawMode, shaders){
     if (drawMode.length !== shaders.length){
         throw "the length of the arrays does not match!";
-    }
+    };
     
     this.drawMode = drawMode;
     this.shaders = shaders;
@@ -39,32 +39,32 @@ Tessellator.ShaderSetDrawDependant = function (drawMode, shaders){
         if (this.tessellator){
             if (this.tessellator !== this.shaders[i].tessellator){
                 throw "not uniform tessellator!";
-            }
+            };
         }else{
             this.tessellator = this.shaders[i].tessellator;
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.init = function (){
     if (this.shader){
         this.shader.init();
-    }
-}
+    };
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.postInit = function (){
     if (this.shader){
         this.shader.postInit();
-    }
-}
+    };
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.hasUniform = function (key){
     if (this.shader){
         return this.shader.hasUniform(key);
     }else{
         return this.shaders[0].hasUniform(key);
-    } 
-}
+    }; 
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.set = function (matrix, render, draw){
     var drawMode = draw.drawMode;
@@ -76,42 +76,42 @@ Tessellator.ShaderSetDrawDependant.prototype.set = function (matrix, render, dra
             this.attribs = this.shader.attribs;
             
             return this.shader.set();
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.postSet = function (){
     this.shader.postSet();
-}
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.setInheriter = function (key, value){
     for (var i = 0, k = this.shaders.length; i < k; i++){
         this.shaders[i].setInheriter(key, value);
-    }
-}
+    };
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.dispose = function (key, value){
     for (var i = 0, k = this.shaders.length; i < k; i++){
         this.shaders[i].dispose();
-    }
-}
+    };
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.unify = function (matrix){
     this.shader.unify(matrix);
-}
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.preUnify = function (matrix){
     this.shader.preUnify(matrix);
-}
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.uniform = function (key, value, matrix, reason){
     this.shader.uniform(key, value, matrix, reason);
-}
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.bind = function (){
     return this.shader.bind();
-}
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.isReady = function (){
     return true;
-}
+};

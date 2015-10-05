@@ -35,27 +35,27 @@ Tessellator.RadialCamera = function (view, radX, radY, lock){
     this.radY = radY === undefined ? Tessellator.float() : (isNaN(radY) ? radY : Tessellator.float(radY)); //pitch
     
     this.lock = lock;
-}
+};
 
 Tessellator.RadialCamera.prototype.x = function (){
     return this.radX.x;
-}
+};
 
 Tessellator.RadialCamera.prototype.y = function (){
     return this.radY.x;
-}
+};
 
 Tessellator.RadialCamera.prototype.apply = function (render){
     this.view.apply(render);
     
     this.set(render.exists("mvMatrix") ? render.get("mvMatrix") : render.get("pMatrix"));
-}
+};
 
 Tessellator.RadialCamera.prototype.applyLighting = function (matrix){
     if (this.view.applyLighting) this.view.applyLighting(matrix);
     
     this.set(matrix);
-}
+};
 
 Tessellator.RadialCamera.prototype.set = function (m){
     if (this.lock){
@@ -63,16 +63,16 @@ Tessellator.RadialCamera.prototype.set = function (m){
             this.radY[0] = -Math.PI / 2 + 0.001;
         }else if (this.radY[0] > Math.PI / 2 - 0.001){
             this.radY[0] = Math.PI / 2 - 0.001;
-        }
-    }
+        };
+    };
     
     m.rotateVec(Tessellator.vec3().pitchyaw(this.radY, this.radX), Tessellator.vec3(0, 1, 0));
-}
+};
 
 Tessellator.RadialCamera.prototype.init = function (interpreter){
     this.view.init(interpreter)
-}
+};
 
 Tessellator.RadialCamera.prototype.postInit = function (interpreter){
     this.view.postInit(interpreter);
-}
+};

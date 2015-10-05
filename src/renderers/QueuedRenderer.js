@@ -29,7 +29,7 @@
 
 Tessellator.QueuedRenderer = function (){
     this.set(arguments);
-}
+};
 
 Tessellator.extend(Tessellator.QueuedRenderer, Tessellator.RendererAbstract);
 
@@ -39,53 +39,53 @@ Tessellator.QueuedRenderer.prototype.set = function (){
             this.queue = arguments[0];
         }else{
             this.queue = arguments;
-        }
+        };
     }else{
         this.queue = arguments;
-    }
+    };
     
     for (var i = 0; i < this.queue.length; i++){
         if (this.queue[i].tessellator){
             this.tessellator = this.queue[i].tessellator;
             break;
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.QueuedRenderer.prototype.add = function (){
     if (!this.queue){
         this.set(arguments);
     }else if (this.queue.constructor !== Array){
         this.queue = Array.prototype.slice.call(this.queue);
-    }
+    };
     
     if (arguments.length === 1){
         if (arguments[0].length){
             this.queue.push.apply(this.queue, arguments[0]);
         }else{
             this.queue = this.queue.push(arguments[0]);
-        }
+        };
     }else{
         this.queue.push.apply(this.queue, arguments);
-    }
-}
+    };
+};
 
 Tessellator.QueuedRenderer.prototype.setAspect = function(aspect){
     for (var i = 0; i < this.queue.length; i++){
         if (this.queue[i].setAspect){
             this.queue[i].setAspect(aspect);
-        }
-    }
+        };
+    };
     
     return this;
-}
+};
 
 Tessellator.QueuedRenderer.prototype.init = function (){
     return this.queue;
-}
+};
 
 Tessellator.QueuedRenderer.prototype.renderRaw = function (matrix, arg){
     for (var i = 0; i < this.queue.length; i++){
         this.queue[i].render(matrix.copy(this.queue[i]), arg);
-    }
-}
+    };
+};

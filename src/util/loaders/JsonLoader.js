@@ -30,11 +30,11 @@
 Tessellator.prototype.createModelFromJSON = function (json, obj){
     if (!json){
         throw "json model must be given";
-    }
+    };
     
     if (!obj){
         obj = new Tessellator.Object(this, Tessellator.TRIANGLE);
-    }
+    };
     
     obj.setAttribute("position", Tessellator.VEC3, new Tessellator.Array(json.vertexPositions), Float32Array);
     obj.setAttribute("color", Tessellator.VEC2, new Tessellator.Array(json.vertexTextureCoords), Float32Array);
@@ -49,7 +49,7 @@ Tessellator.prototype.createModelFromJSON = function (json, obj){
 Tessellator.prototype.loadJSONModel = function (url, obj){
     if (!obj){
         obj = new Tessellator.Object(this, Tessellator.TRIANGLE);
-    }
+    };
     
     var self = this;
     

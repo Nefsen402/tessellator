@@ -30,7 +30,7 @@
 Tessellator.prototype.createModelFromObj = function (text, obj){
     if (!text){
         throw "obj model must be given";
-    }
+    };
     
     var v = new Tessellator.Array();
     var vt = new Tessellator.Array();
@@ -46,14 +46,14 @@ Tessellator.prototype.createModelFromObj = function (text, obj){
     
     if (!obj){
         obj = new Tessellator.Object(this, Tessellator.TRIANGLE);
-    }
+    };
     
     do{
-        nextLine = text.indexOf("\n", ++pos)
+        nextLine = text.indexOf("\n", ++pos);
         
         if (nextLine < 0){
             nextLine = text.length;
-        }
+        };
         
         var s = text.indexOf(" ", pos);
         var type = text.substring(pos, s++).trim();
@@ -66,19 +66,19 @@ Tessellator.prototype.createModelFromObj = function (text, obj){
                     break;
                 }else{
                     oldPos = s;
-                }
+                };
                 
                 s = Math.min(nextLine, text.indexOf(" ", s));
                 
                 if (s === -1){
                     s = text.length;
-                }
+                };
                 
                 var vv = text.substring(oldPos, s).trim();
                 if (vv.length) v.push(parseFloat(vv));
                 
                 s++;
-            }
+            };
         }else if (type == "vn"){
             var oldPos = s;
             
@@ -87,19 +87,19 @@ Tessellator.prototype.createModelFromObj = function (text, obj){
                     break;
                 }else{
                     oldPos = s;
-                }
+                };
                 
                 s = Math.min(nextLine, text.indexOf(" ", s));
                 
                 if (s === -1){
                     s = text.length;
-                }
+                };
                 
                 var vv = text.substring(oldPos, s).trim();
                 if (vv.length) vn.push(parseFloat(vv));
                 
                 s++;
-            }
+            };
         }else if (type == "vt"){
             var oldPos = s;
             
@@ -108,19 +108,19 @@ Tessellator.prototype.createModelFromObj = function (text, obj){
                     break;
                 }else{
                     oldPos = s;
-                }
+                };
                 
                 s = Math.min(nextLine, text.indexOf(" ", s));
                 
                 if (s === -1){
                     s = text.length;
-                }
+                };
                 
                 var vv = text.substring(oldPos, s).trim();
                 if (vv.length) vt.push(parseFloat(vv));
                 
                 s++;
-            }
+            };
         }else if (type == "f"){
             var oldPos = s;
             
@@ -131,13 +131,13 @@ Tessellator.prototype.createModelFromObj = function (text, obj){
                     break;
                 }else{
                     oldPos = s;
-                }
+                };
                 
                 s = Math.min(nextLine, text.indexOf(" ", s));
                 
                 if (s === -1){
                     s = text.length;
-                }
+                };
                 
                 var l = text.substring(oldPos, s).split("/");
                 
@@ -156,7 +156,7 @@ Tessellator.prototype.createModelFromObj = function (text, obj){
                         
                         av.push(v.get(i1 * 3), v.get(i1 * 3 + 1), v.get(i1 * 3 + 2));
                         norm.push(vn.get(i3 * 3), vn.get(i3 * 3 + 1), vn.get(i3 * 3 + 2));
-                    }
+                    };
                 }else if (l.length === 2){
                     var i1 = parseInt(l[0]) - 1;
                     var i2 = parseInt(l[1]) - 1;
@@ -167,18 +167,18 @@ Tessellator.prototype.createModelFromObj = function (text, obj){
                     var i1 = parseInt(l[0]) - 1;
                     
                     av.push(v.get(i1 * 3), v.get(i1 * 3 + 1), v.get(i1 * 3 + 2));
-                }
+                };
                 
                 s++;
-            }
+            };
             
             if (av.length){
                 var tri = new Tessellator.Polygon(av.combine());
                 tri.convert2D();
                 obj.getIndices().push(tri.convertToTriangles(vert.length / 3));
                 vert.push(av);
-            }
-        }
+            };
+        };
     }while ((pos = nextLine) < text.length);
     
     obj.setAttribute("position", Tessellator.VEC3, vert, Float32Array);
@@ -192,7 +192,7 @@ Tessellator.prototype.createModelFromObj = function (text, obj){
 Tessellator.prototype.loadObjModel = function (url, obj){
     if (!obj){
         obj = new Tessellator.Object(this, Tessellator.TRIANGLE);
-    }
+    };
     
     var self = this;
     

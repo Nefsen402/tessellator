@@ -33,20 +33,20 @@ Tessellator.Initializer.setDefault("mask", function () {
 
 Tessellator.Model.prototype.setMask = function (){
     return this.add(new Tessellator.MaskSet(Tessellator.getColor(arguments)));
-}
+};
 
 Tessellator.MaskSet = function (color){
     this.type = Tessellator.MASK;
     
     this.mask = color;
-}
+};
 
 
 Tessellator.MaskSet.prototype.init = function (interpreter){
     if (interpreter.get("draw") === Tessellator.TEXTURE){
         if (interpreter.shape){
             throw "cannot change mask while shape is being drawn";
-        }
+        };
         
         interpreter.flush();
         
@@ -60,10 +60,10 @@ Tessellator.MaskSet.prototype.init = function (interpreter){
         ));
         
         return null;
-    }
-}
+    };
+};
 
 
 Tessellator.MaskSet.prototype.apply = function (render){
     render.set("mask", this.mask);
-}
+};

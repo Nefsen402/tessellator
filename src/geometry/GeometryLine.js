@@ -30,12 +30,12 @@
 Tessellator.Geometry.registerCustomGeometry(Tessellator.LINES, Tessellator.LINES, function (g, add, arg){
     if (arg.get("textureBounds")){
         throw "cannot bind a texture to Tessellator.LINES";
-    }
+    };
     
     if (g.indices.length){
         if (add){
             g.indices.offset(add.positions.length / 3);
-        }
+        };
     }else{
         var off = add ? add.positions.length / 3 : 0;
         var k = g.positions.length / 3;
@@ -45,6 +45,6 @@ Tessellator.Geometry.registerCustomGeometry(Tessellator.LINES, Tessellator.LINES
                 i + 0 + off,
                 i + 1 + off
             ]);
-        }
-    }
+        };
+    };
 });

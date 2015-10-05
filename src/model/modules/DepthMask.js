@@ -29,18 +29,18 @@
 
 Tessellator.Model.prototype.depthMask = function (){
     return this.add(Tessellator.new.apply(Tessellator.DepthMask, arguments));
-}
+};
 
 Tessellator.DepthMask = function (mask){
     this.type = Tessellator.BLEND_FUNC;
     
     this.mask = mask;
-}
+};
 
 Tessellator.DepthMask.prototype.init = function (init){
     init.flush();
-}
+};
 
 Tessellator.DepthMask.prototype.apply = function (render){
     render.depthMask(this.mask);
-}
+};

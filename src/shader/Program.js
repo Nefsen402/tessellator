@@ -40,12 +40,12 @@ Tessellator.Program = function (tessellator){
     this.uedits = 0;
     
     this.disposable = false;
-}
+};
 
 Tessellator.Program.prototype.link = function (shader){
     if (shader.constructor === Tessellator.ShaderPreset){
         shader = shader.create(this.tessellator);
-    }
+    };
     
     this.linked.push(shader);
     
@@ -54,7 +54,7 @@ Tessellator.Program.prototype.link = function (shader){
         
         if (res === undefined || res){
             this.tessellator.GL.attachShader(this.shader, shader.shader);
-        }
+        };
     }else{
         var self = this;
         
@@ -63,16 +63,16 @@ Tessellator.Program.prototype.link = function (shader){
         
             if (res === undefined || res){
                 self.tessellator.GL.attachShader(self.shader, shader.shader);
-            }
+            };
             
             if (self.listener){
                 self.listener(shader);
-            }
-        }
-    }
+            };
+        };
+    };
     
     return this;
-}
+};
 
 Tessellator.Program.prototype.load = function (){
     var ready = true;
@@ -81,8 +81,8 @@ Tessellator.Program.prototype.load = function (){
         if (!this.linked[i].isReady()){
             ready = false;
             break;
-        }
-    }
+        };
+    };
     
     if (!ready){
         var self = this;
@@ -93,7 +93,7 @@ Tessellator.Program.prototype.load = function (){
         
         for (var i = 0; i < this.linked.length; i++){
             this.linked[i].onProgramLoad(this);
-        }
+        };
         
         gl.linkProgram(this.shader);
         
@@ -101,7 +101,7 @@ Tessellator.Program.prototype.load = function (){
             var error = gl.getProgramInfoLog(this.shader);
             
             throw "unable to load shader program: " + error;
-        }
+        };
         
         {
             var attribs = gl.getProgramParameter(this.shader, gl.ACTIVE_ATTRIBUTES);
@@ -112,8 +112,8 @@ Tessellator.Program.prototype.load = function (){
                 var attrib = gl.getActiveAttrib(this.shader, i);
                 
                 this.attribs[attrib.name] = i;
-            }
-        }
+            };
+        };
         
         {
             var uniforms = gl.getProgramParameter(this.shader, gl.ACTIVE_UNIFORMS);
@@ -132,7 +132,7 @@ Tessellator.Program.prototype.load = function (){
                     this.uniformSpace += uniform.size * 2;
                 }else{
                     this.uniformSpace += uniform.size;
-                }
+                };
                 
                 var name;
                 
@@ -140,9 +140,9 @@ Tessellator.Program.prototype.load = function (){
                     name = uniform.name.substring(0, uniform.name.length - 3);
                 }else{
                     name = uniform.name;
-                }
+                };
                 
-                var inherit = Tessellator.Program.DEFAULT_UNIFORM_INHERITER[this.tessellator.tessConst(uniform.type)]
+                var inherit = Tessellator.Program.DEFAULT_UNIFORM_INHERITER[this.tessellator.tessConst(uniform.type)];
                 
                 this.uniforms[name] = {
                     tessellator: this.tessellator,
@@ -160,30 +160,30 @@ Tessellator.Program.prototype.load = function (){
                     edits: 0,
                 };
                 
-            }
+            };
             
             if (this.uniformSpace > this.tessellator.maxUniformSpace){
                 console.error("The amount of uniforms exceeded the maximum! There may be problems!");
-            }
-        }
+            };
+        };
         
         this.setReady();
-    }
+    };
     
     return this;
-}
+};
 
 Tessellator.Program.prototype.setReady = function (){
     this.ready = true;
-}
+};
 
 Tessellator.Program.prototype.isReady = function (){
     return this.ready;
-}
+};
 
 Tessellator.Program.prototype.hasUniform = function (key){
     return key in this.uniforms;
-}
+};
 
 Tessellator.Program.prototype.uniform = function (key, value, matrix, reason){
     var u = this.uniforms[key];
@@ -192,8 +192,8 @@ Tessellator.Program.prototype.uniform = function (key, value, matrix, reason){
         u.configure(value, matrix, reason);
         u.initialValue = false;
         u.edits++;
-    }
-}
+    };
+};
 
 Tessellator.Program.prototype.preUnify = function (matrix){
     for (var o in this.uniforms){
@@ -201,9 +201,9 @@ Tessellator.Program.prototype.preUnify = function (matrix){
         
         if (u.startMap){
             u.startMap(matrix, matrix.gets(o));
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.Program.prototype.unify = function (matrix){
     for (var o in this.uniforms){
@@ -211,21 +211,21 @@ Tessellator.Program.prototype.unify = function (matrix){
         
         if (u.map){
             u.map(matrix);
-        }
+        };
         
         if (!u.initialValue && u.inherit && u.edits !== u.lastUnify){
             u.inherit(matrix);
             
             u.lastUnify = u.edits;
             this.uedits++;
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.Program.prototype.setInheriter = function (key, value){
     if (!value.configure){
         value.configure = Tessellator.Program.DEFAULT_CONFIG;
-    }
+    };
     
     var u = this.uniforms[key];
     
@@ -237,7 +237,7 @@ Tessellator.Program.prototype.setInheriter = function (key, value){
         
         if (u.edits === undefined){
             u.edits = 0;
-        }
+        };
     }else{
         u = {
             configure: value.configure,
@@ -246,22 +246,22 @@ Tessellator.Program.prototype.setInheriter = function (key, value){
         };
         
         this.uniforms[key] = u;
-    }
+    };
     
     return this;
-}
+};
 
 Tessellator.Program.prototype.dispose = function (){
     for (var i = 0; i < this.linked.length; i++){
         if (this.linked[i].disposable){
             this.linked[i].dispose();
-        }
-    }
+        };
+    };
     
     this.tessellator.GL.deleteProgram(this.shader);
     
     return this;
-}
+};
 
 Tessellator.Program.prototype.bind = function (){
     if (this.tessellator.shader !== this){
@@ -270,13 +270,13 @@ Tessellator.Program.prototype.bind = function (){
         this.tessellator.GL.useProgram(this.shader);
         
         return true;
-    }
+    };
     
     return false;
-}
+};
 
 Tessellator.Program.prototype.set = function (){
     return this.isReady();
-}
+};
 
-Tessellator.Program.prototype.postSet = function (){}
+Tessellator.Program.prototype.postSet = function (){};

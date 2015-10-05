@@ -34,7 +34,7 @@ Tessellator.AtlasAnimationRenderer = function (shader){
     
     this.object.setAttribute("textureCoord", Tessellator.VEC2, this.buffer, Float32Array, false, Tessellator.DYNAMIC);
     this.object.upload();
-}
+};
 
 Tessellator.copyProto(Tessellator.AtlasAnimationRenderer, Tessellator.FullScreenRenderer);
 
@@ -66,7 +66,7 @@ Tessellator.AtlasAnimationRenderer.prototype.renderRaw = function (render, textu
         this.buffer.set(2, frame / frames);
         this.buffer.set(4, (frame + 1) / frames);
         this.buffer.set(6, (frame + 1) / frames);
-    }
+    };
     
     this.object.setAttributeData("textureCoord", this.buffer);
     
@@ -74,4 +74,4 @@ Tessellator.AtlasAnimationRenderer.prototype.renderRaw = function (render, textu
     render.disable(gl.DEPTH_TEST);
     
     this.object.render(render);
-}
+};

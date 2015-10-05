@@ -33,14 +33,14 @@ Tessellator.Initializer.setDefault("lineWidth", function () {
 
 Tessellator.Model.prototype.setLineWidth = function (width){
     return this.add (new Tessellator.LineWidth(width));
-}
+};
 
 Tessellator.LineWidth = function (lineWidth){
     this.type = Tessellator.LINE_WIDTH;
     
     this.lineWidth = lineWidth;
-}
+};
 
 Tessellator.LineWidth.prototype.apply = function (render){
     render.lineWidth(this.lineWidth);
-}
+};

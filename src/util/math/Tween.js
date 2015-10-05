@@ -35,11 +35,11 @@ Tessellator.Tween = function (vec){
     this.loopDirectives = false;
     
     this.updated = false;
-}
+};
 
 Tessellator.Tween.prototype.getVec = function (){
     return this.vec;
-}
+};
 
 Tessellator.Tween.prototype.cancel = function (){
     if (!this.updating){
@@ -48,8 +48,8 @@ Tessellator.Tween.prototype.cancel = function (){
         this.directives = [];
         
         this.loopDirectives = false;
-    }
-}
+    };
+};
 
 Tessellator.Tween.prototype.add = function (e){
     this.directives.push(e);
@@ -57,14 +57,14 @@ Tessellator.Tween.prototype.add = function (e){
     if (this.directives.length === 1){
         this.directiveStartTime = Date.now();
         this.ovec = this.vec.clone();
-    }
-}
+    };
+};
 
 Tessellator.Tween.prototype.loop = function (flag){
     this.loopDirectives = flag === undefined ? true : flag;
     
     return this;
-}
+};
 
 Tessellator.Tween.prototype.update = function (){
     if (!this.updating && this.time != this.updated && this.ovec){
@@ -82,33 +82,33 @@ Tessellator.Tween.prototype.update = function (){
                 
                 if (this.loopDirectives){
                     this.add(e);
-                }
+                };
                 
                 if (this.directives.length){
                     this.ovec = this.vec.clone();
                     this.directiveStartTime = time - st;
-                }
+                };
             }else{
                 break;
-            }
-        }
+            };
+        };
         
         this.updating = false;
-    }
-}
+    };
+};
 
 Tessellator.Tween.prototype.dir = function (vec, time){
     time = Tessellator.float.forValue(time || 0);
     
     if (!isNaN(vec)){
         vec = Tessellator.float(vec);
-    }
+    };
     
     if (time <= 0){
         this.add(function (tween, t){
             for (var i = 0; i < tween.vec.length; i++){
                 tween.vec[i] = tween.ovec[i] + t * vec[i];
-            }
+            };
             
             return -1;
         });
@@ -116,39 +116,39 @@ Tessellator.Tween.prototype.dir = function (vec, time){
         this.add(function (tween, t){
             for (var i = 0; i < tween.vec.length; i++){
                 tween.vec[i] = tween.ovec[i] + Math.min(t / time, 1) * vec[i];
-            }
+            };
             
             return t - time;
         });
-    }
+    };
     
     return this;
-}
+};
 
 Tessellator.Tween.prototype.to = function (pos, rate){
     rate = Tessellator.float.forValue(rate || 0);
     
     if (!isNaN(pos)){
         pos = Tessellator.float(pos);
-    }
+    };
     
     this.add(function (tween, t){
         var vec = pos.clone().subtract(tween.ovec).divide(rate);
         
         for (var i = 0; i < tween.vec.length; i++){
             tween.vec[i] = tween.ovec[i] + Math.min(t, rate) * vec[i];
-        }
+        };
         
         return t - rate;
     });
     
     return this;
-}
+};
 
 Tessellator.Tween.prototype.set = function (pos){
     if (!isNaN(pos)){
         pos = Tessellator.float(pos);
-    }
+    };
     
     this.add(function (tween){
         tween.vec.set(pos);
@@ -157,7 +157,7 @@ Tessellator.Tween.prototype.set = function (pos){
     });
     
     return this;
-}
+};
 
 Tessellator.Tween.prototype.delay = function (time){
     this.add(function (tween, t){
@@ -165,24 +165,24 @@ Tessellator.Tween.prototype.delay = function (time){
     });
     
     return this;
-}
+};
 
 Tessellator.Tween.prototype.sin = function (amp, frq, time){
     time = Tessellator.float.forValue(time || 0);
     
     if (!isNaN(amp)){
         amp = Tessellator.float(amp);
-    }
+    };
     
     if (!isNaN(frq)){
         frq = Tessellator.float(frq);
-    }
+    };
     
     if (time <= 0){
         this.add(function (tween, t){
             for (var i = 0; i < tween.vec.length; i++){
                 tween.vec[i] = tween.ovec[i] + Math.sin(t / 1000 * frq[0] * Math.PI * 2) * amp[i];
-            }
+            };
             
             return -1;
         });
@@ -190,31 +190,31 @@ Tessellator.Tween.prototype.sin = function (amp, frq, time){
         this.add(function (tween, t){
             for (var i = 0; i < tween.vec.length; i++){
                 tween.vec[i] = tween.ovec[i] + Math.sin(Math.min(t, time) / 1000 * frq[0] * Math.PI * 2) * amp[i];
-            }
+            };
             
             return t - time;
         });
-    }
+    };
     
     return this;
-}
+};
 
 Tessellator.Tween.prototype.cos = function (amp, frq, time){
     time = Tessellator.float.forValue(time || 0);
     
     if (!isNaN(amp)){
         amp = Tessellator.float(amp);
-    }
+    };
     
     if (!isNaN(frq)){
         frq = Tessellator.float(frq);
-    }
+    };
     
     if (time <= 0){
         this.add(function (tween, t){
             for (var i = 0; i < tween.vec.length; i++){
                 tween.vec[i] = tween.ovec[i] + Math.cos(t / 1000 * frq[0] * Math.PI * 2) * amp[i];
-            }
+            };
             
             return -1;
         });
@@ -222,25 +222,25 @@ Tessellator.Tween.prototype.cos = function (amp, frq, time){
         this.add(function (tween, t){
             for (var i = 0; i < tween.vec.length; i++){
                 tween.vec[i] = tween.ovec[i] + Math.cos(Math.min(t, time) / 1000 * frq[0] * Math.PI * 2) * amp[i];
-            }
+            };
             
             return t - time;
         });
-    }
+    };
     
     return this;
-}
+};
 
 Tessellator.Tween.prototype.rad = function (start, cycles, rsin, rcos, time){
     time = Tessellator.float.forValue(time || 0);
     
     if (!isNaN(start)){
         start = Tessellator.float(start);
-    }
+    };
     
     if (!isNaN(cycles)){
         cycles = Tessellator.float(cycles);
-    }
+    };
     
     if (time <= 0){
         this.add(function (tween, t){
@@ -248,7 +248,7 @@ Tessellator.Tween.prototype.rad = function (start, cycles, rsin, rcos, time){
                 tween.vec[i] = tween.ovec[i] + 
                     Math.sin(t / 1000 * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rsin[i] +
                     Math.cos(t / 1000 * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rcos[i];
-            }
+            };
             
             return -1;
         });
@@ -258,14 +258,14 @@ Tessellator.Tween.prototype.rad = function (start, cycles, rsin, rcos, time){
                 tween.vec[i] = tween.ovec[i] + 
                     Math.sin(Math.min(t / time, 1) * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rsin[i] +
                     Math.cos(Math.min(t / time, 1) * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rcos[i];
-            }
+            };
             
             return t - time;
         });
-    }
+    };
     
     return this;
-}
+};
 
 Tessellator.Tween.prototype.addAll = function (){
     var vecs = Array.prototype.slice.call(arguments);
@@ -273,31 +273,31 @@ Tessellator.Tween.prototype.addAll = function (){
     for (var i = 0; i < vecs.length; i++){
         if (!isNaN(vecs[i])){
             vecs[i] = Tessellator.float(vecs[i]);
-        }
-    }
+        };
+    };
     
     this.add(function (tween){
         for (var i = 0; i < vecs.length; i++){
             if (vecs[i].tween){
                 vecs[i].tween.update();
-            }
-        }
+            };
+        };
         
         for (var i = 0; i < tween.vec.length; i++){
             var x = tween.ovec[i];
             
             for (var ii = 0; ii < vecs.length; ii++){
                 x += vecs[ii][i];
-            }
+            };
             
             tween.vec[i] = x;
-        }
+        };
         
         return -1;
     });
     
     return this;
-}
+};
 
 Tessellator.Tween.prototype.multiplyAll = function (){
     var vecs = Array.prototype.slice.call(arguments);
@@ -305,31 +305,31 @@ Tessellator.Tween.prototype.multiplyAll = function (){
     for (var i = 0; i < vecs.length; i++){
         if (!isNaN(vecs[i])){
             vecs[i] = Tessellator.float(vecs[i]);
-        }
-    }
+        };
+    };
     
     this.add(function (tween){
         for (var i = 0; i < vecs.length; i++){
             if (vecs[i].tween){
                 vecs[i].tween.update();
-            }
-        }
+            };
+        };
         
         for (var i = 0; i < tween.vec.length; i++){
             var x = tween.ovec[i];
             
             for (var ii = 0; ii < vecs.length; ii++){
                 x *= vecs[ii][i];
-            }
+            };
             
             tween.vec[i] = x;
-        }
+        };
         
         return -1;
     });
     
     return this;
-}
+};
 
 Tessellator.Tween.prototype.divideAll = function (){
     var vecs = Array.prototype.slice.call(arguments);
@@ -337,31 +337,31 @@ Tessellator.Tween.prototype.divideAll = function (){
     for (var i = 0; i < vecs.length; i++){
         if (!isNaN(vecs[i])){
             vecs[i] = Tessellator.float(vecs[i]);
-        }
-    }
+        };
+    };
     
     this.add(function (tween){
         for (var i = 0; i < vecs.length; i++){
             if (vecs[i].tween){
                 vecs[i].tween.update();
-            }
-        }
+            };
+        };
         
         for (var i = 0; i < tween.vec.length; i++){
             var x = tween.ovec[i];
             
             for (var ii = 0; ii < vecs.length; ii++){
                 x /= vecs[ii][i];
-            }
+            };
             
             tween.vec[i] = x;
-        }
+        };
         
         return -1;
     });
     
     return this;
-}
+};
 
 Tessellator.Tween.prototype.subtractAll = function (){
     var vecs = Array.prototype.slice.call(arguments);
@@ -369,28 +369,28 @@ Tessellator.Tween.prototype.subtractAll = function (){
     for (var i = 0; i < vecs.length; i++){
         if (!isNaN(vecs[i])){
             vecs[i] = Tessellator.float(vecs[i]);
-        }
-    }
+        };
+    };
     
     this.add(function (tween){
         for (var i = 0; i < vecs.length; i++){
             if (vecs[i].tween){
                 vecs[i].tween.update();
-            }
-        }
+            };
+        };
         
         for (var i = 0; i < tween.vec.length; i++){
             var x = tween.ovec[i];
             
             for (var ii = 0; ii < vecs.length; ii++){
                 x -= vecs[ii][i];
-            }
+            };
             
             tween.vec[i] = x;
-        }
+        };
         
         return -1;
     });
     
     return this;
-}
+};

@@ -29,51 +29,51 @@
 
 Tessellator.prototype.createTextureDrawable = function (width, height, fliter){
     return new Tessellator.TextureDrawable(this, width, height, fliter)
-}
+};
 
 Tessellator.TextureDrawable = function (tessellator, width, height, filter){
     this.super(tessellator, width, height, Tessellator.RGB, Tessellator.UNSIGNED_BYTE, null, filter);
     
     this.color = Tessellator.vec3(255);
-}
+};
 
 Tessellator.copyProto(Tessellator.TextureDrawable, Tessellator.TextureData);
 
 Tessellator.TextureDrawable.prototype.draw = function (arr, x, y, w, h){
     for (var yy = 0; yy < h; yy++){
         this.data.set(arr.subarray((h - yy - 1) * w * 3, (h - yy) * w * 3), ((this.height - (yy + y) - 1) * this.width + x) * 3);
-    }
+    };
     
     this.update();
-}
+};
 
 Tessellator.TextureDrawable.prototype.setColor = function (){
     this.color = Tessellator.getColor(arguments).multiply(255).xyz;
-}
+};
 
 Tessellator.TextureDrawable.prototype.setPixel = function (x, y){
     if (x >= 0 && y >= 0 && x < this.width && y < this.height){
         this.data.set(this.color, ((this.height - y - 1) * this.width + x) * 3);
         
         this.update();
-    }
-}
+    };
+};
 
 Tessellator.TextureDrawable.prototype.getPixel = function (x, y){
     if (x >= 0 && y >= 0 && x < this.width && y < this.height){
         var s = ((this.height - y - 1) * this.width + x) * 3;
         
         return this.data.subarray(s, s + 3);
-    }
-}
+    };
+};
 
 Tessellator.TextureDrawable.prototype.fillRect = function (x, y, w, h){
     for (var xx = x; xx < x + w; xx++){
         for (var yy = y; yy < y + h; yy++){
             this.setPixel(xx, yy);
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.TextureDrawable.prototype.fillOval = function (x, y, w, h){
     for (var xx = x; xx < x + w; xx++){
@@ -83,17 +83,17 @@ Tessellator.TextureDrawable.prototype.fillOval = function (x, y, w, h){
             
             if (Math.sqrt(xxx * xxx + yyy * yyy) < 1){
                 this.setPixel(xx, yy);
-            }
-        }
-    }
-}
+            };
+        };
+    };
+};
 
 Tessellator.TextureDrawable.prototype.drawRect = function (x, y, w, h){
     this.drawLine(x, y, x + w, y);
     this.drawLine(x, y, x, y + h);
     this.drawLine(x + w, y, x + w, y + h);
     this.drawLine(x, y + h, x + w, y + h);
-}
+};
 
 //TODO OPTIMIZATIONS
 Tessellator.TextureDrawable.prototype.drawOval = function (x, y, w, h){
@@ -102,20 +102,19 @@ Tessellator.TextureDrawable.prototype.drawOval = function (x, y, w, h){
         var yyy = (yy - y) / h * 2 - 1;
         
         return Math.sqrt(xxx * xxx + yyy * yyy) < 1;
-    }
+    };
     
     for (var xx = x; xx < x + w; xx++){
         for (var yy = y; yy < y + h; yy++){
             if (dude(xx, yy) && (!dude(xx - 1, yy) || !dude(xx + 1, yy) || !dude(xx, yy - 1) || !dude(xx, yy + 1))){
                 this.setPixel(xx, yy);
-            }
-        }
-    }
-}
+            };
+        };
+    };
+};
 
 Tessellator.TextureDrawable.prototype.drawLine = function (x0, y0, x1, y1){
-    var
-        dx = x1 - x0,
+    var dx = x1 - x0,
         dy = y1 - y0;
     
     if (dx === 0){
@@ -123,11 +122,11 @@ Tessellator.TextureDrawable.prototype.drawLine = function (x0, y0, x1, y1){
             dy = -dy;
             y1 = y0;
             y0 = y1 - dy;
-        }
+        };
         
         for (var y = y0; y <= y1; y++){
             this.setPixel(x0, y);
-        }
+        };
     }else{
         if (dx < 0){
             dx = -dx;
@@ -137,10 +136,9 @@ Tessellator.TextureDrawable.prototype.drawLine = function (x0, y0, x1, y1){
             dy = -dy;
             y1 = y0;
             y0 = y1 - dy;
-        }
+        };
         
-        var
-            e = 0,
+        var e = 0,
             de = Math.abs(dy / dx),
             y = y0;
         
@@ -153,7 +151,7 @@ Tessellator.TextureDrawable.prototype.drawLine = function (x0, y0, x1, y1){
                 this.setPixel(x, y);
                 y += y1 - y0 > 0 ? 1 : -1;
                 e -= 1;
-            }
-        }
-    }
-}
+            };
+        };
+    };
+};

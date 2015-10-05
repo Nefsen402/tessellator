@@ -35,10 +35,10 @@ Tessellator.RendererAbstract = function (shader){
     }else{
         this.tessellator = shader.tessellator;
         this.shader = shader;
-    }
+    };
     
     this.startTime = Date.now();
-}
+};
 
 Tessellator.RendererAbstract.prototype.setShader = function (shader){
     if (!this.tessellator || shader.tessellator === this.tessellator){
@@ -46,10 +46,10 @@ Tessellator.RendererAbstract.prototype.setShader = function (shader){
         this.shader = shader;
     }else{
         throw "incompatible shader";
-    }
+    };
     
     return this;
-}
+};
 
 Tessellator.RendererAbstract.prototype.render = function (matrix, arg){
     if (!matrix){
@@ -58,18 +58,18 @@ Tessellator.RendererAbstract.prototype.render = function (matrix, arg){
         this.postRender();
     }else if (this.init(matrix, arg)){
         this.renderRaw(matrix, arg);
-    }
-}
+    };
+};
 
 Tessellator.RendererAbstract.prototype.setUniformSetter = function (setter){
     this.uniformSetter = setter;
     
     return this;
-}
+};
 
 Tessellator.RendererAbstract.prototype.init = function (){
     return this.shader;
-}
+};
 
 Tessellator.RendererAbstract.prototype.configure = function (matrix){
     if (this.shader){
@@ -80,18 +80,18 @@ Tessellator.RendererAbstract.prototype.configure = function (matrix){
         
         if (this.uniformSetter){
             this.uniformSetter(matrix);
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.RendererAbstract.prototype.preRender = function (){
     this.tessellator.preRender();
-}
+};
 
 Tessellator.RendererAbstract.prototype.postRender = function (){
     this.tessellator.postRender();
-}
+};
 
 Tessellator.RendererAbstract.prototype.renderRaw = function (){
     throw "abstract function not extended";
-}
+};

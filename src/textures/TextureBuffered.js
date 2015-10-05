@@ -29,7 +29,7 @@
 
 Tessellator.prototype.createTextureBuffered = function (){
     return Tessellator.new.apply(Tessellator.TextureBuffered, [this].concat(Array.prototype.slice.call(arguments)));
-}
+};
 
 Tessellator.TextureBuffered = function (){
     this.tessellator = arguments[0];
@@ -47,7 +47,7 @@ Tessellator.TextureBuffered = function (){
             });
         }else{
             this.init();
-        }
+        };
     }else if (arguments.length === 3){
         var scale = arguments[2];
         
@@ -65,11 +65,11 @@ Tessellator.TextureBuffered = function (){
             this.height = this.parentTexture.height * scale;
             
             this.init();
-        }
+        };
     }else{
         throw "invalid arguments in Tessellator.CompressedTexture";
-    }
-}
+    };
+};
 
 Tessellator.extend(Tessellator.TextureBuffered, Tessellator.TextureModel);
 
@@ -80,4 +80,4 @@ Tessellator.TextureBuffered.prototype.init = function (){
         new Tessellator.TextureModel.AttachmentColor(this.filter),
         new Tessellator.TextureModel.AttachmentRenderer(this.renderer, this.parentTexture),
     ]);
-}
+};

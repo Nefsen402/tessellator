@@ -29,7 +29,7 @@
 
 Tessellator.Model.prototype.blendFunc = function (){
     return this.add(Tessellator.new.apply(Tessellator.BlendFunc, arguments));
-}
+};
 
 Tessellator.BlendFunc = function (){
     this.type = Tessellator.BLEND_FUNC;
@@ -38,15 +38,15 @@ Tessellator.BlendFunc = function (){
         this.func = arguments[0];
     }else{
         this.func = Tessellator.vec2(arguments);
-    }
-}
+    };
+};
 
 Tessellator.BlendFunc.prototype.init = function (init){
     init.flush();
-}
+};
 
 Tessellator.BlendFunc.prototype.postInit = Tessellator.EMPTY_FUNC;
 
 Tessellator.BlendFunc.prototype.apply = function (render){
     render.blendFunc(this.func);
-}
+};

@@ -42,13 +42,13 @@ Tessellator.float = function (){
                 array[0] = arg[0];
             }else{
                 throw "too much information";
-            }
+            };
         }else{
             array[0] = arg;
-        }
+        };
     }else{
         throw "too much information";
-    }
+    };
     
     array.__proto__ = Tessellator.float.prototype;
     
@@ -59,16 +59,16 @@ Tessellator.float.forValue = function (value){
     if (value.length){
         if (value.tween){
             value.tween.update();
-        }
+        };
         
         if (value.length === 1){
             return value[0];
         }else{
             return value;
-        }
+        };
     }else{
         return value;
-    }
+    };
 };
 
 Tessellator.float.prototype = Object.create(Float32Array.prototype);
@@ -284,7 +284,7 @@ Tessellator.float.prototype.random = function (scale){
         scale = 1;
     }else{
         scale = Tessellator.float.forValue(scale);
-    }
+    };
     
     this[0] = (Math.random() * 2 - 1) * scale;
     
@@ -312,7 +312,7 @@ if (Object.defineProperty) (function (){
             
             for (var i = 0; i < k; i++){
                 v[i] = vec[0];
-            }
+            };
             
             if (k === 2){
                 v.__proto__ = Tessellator.vec2.prototype;
@@ -320,11 +320,11 @@ if (Object.defineProperty) (function (){
                 v.__proto__ = Tessellator.vec3.prototype;
             }else if (k === 4){
                 v.__proto__ = Tessellator.vec4.prototype;
-            }
+            };
             
             return v;
-        }
-    }
+        };
+    };
     
     var setSwizzle = function (vec, s, v){
         if (vec.tween) vec.tween.cancel();
@@ -335,8 +335,8 @@ if (Object.defineProperty) (function (){
             vec[0] = v[v.length - 1];
         }else{
             vec[0] = v;
-        }
-    }
+        };
+    };
     
     Object.defineProperty(Tessellator.float.prototype,    "x", {get: function (){return getSwizzle(this,    "x");},set: function (v){setSwizzle(this,    "x", v);}});
     Object.defineProperty(Tessellator.float.prototype,   "xx", {get: function (){return getSwizzle(this,   "xx");},set: function (v){setSwizzle(this,   "xx", v);}});

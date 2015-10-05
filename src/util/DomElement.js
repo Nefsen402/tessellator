@@ -29,7 +29,7 @@
 
 if (document.registerElement){
     document.registerElement("tessellator-webgl");
-}
+};
 
 window.addEventListener("load", function () {
     var elems = Array.prototype.slice.call(document.getElementsByTagName("tessellator-webgl"));
@@ -44,12 +44,12 @@ window.addEventListener("load", function () {
             if (elem.getAttribute("args")){
                 context = "{" + elem.getAttribute("args").replace(/'/g, '"') + "}";
                 context = JSON.parse(context);
-            }
+            };
             
             if (!canvas.style.width && !canvas.style.height){
                 canvas.style.width = "100%";
                 canvas.style.height = "100%";
-            }
+            };
             
             {
                 var styleStr = elem.getAttribute("style");
@@ -62,10 +62,10 @@ window.addEventListener("load", function () {
                         
                         if (index > 0){
                             canvas.style[styleStr[ii].substring(0, index)] = styleStr[ii].substring(index + 1);
-                        }
-                    }
-                }
-            }
+                        };
+                    };
+                };
+            };
             
             var js = ["(function (tessellator){"];
             
@@ -85,8 +85,8 @@ window.addEventListener("load", function () {
                         return;
                     }else{
                         canvas.appendChild(node);
-                    }
-                }
+                    };
+                };
                 
                 js.push("})(window.WILDCARD_TESSELLATOR_OBJ);");
                 elem.parentNode.replaceChild(canvas, elem);
@@ -94,9 +94,9 @@ window.addEventListener("load", function () {
                 window.WILDCARD_TESSELLATOR_OBJ = new Tessellator(canvas, context);
                 window.eval(js.join(""));
                 delete window.WILDCARD_TESSELLATOR_OBJ;
-            }
+            };
             
             loader();
         })(elems.shift());
-    }
+    };
 });

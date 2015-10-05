@@ -34,22 +34,22 @@ Tessellator.Model.prototype.createFragment = function (){
         model = this.matrixStack[this.matrixStack.length - 1];
     }else{
         model = this;
-    }
+    };
     
     return this.add(new Tessellator.Model.Fragment(model));
-}
+};
 
 Tessellator.Model.Fragment = function (model){
     this.super(model.tessellator, model.renderer);
     
     this.parent = model;
     this.type = Tessellator.MODEL_FRAGMENT;
-}
+};
 
 Tessellator.copyProto(Tessellator.Model.Fragment, Tessellator.Model);
 
 Tessellator.Model.Fragment.prototype.apply = function (matrix, mod, renderer){
     if (this.render){
         renderer.renderModel(matrix, this);
-    }
-}
+    };
+};

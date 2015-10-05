@@ -34,13 +34,12 @@ Tessellator.DirectionalLightingShadowMapRenderer = function (shader, x, y, z, li
     this.y = y;
     this.z = z;
     this.light = light;
-}
+};
 
 Tessellator.extend(Tessellator.DirectionalLightingShadowMapRenderer, Tessellator.ModelRenderer);
 
 Tessellator.DirectionalLightingShadowMapRenderer.prototype.renderRaw = function (matrix, obj){
-    var
-        dx = 1 / (this.x * -2),
+    var dx = 1 / (this.x * -2),
         dy = 1 / (this.y * -2),
         dz = 1 / (this.z / 10 - this.z * 2);
     
@@ -57,4 +56,4 @@ Tessellator.DirectionalLightingShadowMapRenderer.prototype.renderRaw = function 
     //console.log(mvmat);
     
     this.super.renderRaw(matrix, obj);
-}
+};

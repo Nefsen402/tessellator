@@ -32,8 +32,8 @@ Tessellator.Model.prototype.translate = function(){
         return this.add(arguments[0]);
     }else{
         return this.add(Tessellator.new.apply(Tessellator.Translate, arguments));
-    }
-}
+    };
+};
 
 Tessellator.Translate = function (){
     this.type = Tessellator.TRANSLATE;
@@ -45,30 +45,30 @@ Tessellator.Translate = function (){
             this.pos = Tessellator.vec3(arguments[0], arguments[0], arguments[0]);
         }else{
             this.pos = arguments[0];
-        }
+        };
     }else if (arguments.length === 2){
         this.pos = Tessellator.vec3(arguments[0], arguments[1], 0);
     }else if (arguments.length === 3){
         this.pos = Tessellator.vec3(arguments[0], arguments[1], arguments[2]);
     }else{
         throw "invalid arguments in Tessellator.Translate()";
-    }
-}
+    };
+};
 
 Tessellator.Translate.prototype.apply = function (render){
     var m = render.get("mvMatrix");
     
     this.set(m);
-}
+};
 
 Tessellator.Translate.prototype.applyLighting = function (matrix){
     this.set(matrix);
-}
+};
 
 Tessellator.Translate.prototype.set = function (m){
     m.translate(this.pos);
-}
+};
 
 Tessellator.Translate.prototype.init = function (interpreter){
     interpreter.flush();
-}
+};

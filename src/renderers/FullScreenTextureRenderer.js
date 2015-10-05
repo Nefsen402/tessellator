@@ -32,8 +32,8 @@ Tessellator.FullScreenTextureRenderer = function (shader){
     
     if (arguments.length > 1){
         this.textures = Array.prototype.slice.call(arguments, 1, arguments.length);
-    }
-}
+    };
+};
 
 Tessellator.copyProto(Tessellator.FullScreenTextureRenderer, Tessellator.FullScreenRenderer);
 
@@ -41,19 +41,19 @@ Tessellator.FullScreenTextureRenderer.prototype.setTextures = function (textures
     this.textures = textures;
     
     return this;
-}
+};
 
 Tessellator.FullScreenTextureRenderer.prototype.setResolutionScale = function (res){
     if (isNaN(res)){
         this.res = res;
     }else{
         this.res = Tessellator.vec2(res);
-    }
-}
+    };
+};
 
 Tessellator.FullScreenTextureRenderer.prototype.setRenderer = function (renderer){
     this.rendererAttachment.renderer = renderer;
-}
+};
 
 Tessellator.FullScreenTextureRenderer.prototype.renderRaw = function (render, arg){
     var textures = this.textures;
@@ -63,8 +63,8 @@ Tessellator.FullScreenTextureRenderer.prototype.renderRaw = function (render, ar
             textures = arg;
         }else{
             textures = [ arg ];
-        }
-    }
+        };
+    };
     
     if (textures){
         for (var i = 0; i < textures.length; i++){
@@ -72,9 +72,9 @@ Tessellator.FullScreenTextureRenderer.prototype.renderRaw = function (render, ar
                 render.set("sampler", textures[0]);
             }else{
                 render.set("sampler" + (i + 1).toString(), textures[i]);
-            }
-        }
+            };
+        };
         
         this.super.renderRaw(render, arg);
-    }
-}
+    };
+};

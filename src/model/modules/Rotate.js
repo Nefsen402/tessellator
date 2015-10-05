@@ -32,8 +32,8 @@ Tessellator.Model.prototype.rotate = function (){
         return this.add(arguments[0]);
     }else{
         return this.add(Tessellator.new.apply(Tessellator.Rotate, arguments));
-    }
-}
+    };
+};
 
 Tessellator.Model.prototype.rotateDeg = function (){
     var rotate;
@@ -44,10 +44,10 @@ Tessellator.Model.prototype.rotateDeg = function (){
         arguments[0] *= Math.PI / 180;
         
         return this.add(Tessellator.new.apply(Tessellator.Rotate, arguments));
-    }
+    };
     
     return this.add(rotate);
-}
+};
 
 Tessellator.Rotate = function (){
     this.type = Tessellator.ROTATE;
@@ -70,28 +70,28 @@ Tessellator.Rotate = function (){
         this.vec = Tessellator.vec3(arguments[1], arguments[2], arguments[3]);
     }else{
         throw "invalid arguments in Tessellator.rotate()";
-    }
+    };
     
     if (!this.degree.length){
         this.degree = Tessellator.float(this.degree);
-    }
-}
+    };
+};
 
 Tessellator.Rotate.prototype.apply = function (render){
     var m = render.get("mvMatrix");
     
     this.set(m);
-}
+};
 
 Tessellator.Rotate.prototype.applyLighting = function (matrix){
     this.set(matrix);
-}
+};
 
 Tessellator.Rotate.prototype.set = function (m){
     m.rotate(this.degree, this.vec);
-}
+};
 
 
 Tessellator.Rotate.prototype.init = function (interpreter){
     interpreter.flush();
-}
+};

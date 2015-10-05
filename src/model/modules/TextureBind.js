@@ -29,29 +29,29 @@
 
 Tessellator.Model.prototype.bindTexture = function (texture){
     return this.add(new Tessellator.TextureBind(texture));
-}
+};
 
 Tessellator.TextureBind = function (texture){
     this.type = Tessellator.TEXTURE;
     this.texture = texture;
     
     this.disposable = true;
-}
+};
 
 Tessellator.TextureBind.prototype.dispose = function (){
     if (this.texture && this.texture.disposable){
         this.texture.dispose();
-    }
-}
+    };
+};
 
 Tessellator.TextureBind.prototype.init = function (interpreter){
     if (interpreter.shape){
         throw "cannot bind a new texture if there is a shape currently being drawn.";
-    }
+    };
     
     if (this.texture.constructor === String){
         this.texture = interpreter.tessellator.getTexture(this.texture);
-    }
+    };
     
     interpreter.set("textureBounds", this);
     
@@ -66,10 +66,10 @@ Tessellator.TextureBind.prototype.init = function (interpreter){
     interpreter.set("draw", Tessellator.TEXTURE);
     
     interpreter.set("mask", false);
-}
+};
 
 Tessellator.TextureBind.prototype.postInit = Tessellator.EMPTY_FUNC;
 
 Tessellator.TextureBind.prototype.apply = function (render, model){
     render.set("texture", this.texture);
-}
+};

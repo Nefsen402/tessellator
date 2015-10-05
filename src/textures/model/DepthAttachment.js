@@ -27,7 +27,7 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.TextureModel.AttachmentDepth = function (){}
+Tessellator.TextureModel.AttachmentDepth = function (){};
 
 Tessellator.TextureModel.AttachmentDepth.prototype.setup = function (texture){
     var gl = texture.tessellator.GL;
@@ -43,11 +43,11 @@ Tessellator.TextureModel.AttachmentDepth.prototype.setup = function (texture){
         gl.bindRenderbuffer(gl.RENDERBUFFER, this.buffer);
         gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.width, this.height);
         gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-    }
+    };
     
     
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.buffer);
-}
+};
 
 Tessellator.TextureModel.AttachmentDepth.prototype.configure = Tessellator.EMPTY_FUNC;
 
@@ -56,5 +56,5 @@ Tessellator.TextureModel.AttachmentDepth.prototype.dispose = function (){
         this.tessellator.GL.deleteRenderbuffer(this.buffer);
         
         this.buffer = null;
-    }
-}
+    };
+};

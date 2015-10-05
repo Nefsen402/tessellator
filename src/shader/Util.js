@@ -31,7 +31,7 @@ Tessellator.prototype.createShaderProgram = function (vertexShader, fragmentShad
     if (vertexShader.constructor === Tessellator.ShaderPreset){
         if (vertexShader.type !== Tessellator.VERTEX_SHADER){
             throw "the vertexShader argument is set to something else then a vertex shader";
-        }
+        };
         
         vertexShader = vertexShader.create(this);
     }else if (vertexShader.constructor !== Tessellator.Shader){
@@ -42,18 +42,18 @@ Tessellator.prototype.createShaderProgram = function (vertexShader, fragmentShad
                 shader.loadRemote(vertexShader);
             }else{
                 shader.load(vertexShader);
-            }
+            };
         }else{
             shader.loadDOM(vertexShader);
-        }
+        };
         
         vertexShader = shader;
-    }
+    };
     
     if (fragmentShader.constructor === Tessellator.ShaderPreset){
         if (fragmentShader.type !== Tessellator.FRAGMENT_SHADER){
             throw "the fragmentShader argument is set to something else then a fragment shader";
-        }
+        };
         
         fragmentShader = fragmentShader.create(this);
     }else if (fragmentShader.constructor !== Tessellator.Shader){
@@ -64,16 +64,16 @@ Tessellator.prototype.createShaderProgram = function (vertexShader, fragmentShad
                 shader.loadRemote(fragmentShader);
             }else{
                 shader.load(fragmentShader);
-            }
+            };
         }else{
             shader.loadDOM(fragmentShader);
-        }
+        };
         
         fragmentShader = shader;
-    }
+    };
     
     return new Tessellator.Program(this).link(vertexShader).link(fragmentShader).load();
-}
+};
 
 Tessellator.prototype.loadShaderProgram = Tessellator.prototype.createShaderProgram;
 Tessellator.prototype.loadShaderProgramFromCode = Tessellator.prototype.createShaderProgram;
@@ -81,22 +81,22 @@ Tessellator.prototype.loadShaderProgramFromDOM = Tessellator.prototype.createSha
 
 Tessellator.prototype.createPixelShader = function (shader){
     return this.createShaderProgram(Tessellator.PIXEL_SHADER_VERTEX_SHADER, shader);
-}
+};
 
 Tessellator.prototype.getShaderFromDOM = function (dom){
     return new Tessellator.Shader(this).loadDOM(dom);
-}
+};
 
 
 Tessellator.prototype.getShader = function (shaderSource, type){
     if (shaderSource.constructor === Tessellator.ShaderPreset){
-        console.warn("Passing a Tessellator.ShaderPreset to the getShader helper function in not recommended.")
+        console.warn("Passing a Tessellator.ShaderPreset to the getShader helper function in not recommended.");
         return shaderSource.create(this);
-    }
+    };
     
     return new Tessellator.Shader(this, type).load(shaderSource);
-}
+};
 
 Tessellator.prototype.createBypassShader = function (){
     return this.createPixelShader(tessellator.getShader(Tessellator.PIXEL_SHADER_PASS, Tessellator.FRAGMENT_SHADER));
-}
+};

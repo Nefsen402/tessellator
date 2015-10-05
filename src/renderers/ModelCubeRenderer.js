@@ -32,13 +32,13 @@ Tessellator.ModelCubeRenderer = function (shader, model, pos){
     
     this.model = model;
     this.pos = pos;
-}
+};
 
 Tessellator.extend(Tessellator.ModelCubeRenderer, Tessellator.ModelRenderer);
 
 Tessellator.ModelCubeRenderer.prototype.init = function (matrix){
     return this.super.init(matrix, this.model);
-}
+};
 
 Tessellator.ModelCubeRenderer.prototype.renderRaw = function (matrix, side){
     var mat = matrix.get("mvMatrix");
@@ -54,9 +54,9 @@ Tessellator.ModelCubeRenderer.prototype.renderRaw = function (matrix, side){
         up = Tessellator.vec3(0, 0, 1);
     }else{
         up = Tessellator.vec3(0, 1, 0);
-    }
+    };
     
     mat.rotateVec(side, up);
     
     this.renderModel(matrix, this.model);
-}
+};

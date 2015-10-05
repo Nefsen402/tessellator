@@ -41,28 +41,28 @@ Tessellator.DirectionalCamera = function (){
     }else{
         this.vec = arguments[1];
         this.up = arguments[2] !== undefined ? arguments[2] : Tessellator.vec3(0, 1, 0);
-    }
-}
+    };
+};
 
 Tessellator.DirectionalCamera.prototype.applyLighting = function (matrix){
     if (this.view.applyLighting) this.view.applyLighting(matrix);
     
     this.set(matrix);
-}
+};
 
 Tessellator.DirectionalCamera.prototype.apply = function (render){
     this.view.apply(render);
     this.set(render.get("mvMatrix"));
-}
+};
 
 Tessellator.DirectionalCamera.prototype.set = function (m){
     m.rotateVec(this.vec, this.up);
-}
+};
 
 Tessellator.DirectionalCamera.prototype.init = function (interpreter){
     this.view.init(interpreter)
-}
+};
 
 Tessellator.DirectionalCamera.prototype.postInit = function (interpreter){
     this.view.postInit(interpreter);
-}
+};

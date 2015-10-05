@@ -29,16 +29,16 @@
 
 Tessellator.Model.prototype.setFontSheet = function (fontSheet){
     return this.add (new Tessellator.FontSheet(fontSheet));
-}
+};
 
 Tessellator.FontSheet = function (fontSheet){
     this.type = Tessellator.FONT_SHEET;
     
     this.fontSheet = fontSheet;
-}
+};
 
 Tessellator.FontSheet.prototype.init = function (interpreter){
     interpreter.set("fontSheet", this.fontSheet);
     
     return null;
-}
+};

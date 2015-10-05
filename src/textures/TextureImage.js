@@ -29,7 +29,7 @@
 
 Tessellator.prototype.loadTexture = function (src, filter){
     return new Tessellator.TextureImage(this, src, filter);
-}
+};
 
 Tessellator.prototype.createTexture = Tessellator.prototype.loadTexture;
 
@@ -42,10 +42,10 @@ Tessellator.prototype.getTexture = function (src){
         texture = this.createTexture(src);
         
         this.textureCache[src] = texture;
-    }
+    };
     
     return texture;
-}
+};
 
 Tessellator.TextureImage = function (tessellator, src, filter){
     this.super (tessellator);
@@ -64,7 +64,7 @@ Tessellator.TextureImage = function (tessellator, src, filter){
                 
                 if (!self.filter){
                     self.filter = Tessellator.getAppropriateTextureFilter(self.width, self.height);
-                }
+                };
                 
                 self.setReady();
             });
@@ -76,7 +76,7 @@ Tessellator.TextureImage = function (tessellator, src, filter){
                 
                 if (!this.filter){
                     this.filter = Tessellator.getAppropriateTextureFilter(this.image.width, this.image.height);
-                }
+                };
                 
                 this.setReady();
             }else{
@@ -89,11 +89,11 @@ Tessellator.TextureImage = function (tessellator, src, filter){
                     
                     if (!self.filter){
                         self.filter = Tessellator.getAppropriateTextureFilter(self.width, self.height);
-                    }
+                    };
                     
                     self.setReady();
                 });
-            }
+            };
         }else{
             this.image = src;
             this.width = this.image.width;
@@ -101,12 +101,12 @@ Tessellator.TextureImage = function (tessellator, src, filter){
             
             if (!this.filter){
                 this.filter = Tessellator.getAppropriateTextureFilter(this.width, this.height);
-            }
+            };
             
             this.setReady();
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.copyProto(Tessellator.TextureImage, Tessellator.Texture);
 
@@ -122,11 +122,11 @@ Tessellator.TextureImage.prototype.configure = function (target, track){
                     gl.bindTexture(gl.TEXTURE_2D, this.texture = gl.createTexture());
                 }else{
                     gl.bindTexture(gl.TEXTURE_2D, this.texture);
-                }
+                };
                 
                 this.filter(this.tessellator, this);
-            }
-        }
+            };
+        };
         
         if (this.autoUpdate || !this.isTracking(track)){
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
@@ -134,11 +134,11 @@ Tessellator.TextureImage.prototype.configure = function (target, track){
             
             this.track(track);
             return true;
-        }
-    }
+        };
+    };
     
     return false;
-}
+};
 
 Tessellator.TextureImage.imageCache = [];
 
@@ -146,9 +146,9 @@ Tessellator.TextureImage.imageCache.find = function (name){
     for (var i = 0; i < this.length; i++){
         if (this[i].src == name){
             return this[i]
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.TextureImage.loadImage = function (src, onLoad){
     var image = Tessellator.TextureImage.imageCache.find(src);
@@ -159,12 +159,12 @@ Tessellator.TextureImage.loadImage = function (src, onLoad){
                 image.listeners.push(onLoad);
             }else{
                 onLoad(image);
-            }
-        }
+            };
+        };
     }else{
         if (Tessellator.TextureImage.imageCache.length >= 16){
             Tessellator.TextureImage.imageCache.splice(0, 1);
-        }
+        };
         
         image = document.createElement("img");
         image.loaded = false;
@@ -175,7 +175,7 @@ Tessellator.TextureImage.loadImage = function (src, onLoad){
             ];
         }else{
             image.listeners = [];
-        }
+        };
         
         image.onload = function (){
             this.loaded = true;
@@ -183,16 +183,16 @@ Tessellator.TextureImage.loadImage = function (src, onLoad){
             
             for (var i = 0, k = this.listeners.length; i < k; i++){
                 this.listeners[i](this);
-            }
+            };
             
             delete this.listeners;
-        }
+        };
         
         image.crossOrigin='';
         image.src = src;
         
         Tessellator.TextureImage.imageCache[src] = image;
-    }
+    };
     
     return image;
-}
+};

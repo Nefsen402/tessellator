@@ -29,7 +29,7 @@
 
 Tessellator.Model.prototype.setClip = function (x, y, width, height){
     return this.add(new Tessellator.Clip(x, y, width, height));
-}
+};
 
 Tessellator.Clip = function (x, y, w, h){
     this.x = x;
@@ -42,14 +42,14 @@ Tessellator.Clip = function (x, y, w, h){
     this.clip[1] = y;
     this.clip[2] = w;
     this.clip[3] = h;
-}
+};
 
 Tessellator.Clip.prototype.init = function (interpreter){
     interpreter.flush();
-}
+};
 
 Tessellator.Clip.prototype.postInit = Tessellator.EMPTY_FUNC;
 
 Tessellator.Clip.prototype.apply = function (render){
     render.set("clip", this.clip);
-}
+};

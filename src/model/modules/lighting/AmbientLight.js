@@ -29,12 +29,12 @@
 
 Tessellator.Model.prototype.setAmbientLight = function (){
     return this.add(new Tessellator.AmbientLight());
-}
+};
 
 Tessellator.AmbientLight = function (){
     this.type = Tessellator.LIGHTING_AMBIENT;
     this.subtype = Tessellator.LIGHTING;
-}
+};
 
 
 Tessellator.AmbientLight.prototype.set = function (lighting, index, matrix){
@@ -44,16 +44,16 @@ Tessellator.AmbientLight.prototype.set = function (lighting, index, matrix){
     lighting[1 + index] = this.color[0] * this.color[3];
     lighting[2 + index] = this.color[1] * this.color[3];
     lighting[3 + index] = this.color[2] * this.color[3];
-}
+};
 
 Tessellator.AmbientLight.prototype.applyLighting = function (matrix, index, renderer){
     this.set(renderer.lightingTexture.data, index[0] * 4 * 4, matrix);
     
     if (index[0]++ * 4 * 4 >= renderer.lightingTexture.data.length){
         throw "too many lights!";
-    }
-}
+    };
+};
 
 Tessellator.AmbientLight.prototype.init = function (interpreter){
     this.color = interpreter.get("color");
-}
+};

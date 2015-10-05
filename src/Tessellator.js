@@ -35,7 +35,7 @@ var Tessellator = function (canvas){
         canvas.style.height = "100%";
     }else if (canvas.constructor === String){
         canvas = document.getElementById(canvas);
-    }
+    };
     
     this.canvas = canvas;
     
@@ -45,7 +45,7 @@ var Tessellator = function (canvas){
         contextArgs = arguments[1];
     }else{
         contextArgs = Array.prototype.slice.call(arguments, 1);
-    }
+    };
     
     if (contextArgs && contextArgs.renderTD){
         delete contextArgs.renderTD;
@@ -54,7 +54,7 @@ var Tessellator = function (canvas){
         this.TD = this.canvas.getContext("2d");
     }else{
         this.renderCanvas = this.canvas;
-    }
+    };
     
     try{
         var contexts;
@@ -67,11 +67,11 @@ var Tessellator = function (canvas){
                 "webgl",
                 "experimental-webgl"
             ];
-        }
+        };
         
         if (contexts.length <= 0){
             throw "no contexts provided";
-        }
+        };
         
         var context = null;
         
@@ -81,8 +81,8 @@ var Tessellator = function (canvas){
             if (context){
                 this.context = contexts[i];
                 break;
-            }
-        }
+            };
+        };
         
         if (context){
             this.GL = context;
@@ -96,20 +96,20 @@ var Tessellator = function (canvas){
                     error.push(" or ", contexts[i]);
                 }else{
                     error.push(", ", contexts[i]);
-                }
-            }
+                };
+            };
             
             throw error.join("");
-        }
+        };
         
         if (this.context == "experimental-webgl"){
             console.debug("Experimental webGL is being used!");
-        }
+        };
     }catch (e){
         this.GL = null;
         
         throw "Failed to initialize Tessellator: " + e;
-    }
+    };
     
     var self = this;
     
@@ -129,17 +129,17 @@ var Tessellator = function (canvas){
         }else{
             canvas.setAttribute("width", self.width);
             canvas.setAttribute("height", self.height);
-        }
+        };
         
         if (self.onresize){
             self.onresize(self.width, self.height);
-        }
+        };
     };
     
     this.canvasResize = function () {
         if (canvas.clientWidth !== self.originWidth || canvas.clientHeight !== self.originHeight){
             self.forceCanvasResize();
-        }
+        };
     };
     
     window.addEventListener("resize", this.canvasResize);
@@ -182,8 +182,8 @@ var Tessellator = function (canvas){
     
     for (var i = 0; i < Tessellator.createHandle.length; i++){
         Tessellator.createHandle[i].call(this);
-    }
-}
+    };
+};
 
 Tessellator.VERSION = "5g beta";
 
@@ -201,7 +201,7 @@ Tessellator.VENDORS = [
 
 if (window.module){
     window.module.exports = Tessellator;
-}
+};
 
 Tessellator.prototype.frameBuffer = null;
 Tessellator.prototype.boundTexture = null;
@@ -212,7 +212,7 @@ Tessellator.createHandle = [];
 Tessellator.prototype.dispose = function (){
    while (this.resources.length){
        this.resources[this.resources.length - 1].dispose();
-   }
+   };
 };
 
 Tessellator.prototype.setResolutionScale = function (scale){
@@ -220,7 +220,7 @@ Tessellator.prototype.setResolutionScale = function (scale){
         this.resolutionScale = scale;
     }else{
         this.resolutionScale = Tessellator.vec2(scale);
-    }
+    };
     
     this.forceCanvasResize();
 };
@@ -239,21 +239,21 @@ Tessellator.prototype.printLowLevelAccess = function (func){
                     str += arguments[i];
                 }else{
                     str += ", " + arguments[i];
-                }
-            }
+                };
+            };
             
             str += "]";
             
             console.debug(str);
             return origional.apply(self.GL, arguments);
-        }
+        };
     }else{
         for (var o in this.GL){
             if (typeof(this.GL[o]) == "function"){
                 this.printLowLevelAccess(o);
-            }
-        }
-    }
+            };
+        };
+    };
 };
 
 Tessellator.prototype.countLowLevelAccess = function (func){
@@ -268,14 +268,14 @@ Tessellator.prototype.countLowLevelAccess = function (func){
             self.gledits++;
             
             return origional.apply(self.GL, arguments);
-        }
+        };
     }else{
         for (var o in this.GL){
             if (typeof(this.GL[o]) == "function"){
                 this.countLowLevelAccess(o);
-            }
-        }
-    }
+            };
+        };
+    };
 };
 
 Tessellator.prototype.getDataURL = function (){
@@ -289,13 +289,13 @@ Tessellator.prototype.preRender = function (){
     
     if (this.TD){
         this.TD.clearRect(0, 0, this.originWidth, this.originHeight);
-    }
+    };
 };
 
 Tessellator.prototype.postRender = function (){
     if (this.TD){
         this.TD.drawImage(this.renderCanvas, 0, 0, this.originWidth, this.originHeight, 0, 0, this.width, this.height);
-    }
+    };
 };
 
 Tessellator.prototype.super_preRender = Tessellator.prototype.preRender;

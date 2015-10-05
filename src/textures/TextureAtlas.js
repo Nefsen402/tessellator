@@ -29,12 +29,12 @@
 
 Tessellator.prototype.createTextureAtlas = function (){
     return Tessellator.new.apply(Tessellator.TextureAtlas, [this].concat(Array.prototype.slice.call(arguments)));
-}
+};
 
 Tessellator.TextureAtlas = function (tessellator, width, height){
     if (!tessellator.textureAtlasRenderer){
         tessellator.textureAtlasRenderer = new Tessellator.AtlasRenderer(tessellator);
-    }
+    };
     
     if (arguments.length === 4){
         this.atlas = arguments[3];
@@ -47,18 +47,16 @@ Tessellator.TextureAtlas = function (tessellator, width, height){
             
             this.updateAtlas();
         }else{
-            var
-                segX = arguments[3],
+            var segX = arguments[3],
                 segY = arguments[4];
             
             this.atlas = new Array(segX);
             for (var i = 0; i < segX; i++){
                 this.atlas[i] = new Array(segY);
-            }
-        }
+            };
+        };
     }else if (arguments.length === 6){
-        var
-            segX = arguments[3],
+        var segX = arguments[3],
             segY = arguments[4];
         
         this.filter = arguments[5];
@@ -66,10 +64,10 @@ Tessellator.TextureAtlas = function (tessellator, width, height){
         this.atlas = new Array(segX);
         for (var i = 0; i < segX; i++){
             this.atlas[i] = new Array(segY);
-        }
+        };
     }else{
         throw "invalid arguments";
-    }
+    };
     
     this.super(tessellator, width, height, [
         new Tessellator.TextureModel.AttachmentColor(this.filter),
@@ -78,7 +76,7 @@ Tessellator.TextureAtlas = function (tessellator, width, height){
     
     this.disposable = false;
     this.updateCache = [];
-}
+};
 
 Tessellator.copyProto(Tessellator.TextureAtlas, Tessellator.TextureModel);
 
@@ -95,22 +93,22 @@ Tessellator.TextureAtlas.prototype.updateAtlas = function (textures){
                         textures[i].texture.addListener(func);
                         
                         return;
-                    }
-                }
+                    };
+                };
                 
                 self.updateCache.push(textures);
-            }
+            };
             
             func();
-        }
+        };
     }else{
         for (var x = 0, xk = this.atlas.length; x < xk; x++){
             for (var y = 0, yk = this.atlas[x].length; y < yk; y++){
                 if (this.atlas[x][y]) this.updateAtlas(this.atlas[x][y]);
-            }
-        }
-    }
-}
+            };
+        };
+    };
+};
 
 Tessellator.TextureAtlas.prototype.set = function (x, y, texture){
     this.atlas[x][y] = [{
@@ -120,11 +118,11 @@ Tessellator.TextureAtlas.prototype.set = function (x, y, texture){
     this.atlas[x][y].pos = Tessellator.vec2(x, y);
     
     this.updateAtlas(this.atlas[x][y]);
-}
+};
 
 Tessellator.TextureAtlas.prototype.get = function (x, y, i){
     return this.atlas[x][y][i || 0].texture;
-}
+};
 
 Tessellator.TextureAtlas.prototype.add = function (x, y, texture){
     if (!this.atlas[x][y]){
@@ -135,11 +133,11 @@ Tessellator.TextureAtlas.prototype.add = function (x, y, texture){
         });
         
         this.updateAtlas(this.atlas[x][y]);
-    }
-}
+    };
+};
 
 Tessellator.TextureAtlas.prototype.mask = function (x, y, mask, i){
     this.atlas[x][y][i || 0].mask = mask;
     
     this.updateAtlas(this.atlas[x][y]);
-}
+};

@@ -37,29 +37,29 @@ Tessellator.Initializer.setDefault("color255", function () {
 
 Tessellator.Model.prototype.setColor = function (){
     return this.add(new Tessellator.ColorSet(Tessellator.getColor(arguments)));
-}
+};
 
 Tessellator.ColorSet = function (color){
     this.type = Tessellator.COLOR;
     
     this.color = color;
-}
+};
 
 
 Tessellator.ColorSet.prototype.init = function (interpreter){
     if (interpreter.shape){
         throw "cannot change color while drawing";
-    }
+    };
     
     if (interpreter.get("draw") !== Tessellator.COLOR){
         interpreter.flush();
         
         interpreter.set("draw", Tessellator.COLOR);
-    }
+    };
     
     interpreter.set("textureBounds", null);
     interpreter.set("color", this.color);
     interpreter.set("color255", this.color.clone().multiply(255));
     
     return null;
-}
+};

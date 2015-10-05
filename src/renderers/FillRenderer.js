@@ -36,9 +36,9 @@ Tessellator.FillRenderer = function (renderer){
     }else{
         this.renderer = renderer;
         this.super(renderer.tessellator.createPixelShader(Tessellator.PIXEL_SHADER_COLOR));
-    }
+    };
     
-}
+};
 
 Tessellator.extend(Tessellator.FillRenderer, Tessellator.FullScreenRenderer);
 
@@ -52,5 +52,5 @@ Tessellator.FillRenderer.prototype.renderRaw = function (render, arg){
         newrender.set("window", render.gets("window"));
         
         this.renderer.render(newrender, arg);
-    }
-}
+    };
+};

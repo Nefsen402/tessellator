@@ -39,8 +39,8 @@ Tessellator.RenderLoop = function (){
             
         if (arguments.length > 0){
             this.item = Tessellator.new.apply(Tessellator.RenderLoop.Item, arguments);
-        }
-    }
+        };
+    };
     
     this.animate = Tessellator.getVendorIndependent(window, "requestanimationframe");
     
@@ -50,10 +50,10 @@ Tessellator.RenderLoop = function (){
         
         this.animate = function (callback){
             callback();
-        }
+        };
         
         console.warn("Using a fall back render loop. Rendering at 60fps");
-    }
+    };
     
     var self = this;
     
@@ -71,9 +71,9 @@ Tessellator.RenderLoop = function (){
                     self.fpswait = undefined;
                     self.animationFrame = self.animate.call(window, self.renderLoop);
                 }, time);
-            }
-        }
-    }
+            };
+        };
+    };
     
     this.start();
 };
@@ -81,15 +81,15 @@ Tessellator.RenderLoop = function (){
 Tessellator.RenderLoop.prototype.stop = function (){
     if (this.fpswait !== undefined){
         window.clearTimeout(this.fpswait);
-    }
+    };
     
     if (this.animationFrame !== undefined){
         if (!this.usingFallback) {
             Tessellator.getVendorIndependent(window, "cancelanimationframe")(this.animationFrame);
-        }
+        };
         
         this.animationFrame = undefined;
-    }
+    };
     
     this.item.fps = 0;
     this.item.averageFps = 0;
@@ -101,7 +101,7 @@ Tessellator.RenderLoop.prototype.start = function (){
     
     if (this.animationFrame === undefined){
         this.animationFrame = this.animate.call(window, this.renderLoop);
-    }
+    };
 };
 
 Tessellator.RenderLoop.prototype.getFPS = function (){
@@ -115,7 +115,7 @@ Tessellator.RenderLoop.prototype.getAverageFPS = function (){
 Tessellator.RenderLoop.prototype.setFPS = function (fps){
     if (this.usingFallback && !fps){
         throw "cannot unlock fps while fallback is being used!";
-    }
+    };
     
     this.item.setFPS(fps);
 };
@@ -168,7 +168,7 @@ Tessellator.RenderLoop.Item.prototype.render = function (){
         this.avSample[2] = this.avSample[0] / 32;
         this.avSample[0] = 0;
         this.avSample[1] = 0;
-    }
+    };
     
     this.avSample[0] += this.fps;
     var det = ++this.avSample[1] / 32;
@@ -187,5 +187,5 @@ Tessellator.RenderLoop.Item.prototype.render = function (){
         return comp;
     }else{
         return 0;
-    }
+    };
 };

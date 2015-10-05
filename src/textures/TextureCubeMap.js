@@ -29,7 +29,7 @@
 
 Tessellator.prototype.createTextureCubeMap = function (filter){
     return new Tessellator.TextureCubeMap(this, filter);
-}
+};
 
 Tessellator.TextureCubeMap = function (tessellator, filter){
     this.super(tessellator);
@@ -38,7 +38,7 @@ Tessellator.TextureCubeMap = function (tessellator, filter){
     this.fliter = filter || Tessellator.TEXTURE_FILTER_NEAREST_CLAMP;
     
     this.textures = new Array(6);
-}
+};
 
 Tessellator.extend(Tessellator.TextureCubeMap, Tessellator.Texture);
 
@@ -48,12 +48,12 @@ Tessellator.TextureCubeMap.prototype.set = function (side, texture){
         target: side,
         ref: this,
         tessellator: this.tessellator,
-    }
-}
+    };
+};
 
 Tessellator.TextureCubeMap.prototype.get = function (side){
     return this.textures[Tessellator.TextureCubeMap.INDEX_LOOKUP.indexOf(side)].texture;
-}
+};
 
 Tessellator.TextureCubeMap.prototype.configure = function (target, track){
     var gl = this.tessellator.GL;
@@ -62,7 +62,7 @@ Tessellator.TextureCubeMap.prototype.configure = function (target, track){
         if (!this.texture){
             gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture = gl.createTexture());
             this.fliter(this.tessellator, this);
-        }
+        };
         
         var ready = true;
         
@@ -76,14 +76,14 @@ Tessellator.TextureCubeMap.prototype.configure = function (target, track){
                 
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
                 tex.texture.configure(tex.target, tex);
-            }
-        }
+            };
+        };
         
         if (ready){
             this.setReady();
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.POS_X = Tessellator.Constant.create("TEXTURE_CUBE_MAP_POSITIVE_X", Tessellator.vec3(-1, 0, 0));
 Tessellator.NEG_X = Tessellator.Constant.create("TEXTURE_CUBE_MAP_NEGATIVE_X", Tessellator.vec3(1, 0, 0));

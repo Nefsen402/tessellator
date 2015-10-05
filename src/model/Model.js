@@ -29,11 +29,11 @@
 
 Tessellator.prototype.renderModel = function (model, renderer){
     model.renderModel(renderer);
-}
+};
 
 Tessellator.prototype.createModel = function (renderer){
     return new Tessellator.Model(this, renderer);
-}
+};
 
 Tessellator.prototype.createMatrix = Tessellator.prototype.createModel;
 
@@ -48,7 +48,7 @@ Tessellator.Model = function (tessellator, renderer){
     this.tessellator = tessellator;
     
     this.matrixStack = [ this ];
-}
+};
 
 Tessellator.Model.prototype.renderModel = function (renderer){
     if (!renderer){
@@ -57,14 +57,14 @@ Tessellator.Model.prototype.renderModel = function (renderer){
         }else{
             if (!this.tessellator.defaultRenderer){
                 this.tessellator.defaultRenderer = new Tessellator.ModelRenderer(this.tessellator);
-            }
+            };
             
             renderer = this.tessellator.defaultRenderer;
-        }
-    }
+        };
+    };
     
     renderer.render(null, this);
-}
+};
 
 Tessellator.Model.prototype.remove = function (obj){
     if (this.model){
@@ -75,10 +75,10 @@ Tessellator.Model.prototype.remove = function (obj){
                 this.parent.remove(this);
             }else{
                 this.model.splice(this.model.indexOf(obj), 1);
-            }
-        }
-    }
-}
+            };
+        };
+    };
+};
 
 Tessellator.Model.prototype.apply = function (matrix, mod, renderer){
     if (this.render){
@@ -89,19 +89,19 @@ Tessellator.Model.prototype.apply = function (matrix, mod, renderer){
             this.renderer.render(copy, this);
         }else{
             renderer.renderModel(copy, this);
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.Model.prototype.applyLighting = function (matrix, index, renderer){
     if (this.render && !this.renderer){
         return renderer.setLighting(this, matrix.clone(), index);
-    }
-}
+    };
+};
 
 Tessellator.Model.prototype.init = function (interpreter){
     interpreter.flush();
-}
+};
 
 Tessellator.Model.prototype.push = function (renderer){
     var matrix = new Tessellator.Model(this.tessellator, renderer);
@@ -111,15 +111,15 @@ Tessellator.Model.prototype.push = function (renderer){
     this.matrixStack.push(matrix);
     
     return matrix;
-}
+};
 
 Tessellator.Model.prototype.pop = function () {
     if (this.matrixStack.length <= 1){
         throw "cannot pop from a empty matrix stack!";
-    }
+    };
     
     return this.matrixStack.pop().update();
-}
+};
 
 
 Tessellator.Model.prototype.createModel = function (renderer) {
@@ -129,7 +129,7 @@ Tessellator.Model.prototype.createModel = function (renderer) {
     this.add(matrix);
     
     return matrix;
-}
+};
 
 Tessellator.Model.prototype.createMatrix = Tessellator.Model.prototype.createModel;
 
@@ -141,28 +141,28 @@ Tessellator.Model.prototype.configureDrawing = function (){
         this.disposed = false;
         
         matrix.actions = new Tessellator.Initializer(matrix.tessellator, matrix.parent ? matrix.parent.actions : null);
-    }
-}
+    };
+};
 
 Tessellator.Model.prototype.add = function (action){
     if (!action){
         throw "null pointer";
-    }
+    };
     
     this.configureDrawing();
     
     this.matrixStack[this.matrixStack.length - 1].actions.push(action);
     return action;
-}
+};
 
 Tessellator.Model.prototype.isDrawing = function (){
     return this.actions && this.actions.constructor === Tessellator.Initializer;
-}
+};
 
 Tessellator.Model.prototype.finish = function (){
     if (this.matrixStack.length > 1){
         throw "cannot finish a model with items in the matrixStack!";
-    }
+    };
     
     this.disposed = false;
     
@@ -177,10 +177,10 @@ Tessellator.Model.prototype.finish = function (){
         this.model = null;
         
         this.render = false;
-    }
+    };
     
     return this;
-}
+};
 
 //for compatibility
 Tessellator.Model.prototype.update = Tessellator.Model.prototype.finish;
@@ -197,14 +197,14 @@ Tessellator.Model.prototype.dispose = function (){
             
             if (mod.disposable){
                 mod.dispose();
-            }
-        }
+            };
+        };
         
         this.model = null;
-    }
+    };
     
     this.remove();
-}
+};
 
 Tessellator.Model.prototype.disposeShallow = function (){
     this.render = false;
@@ -218,16 +218,16 @@ Tessellator.Model.prototype.disposeShallow = function (){
                 if (mod.disposable){
                     if (mod.disposable){
                         mod.dispose();
-                    }
-                }
-            }
-        }
+                    };
+                };
+            };
+        };
         
         this.model = null;
-    }
+    };
     
     this.remove();
-}
+};
 
 Tessellator.Model.prototype.createTexture = function (width, height, filter, renderer){
     return new Tessellator.TextureModel(this.tessellator, width, height, [
@@ -235,7 +235,7 @@ Tessellator.Model.prototype.createTexture = function (width, height, filter, ren
         new Tessellator.TextureModel.AttachmentDepth(),
         new Tessellator.TextureModel.AttachmentModel(this, renderer)
     ]);
-}
+};
 
 Tessellator.Model.prototype.countRenderItems = function (){
     var count = 0;
@@ -245,12 +245,12 @@ Tessellator.Model.prototype.countRenderItems = function (){
             if (this.model[i].type === Tessellator.MODEL){
                 if (this.model[i].render){
                     count += this.model[i].countRenderItems();
-                }
-            }
+                };
+            };
             
             count++;
-        }
-    }
+        };
+    };
     
     return count;
-}
+};

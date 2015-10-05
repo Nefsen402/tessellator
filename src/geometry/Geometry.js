@@ -36,12 +36,12 @@ Tessellator.Geometry = function (type, arg){
     this.type = type || Tessellator.TRIGANGLE;
     this.conversionArg = arg;
     this.disposed = false;
-}
+};
 
 Tessellator.Geometry.prototype.createObject = function (tessellator, drawMode, save){
     if (this.object){
         return this.object;
-    }
+    };
     
     save = save || Tessellator.STATIC;
     
@@ -54,13 +54,13 @@ Tessellator.Geometry.prototype.createObject = function (tessellator, drawMode, s
     
     if (this.normals.length){
         this.object.setAttribute("normal", Tessellator.VEC3, this.normals, Float32Array, false, save);
-    }
+    };
     
     if (drawMode === Tessellator.TEXTURE){
         this.object.setAttribute("color", Tessellator.VEC2, this.colors, Float32Array, false, save);
     }else{
         this.object.setAttribute("color", Tessellator.VEC4, this.colors, Uint8Array, true, save);
-    }
+    };
     
     this.object.upload();
     
@@ -71,11 +71,11 @@ Tessellator.Geometry.prototype.createObject = function (tessellator, drawMode, s
     this.conversionArg = null;
     
     return this.object;
-}
+};
 
 Tessellator.Geometry.prototype.getObject = function (){
     return this.object;
-}
+};
 
 Tessellator.Geometry.prototype.dispose = function (){
     if (!this.disposed){
@@ -86,26 +86,26 @@ Tessellator.Geometry.prototype.dispose = function (){
             this.colors = null;
             this.normals = null;
             this.indices = null;
-        }
+        };
         
         this.disposed = true;
-    }
-}
+    };
+};
 
 //for models
 Tessellator.Geometry.prototype.apply = function (matrix){
     if (this.object){
         this.object.render(matrix);
-    }
-}
+    };
+};
 
 Tessellator.Geometry.prototype.addPositions = function (pos){
     if (!this.matrix){
         this.positions.push(pos);
     }else for (var i = 0; i < pos.length; i += 3){
         this.positions.push(Tessellator.vec3(pos[i], pos[i + 1], pos[i + 2]).multipy(this.matrix))
-    }
-}
+    };
+};
 
 Tessellator.Geometry.prototype.generateNormals = function (){
     this.convert();
@@ -114,13 +114,11 @@ Tessellator.Geometry.prototype.generateNormals = function (){
         var normals = new Float32Array(this.positions.length);
         
         for (var i = 0; i < this.indices.length; i += 3){
-            var
-                ia = this.indices.get(i + 0),
+            var ia = this.indices.get(i + 0),
                 ib = this.indices.get(i + 1),
                 ic = this.indices.get(i + 2);
             
-            var
-                x1 = this.positions.get(ia * 3 + 0),
+            var x1 = this.positions.get(ia * 3 + 0),
                 y1 = this.positions.get(ia * 3 + 1),
                 z1 = this.positions.get(ia * 3 + 2),
                 
@@ -133,8 +131,7 @@ Tessellator.Geometry.prototype.generateNormals = function (){
                 z3 = this.positions.get(ic * 3 + 2);
             
             //deltas
-            var
-                Ux = x2 - x1,
+            var Ux = x2 - x1,
                 Uy = y2 - y1,
                 Uz = z2 - z1,
                 
@@ -143,8 +140,7 @@ Tessellator.Geometry.prototype.generateNormals = function (){
                 Vz = z3 - z1;
             
             //normals
-            var
-                Nx = (Uy * Vz) - (Uz * Vy),
+            var Nx = (Uy * Vz) - (Uz * Vy),
                 Ny = (Uz * Vx) - (Ux * Vz),
                 Nz = (Ux * Vy) - (Uy * Vx);
             
@@ -159,47 +155,47 @@ Tessellator.Geometry.prototype.generateNormals = function (){
             normals[ic * 3 + 0] = Nx;
             normals[ic * 3 + 1] = Ny;
             normals[ic * 3 + 2] = Nz;
-        }
+        };
         
         this.normals.push(normals);
-    }
-}
+    };
+};
 
 Tessellator.Geometry.prototype.translate = function (vec){
     if (!this.matrix){
         this.matrix = Tessellator.mat4();
-    }
+    };
     
     this.matrix.translate(vec);
-}
+};
 
 Tessellator.Geometry.prototype.rotate = function (r, vec){
     if (!this.matrix){
         this.matrix = Tessellator.mat4();
-    }
+    };
     
     this.matrix.rotate(r, vec);
-}
+};
 
 Tessellator.Geometry.prototype.scale = function (vec){
     if (!this.matrix){
         this.matrix = Tessellator.mat4();
-    }
+    };
     
     this.matrix.scale(vec);
-}
+};
 
 Tessellator.Geometry.prototype.align = function (vec, up){
     if (!this.matrix){
         this.matrix = Tessellator.mat4();
-    }
+    };
     
     if (!up){
         this.matrix.align(vec, Tessellator.vec3(0, 1, 0));
     }else{
         this.matrix.align(vec, up);
-    }
-}
+    };
+};
 
 Tessellator.Geometry.prototype.canConvertTo = function (to){
     var g = Tessellator.Geometry.CUSTOM_GEOMETRY_REGISTER;
@@ -211,11 +207,11 @@ Tessellator.Geometry.prototype.canConvertTo = function (to){
         
         if (converter[0] === this.type && converter[1] === to){
             return true;
-        }
-    }
+        };
+    };
 
     return false;
-}
+};
 
 Tessellator.Geometry.prototype.convert = function (adding){
     var g = Tessellator.Geometry.CUSTOM_GEOMETRY_REGISTER;
@@ -229,11 +225,11 @@ Tessellator.Geometry.prototype.convert = function (adding){
             converter[2](this, adding, this.conversionArg);
             
             return true;
-        }
-    }
+        };
+    };
 
     return false;
-}
+};
 
 Tessellator.Geometry.prototype.add = function (newGeometry, arg){
     if (newGeometry.canConvertTo(this.type)){
@@ -244,13 +240,13 @@ Tessellator.Geometry.prototype.add = function (newGeometry, arg){
             this.colors.push(newGeometry.colors);
             this.normals.push(newGeometry.normals);
             this.indices.push(newGeometry.indices);
-        }
+        };
         
         return true;
-    }
+    };
     
     return false;
-}
+};
 
 Tessellator.Geometry.registerCustomGeometry = function (from, to, editor){
     var g = Tessellator.Geometry.CUSTOM_GEOMETRY_REGISTER;
@@ -260,10 +256,10 @@ Tessellator.Geometry.registerCustomGeometry = function (from, to, editor){
             g[i][2] = editor;
             
             return;
-        }
-    }
+        };
+    };
     
     g.push([from, to, editor]);
-}
+};
 
 Tessellator.Geometry.CUSTOM_GEOMETRY_REGISTER = [];

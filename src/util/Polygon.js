@@ -39,7 +39,7 @@ Tessellator.Polygon.prototype.getNormal = function (){
         normal[0] += (poly[i + 1] - poly[(i + 4) % poly.length]) * (poly[i + 2] + poly[(i + 5) % poly.length]);
         normal[1] += (poly[i + 2] - poly[(i + 5) % poly.length]) * (poly[i + 0] + poly[(i + 3) % poly.length]);
         normal[2] += (poly[i + 0] - poly[(i + 3) % poly.length]) * (poly[i + 1] + poly[(i + 4) % poly.length]);
-    }
+    };
     
     return normal.normalize();
 };
@@ -47,7 +47,7 @@ Tessellator.Polygon.prototype.getNormal = function (){
 Tessellator.Polygon.prototype.convert2D = function (normal){
     if (!normal){
         normal = this.getNormal();
-    }
+    };
     
     var up = normal.clone().normalize();
     var right, backward;
@@ -56,7 +56,7 @@ Tessellator.Polygon.prototype.convert2D = function (normal){
         right = up.cross(Tessellator.vec3(0, 0, 1));
     }else{
         right = up.cross(Tessellator.vec3(1, 0, 0));
-    }
+    };
     right.normalize();
     backward = right.clone().cross(up);
     
@@ -76,7 +76,7 @@ Tessellator.Polygon.prototype.convert2D = function (normal){
         
         dPoly[i * 2] = v[0];
         dPoly[i * 2 + 1] = v[1];
-    }
+    };
     
     this.vertices = dPoly;
 };
@@ -89,18 +89,17 @@ Tessellator.Polygon.prototype.convertToTriangles = function (off){
     
     if (points <= 2){
         throw "not a complete polygon";
-    }
+    };
     
     var indices = new Tessellator.Array(16);
     
     var avl = new Array(points);
     for (var i = 0; i < points; i++){
         avl[i] = i;
-    }
+    };
     
     for (var i = 0; i < 3 * avl.length || avl.length >= 6; i++){
-        var
-            i0 = avl[(i + 0) % avl.length],
+        var i0 = avl[(i + 0) % avl.length],
             i1 = avl[(i + 1) % avl.length],
             i2 = avl[(i + 2) % avl.length],
             
@@ -110,8 +109,7 @@ Tessellator.Polygon.prototype.convertToTriangles = function (off){
         
         if ((ay - by) * (cx - bx) + (bx - ax) * (cy - by) >= 0){
             for (var ii = 0; ii < avl.length; (ii === i - 1) ? ii += 3 : ii++){
-                var
-                    p = avl[ii],
+                var p = avl[ii],
                 
                     v0x = cx              - ax,
                     v0y = cy              - ay,
@@ -132,14 +130,14 @@ Tessellator.Polygon.prototype.convertToTriangles = function (off){
                 
                 if (u >= 0 && v >= 0 && u + v < 1){
                     break;
-                }
-            }
+                };
+            };
             
             indices.push(i0 + off, i1 + off, i2 + off);
             avl.splice((i + 1) % avl.length, 1);
             i = -1;
-        }
-    }
+        };
+    };
     
     indices.push(avl[0] + off, avl[1] + off, avl[2] + off);
     return indices;

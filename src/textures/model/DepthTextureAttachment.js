@@ -29,38 +29,38 @@
 
 Tessellator.TextureModel.AttachmentDepthTexture = function (filter){
     this.filter = filter;
-}
+};
 
 Tessellator.copyProto(Tessellator.TextureModel.AttachmentDepthTexture, Tessellator.Texture);
 
 Tessellator.TextureModel.AttachmentDepthTexture.prototype.setup = function (texture){
     if (this.tessellator && this.tessellator !== texture.tessellator){
         throw "cannot mix resources between multiple contexts";
-    }
+    };
     
     if (!texture.tessellator.extensions.get("WEBGL_depth_texture")){
         throw "depth texture is not supported!";
-    }
+    };
     
     if (!this.tessellator){
         this.super(texture.tessellator);
-    }
+    };
     
     this.width = texture.width;
     this.height = texture.height;
     
     if (!this.filter){
         this.filter = Tessellator.getAppropriateTextureFilter(texture.width, texture.height);
-    }
+    };
     
     if (texture.bindingAttachment.constructor === Tessellator.TextureDummy){
         texture.bindingAttachment = this;
-    }
+    };
     
     this.dispose();
     this.clearTracking();
     this.setReady();
-}
+};
 
 Tessellator.TextureModel.AttachmentDepthTexture.prototype.configure = function (parent, target, track){
     var gl = parent.tessellator.GL;
@@ -70,7 +70,7 @@ Tessellator.TextureModel.AttachmentDepthTexture.prototype.configure = function (
     if (!track || track.constructor === Tessellator.RenderMatrix){
         if (track){
             track.dirty();
-        }
+        };
         
         track = null;
         
@@ -78,19 +78,19 @@ Tessellator.TextureModel.AttachmentDepthTexture.prototype.configure = function (
         if (!this.isTracking(track)){
             gl.bindTexture(gl.TEXTURE_2D, this.texture = gl.createTexture());
             this.filter(parent.tessellator, this);
-        }
+        };
         
         tex = this.texture;
-    }
+    };
     
     if (!this.isTracking(track)){
         if (!tex){
             tex = track.glTexture;
-        }
+        };
         
         gl.texImage2D(parent.tessellator.glConst(target), 0, gl.DEPTH_COMPONENT, this.width, this.height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, parent.tessellator.glConst(target), tex, 0);
         
         this.track(track);
-    }
-}
+    };
+};

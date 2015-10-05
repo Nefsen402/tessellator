@@ -48,19 +48,19 @@ Tessellator.TextureModel = function (tessellator, width, height, attachments){
             new Tessellator.TextureModel.AttachmentColor(this.attachments),
             new Tessellator.TextureModel.AttachmentDepth()
         ];
-    }
+    };
     
     this.bindingAttachment = new Tessellator.TextureDummy();
     this.renderAttachment = null;
     
     this.setSize(width, height);
-}
+};
 
 Tessellator.copyProto(Tessellator.TextureModel, Tessellator.Texture);
 
 Tessellator.TextureModel.prototype.isReady = function (){
     return this.bindingAttachment && this.bindingAttachment.isReady();
-}
+};
 
 Tessellator.TextureModel.prototype.setup = function (){
     this.disposeShallow();
@@ -75,15 +75,15 @@ Tessellator.TextureModel.prototype.setup = function (){
     if (this.tessellator.extensions.get("WEBGL_draw_buffers")){
         this.buffers = [];
         this.buffers.ext = this.tessellator.extensions.get("WEBGL_draw_buffers");
-    }
+    };
     
     for (var i = 0, k = this.attachments.length; i < k; i++){
         this.attachments[i].setup(this);
-    }
+    };
     
     lastFrameBuffer.bindFramebuffer(this);
     this.setReady();
-}
+};
 
 Tessellator.TextureModel.prototype.configure = function (target, track){
     if (this.isReady()){
@@ -92,18 +92,18 @@ Tessellator.TextureModel.prototype.configure = function (target, track){
         
         for (var i = 0; i < this.attachments.length; i++){
             this.attachments[i].configure(this, target, track);
-        }
+        };
         
         if (this.autoUpdate || !this.isTracking(null)){
             this.renderAttachment.render(this, track);
             
             this.track(null);
-        }
+        };
         
         lastFrameBuffer.bindFramebuffer(this);
         this.configured = true;
-    }
-}
+    };
+};
 
 Tessellator.TextureModel.prototype.render = function (track){
     if (!this.configured){
@@ -115,8 +115,8 @@ Tessellator.TextureModel.prototype.render = function (track){
         this.renderAttachment.render(this);
         
         lastFrameBuffer.bindFramebuffer(this);
-    }
-}
+    };
+};
 
 Tessellator.TextureModel.prototype.bindFramebuffer = function (last){
     this.tessellator.GL.bindFramebuffer(this.tessellator.GL.FRAMEBUFFER, this.frameBuffer);
@@ -124,8 +124,8 @@ Tessellator.TextureModel.prototype.bindFramebuffer = function (last){
     
     if (this.buffers){
         this.buffers.ext.drawBuffersWEBGL(this.buffers);
-    }
-}
+    };
+};
 
 Tessellator.TextureModel.prototype.disposeShallow = function (){
     if (this.frameBuffer){
@@ -133,16 +133,16 @@ Tessellator.TextureModel.prototype.disposeShallow = function (){
         
         this.tessellator.resources.remove(this);
         this.frameBuffer = null;
-    }
-}
+    };
+};
 
 Tessellator.TextureModel.prototype.dispose = function (){
     this.disposeShallow();
     
     for (var i = 0, k = this.attachments.length; i < k; i++){
         this.attachments[i].dispose(this);
-    }
-}
+    };
+};
 
 Tessellator.TextureModel.prototype.setSize = function (width, height){
     width = width | 0;
@@ -153,21 +153,21 @@ Tessellator.TextureModel.prototype.setSize = function (width, height){
         this.height = height;
         
         this.setup();
-    }
-}
+    };
+};
 
 Tessellator.TextureModel.prototype.bind = function (){
     if (this.bindingAttachment){
         this.bindingAttachment.bind();
-    }
-}
+    };
+};
 
 Tessellator.TextureModel.prototype.getAttachment = function (c) {
     for (var i = 0, k = this.attachments.length; i < k; i++){
         if (this.attachments[i].constructor === c){
             return this.attachments[i];
-        }
-    }
+        };
+    };
     
     return null;
-}
+};

@@ -32,30 +32,30 @@ Tessellator.Shader = function (tessellator, type){
     
     if (type){
         this.create(type);
-    }
+    };
     
     this.ready = false;
     this.disposable = true;
-}
+};
 
 Tessellator.Shader.prototype.setReady = function (){
     this.ready = true;
     
     if (this.listener){
         this.listener(this);
-    }
-}
+    };
+};
 
 Tessellator.Shader.prototype.isReady = function (){
     return this.ready;
-}
+};
 
 Tessellator.Shader.prototype.loadDOM = function (dom){
     if (!dom){
         return;
     }else if (dom.constructor === String){
         dom = document.getElementById(dom);
-    }
+    };
     
     
     if (!this.shader){
@@ -67,10 +67,10 @@ Tessellator.Shader.prototype.loadDOM = function (dom){
             type = this.tessellator.GL.VERTEX_SHADER;
         }else{
             throw "unknown shader: " + dom.type;
-        }
+        };
         
         this.create(type);
-    }
+    };
     
     var self = this;
     
@@ -79,7 +79,7 @@ Tessellator.Shader.prototype.loadDOM = function (dom){
     });
     
     return this;
-}
+};
 
 Tessellator.Shader.prototype.loadRemote = function (src){
     var self = this;
@@ -89,14 +89,14 @@ Tessellator.Shader.prototype.loadRemote = function (src){
     });
     
     return this;
-}
+};
 
 Tessellator.Shader.prototype.load = function (source){
     if (!source){
         throw "no source!";
     }else if (!this.shader){
         throw "no shader!";
-    }
+    };
     
     {
         var gl = this.tessellator.GL;
@@ -111,7 +111,7 @@ Tessellator.Shader.prototype.load = function (source){
                 error = "fragment shader problem";
             }else if (this.type === gl.VERTEX_SHADER){
                 error = "vertex shader problem";
-            }
+            };
             
             var t = [];
             t.type = error;
@@ -123,10 +123,10 @@ Tessellator.Shader.prototype.load = function (source){
                 
                 for (var i = 0; i < this.length; i++){
                     s.push(this[i].raw);
-                }
+                };
                 
                 return s.join("\n");
-            }
+            };
             
             var info = gl.getShaderInfoLog(this.shader);
             var lines = info.split("\n");
@@ -134,7 +134,7 @@ Tessellator.Shader.prototype.load = function (source){
             for (var i = 0; i < lines.length; i++){
                 if (!lines[i].trim().length){
                     continue;
-                }
+                };
                 
                 var ii = lines[i].indexOf(":");
                 
@@ -164,10 +164,10 @@ Tessellator.Shader.prototype.load = function (source){
                             o.line = l;
                             
                             m = iii + 1;
-                        }
+                        };
                     }else{
                         m = ii + 1;
-                    }
+                    };
                     
                     o.info = lines[i].substring(m);
                     
@@ -177,17 +177,17 @@ Tessellator.Shader.prototype.load = function (source){
                         type: "unknown",
                         info: lines[i]
                     });
-                }
-            }
+                };
+            };
             
             throw t;
-        }
-    }
+        };
+    };
     
     this.setReady();
     
     return this;
-}
+};
 
 Tessellator.Shader.prototype.create = function (type){
     if (this.shader){
@@ -195,16 +195,16 @@ Tessellator.Shader.prototype.create = function (type){
     }else{
         this.type = this.tessellator.glConst(type);
         this.shader = this.tessellator.GL.createShader(this.type);
-    }
+    };
     
     return this;
-}
+};
 
 Tessellator.Shader.prototype.dispose = function (){
     if (this.shader){
         this.tessellator.GL.deleteShader(this.shader);
-    }
-}
+    };
+};
 
 Tessellator.Shader.prototype.onLink = Tessellator.EMPTY_FUNC;
 

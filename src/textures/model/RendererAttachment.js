@@ -30,13 +30,13 @@
 Tessellator.TextureModel.AttachmentRenderer = function (renderer, arg){
     this.renderer = renderer;
     this.arg = arg;
-}
+};
 
 Tessellator.TextureModel.AttachmentRenderer.prototype.configure = Tessellator.EMPTY_FUNC;
 
 Tessellator.TextureModel.AttachmentRenderer.prototype.setup = function (texture){
     texture.renderAttachment = this;
-}
+};
 
 Tessellator.TextureModel.AttachmentRenderer.prototype.render = function (texture, render){
     var matrix = new Tessellator.RenderMatrix(this.renderer);
@@ -47,7 +47,7 @@ Tessellator.TextureModel.AttachmentRenderer.prototype.render = function (texture
     
     if (render && render.dirty){
         render.dirty();
-    }
-}
+    };
+};
 
-Tessellator.TextureModel.AttachmentRenderer.prototype.dispose = function (){}
+Tessellator.TextureModel.AttachmentRenderer.prototype.dispose = function (){};

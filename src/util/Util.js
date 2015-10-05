@@ -30,13 +30,13 @@
 (function () {
     var Factory = function (constructor, args) {
         return constructor.apply(this, args);
-    }
+    };
 
 
     Tessellator.new = function() {
         Factory.prototype = this.prototype;
         return new Factory(this, arguments);
-    }
+    };
     
     Tessellator.extend = function (o, o2){
         var newproto = Object.create(o2.prototype);
@@ -59,17 +59,17 @@
                         level = cache;
                         
                         return value;
-                    }
+                    };
                 })(oo);
-            }
+            };
             
             this.super = instance;
-        }
+        };
         
         newproto.constructor = o;
         
         o.prototype = newproto;
-    }
+    };
 })();
 
 Tessellator.copyProto = Tessellator.extend;
@@ -78,14 +78,14 @@ Tessellator.prototype.glConst = function (c){
     if (c.constructor === Array){
         for (var i = 0; i < c.length; i++){
             c[i] = this.glConst(c[i]);
-        }
+        };
         
         return c;
     }else if (c.constructor === Tessellator.Constant){
         return c.gl;
     }else{
         return c;
-    }
+    };
 };
 
 Tessellator.prototype.tessConst = function (c){
@@ -100,7 +100,7 @@ Tessellator.Extensions = function (tessellator){
     
     for (var i = 0; i < avaliable.length; i++){
         this.extensions[avaliable[i]] = undefined;
-    }
+    };
 };
 
 Tessellator.Extensions.prototype.get = function (key){
@@ -109,14 +109,14 @@ Tessellator.Extensions.prototype.get = function (key){
     if (c === undefined){
         for (var i = 0; i < Tessellator.VENDORS.length && !c; i++){
             c = this.tessellator.GL.getExtension(Tessellator.VENDORS[i] + key);
-        }
+        };
         
         if (!c){
             c = undefined;
-        }
+        };
         
         this.extensions[key] = c;
-    }
+    };
     
     return c;
 };
@@ -126,7 +126,7 @@ Tessellator.EMPTY_FUNC = function () {};
 Tessellator.getSourceText = function(elem, notify){
     if (!elem){
         return;
-    }
+    };
     
     if (elem.getAttribute("src")){
         return Tessellator.getRemoteText(elem.getAttribute("src"), notify);
@@ -136,21 +136,21 @@ Tessellator.getSourceText = function(elem, notify){
         for (var i = 0; i < elem.childNodes.length; i++){
             if (elem.childNodes[i].nodeType === elem.childNodes[i].TEXT_NODE){
                 code.push(elem.childNodes[i].textContent);
-            }
-        }
+            };
+        };
         
         if (notify){
             notify(code.join(""));
         }else{
             return code.join("");
-        }
-    }
+        };
+    };
 };
 
 Tessellator.getRemoteText = function(src, notify){
     if (!src){
         return;
-    }
+    };
     
     var request = new XMLHttpRequest();
     
@@ -163,9 +163,9 @@ Tessellator.getRemoteText = function(src, notify){
                     console.error("Unable to load resource: " + src + ", server responded with: " + request.status + " (" + request.statusText + ")");
                 }else{
                     notify(request.responseText);
-                }
-            }
-        }
+                };
+            };
+        };
         
         request.send();
     }else{
@@ -173,7 +173,7 @@ Tessellator.getRemoteText = function(src, notify){
         request.send();
         
         return request.responseText;
-    }
+    };
 };
 
 Tessellator.getFirstDomFromType = function (dom, type){
@@ -182,13 +182,13 @@ Tessellator.getFirstDomFromType = function (dom, type){
             for (var ii = 0, kk = type.length; ii < kk; ii++){
                 if (dom.childNodes[i].type === type[ii]){
                     return dom.childNodes[i];
-                }
-            }
+                };
+            };
         }else if (dom.childNodes[i].type === type){
             return dom.childNodes[i];
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.getColor = function (data){
     var color;
@@ -213,7 +213,7 @@ Tessellator.getColor = function (data){
                 var blue = ((arg >> 0) & 0xFF) / 255;
                 
                 color = Tessellator.vec4(red, green, blue, 1);
-            }
+            };
         }else if (arg.constructor === Tessellator.vec4){
             color = arg;
         }else if (arg.constructor === Tessellator.vec3){
@@ -231,7 +231,7 @@ Tessellator.getColor = function (data){
                 color = Tessellator.vec4(arg, arg, arg, 1);
             }else{
                 color = Tessellator.vec4();
-            }
+            };
         }else if (arg.length === 9 && arg.chatAt(0) === '#'){
             var red = parseInt(arg.substring(1, 3), 16) / 256;
             var green = parseInt(arg.substring(3, 5), 16) / 256;
@@ -260,10 +260,10 @@ Tessellator.getColor = function (data){
             color = Tessellator.vec4(red, green, blue, alpha);
         }else{
             color = Tessellator.COLORS[arg.toUpperCase()];
-        }
+        };
     }else{
         throw "too many arguments: " + data.length;
-    }
+    };
     
     return color;
 };
@@ -302,7 +302,7 @@ Tessellator.prototype.create3DTextureModel = function (texture, width, height, d
                 c + 1 / texture.width, 1,
                 c, 1
             ]);
-        }
+        };
         
         for (var y = 0; y < texture.height; y++){
             var c = y / texture.height;
@@ -318,7 +318,7 @@ Tessellator.prototype.create3DTextureModel = function (texture, width, height, d
                 1, c + 1 / texture.width,
                 1, c
             ]);
-        }
+        };
         
         model.end();
         model.start(Tessellator.QUAD);
@@ -348,7 +348,7 @@ Tessellator.prototype.create3DTextureModel = function (texture, width, height, d
                 c, height, 0,
                 c, height, -depth
             );
-        }
+        };
         
         for (var y = 0; y < texture.height; y++){
             var c = y / texture.height * height;
@@ -364,11 +364,11 @@ Tessellator.prototype.create3DTextureModel = function (texture, width, height, d
                 width, c, -depth,
                 width, c, 0
             );
-        }
+        };
         
         model.end();
         model.finish();
-    }
+    };
     
     texture.addListener(builder);
     
@@ -382,9 +382,9 @@ Tessellator.getVendorIndependent = function (object, name){
         for (var i = 0; i < Tessellator.VENDORS.length; i++){
             if (oo == Tessellator.VENDORS[i] + name){
                 return object[o];
-            }
-        }
-    }
+            };
+        };
+    };
 };
 
 Tessellator.prototype.getPointerLock = function (){
@@ -393,7 +393,7 @@ Tessellator.prototype.getPointerLock = function (){
 
 Tessellator.prototype.hasPointerLock = function (){
     return this.pointerLock;
-}
+};
 
 Tessellator.prototype.aquirePointerLock = function (){
     if (this.getPointerLock() !== this.canvas){
@@ -410,21 +410,21 @@ Tessellator.prototype.aquirePointerLock = function (){
                         Tessellator.getVendorIndependent(document, "exitpointerlock").call(document);
                         
                         tessellator.pointerLock = null;
-                    }
-                }
+                    };
+                };
             })(this),
-        }
+        };
         
         document.addEventListener("pointerlockchange", this.pointerLock.event);
         document.addEventListener("mozpointerlockchange", this.pointerLock.event);
         document.addEventListener("webkitpointerlockchange", this.pointerLock.event);
-    }
+    };
 };
 
 Tessellator.prototype.releasePointerLock = function (){
     if (this.pointerLock){
         this.pointerLock.event();
-    }
+    };
 };
 
 Tessellator.prototype.requestFullscreen = function (){
@@ -446,10 +446,10 @@ Tessellator.prototype.requestFullscreen = function (){
                         Tessellator.getVendorIndependent(document, "exitfullscreen").call(document);
                         
                         tessellator.fullscreen = null;
-                    }
-                }
+                    };
+                };
             })(this),
-        }
+        };
         
         this.canvas.style.cssText = "width:100%;height:100%;display:block;top:0px;left:0px;";
         
@@ -458,7 +458,7 @@ Tessellator.prototype.requestFullscreen = function (){
         this.canvas.addEventListener("fullscreenchange", this.fullscreen.event);
         this.canvas.addEventListener("webkitfullscreenchange", this.fullscreen.event);
         this.canvas.addEventListener("mozfullscreenchange", this.fullscreen.event);
-    }
+    };
 };
 
 Tessellator.prototype.isFullscreen = function (){
@@ -468,5 +468,5 @@ Tessellator.prototype.isFullscreen = function (){
 Tessellator.prototype.exitFullscreen = function (){
     if (this.fullscreen){
         this.fullscreen.event();
-    }
+    };
 };

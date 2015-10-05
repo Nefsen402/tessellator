@@ -43,7 +43,7 @@ Tessellator.TextureModelCubeMap = function (tessellator, size, model, pos, filte
         ]);
         
         this.set(dir, texture);
-    }
-}
+    };
+};
 
 Tessellator.extend(Tessellator.TextureModelCubeMap, Tessellator.TextureCubeMap);

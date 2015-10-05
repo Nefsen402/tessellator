@@ -36,10 +36,10 @@ Tessellator.Geometry.registerCustomGeometry(Tessellator.TRIANGLE, Tessellator.TR
         if (add && add.positions.length){
             if (add.normals.length){
                 g.generateNormals();
-            }
+            };
             
             g.indices.offset(add.positions.length / 3);
-        }
+        };
         
         if (tb){
             for (var i = 0; i < k; i += 3){
@@ -53,11 +53,11 @@ Tessellator.Geometry.registerCustomGeometry(Tessellator.TRIANGLE, Tessellator.TR
                     ];
                 }else{
                     bounds = tb.bounds.subarray(i * 6, (i + 1) * 6);
-                }
+                };
                 
                 this.shape.colors.push(bounds);
-            }
-        }
+            };
+        };
     }else{
         var k = g.positions.length / 3;
         var off = add ? add.positions.length / 3 : 0;
@@ -80,12 +80,12 @@ Tessellator.Geometry.registerCustomGeometry(Tessellator.TRIANGLE, Tessellator.TR
                     ];
                 }else{
                     bounds = tb.bounds.subarray(i * 6, (i + 1) * 6);
-                }
+                };
                 
                 this.shape.colors.push(bounds);
-            }
-        }
-    }
+            };
+        };
+    };
 });
 
 Tessellator.Geometry.registerCustomGeometry(Tessellator.NORMAL, Tessellator.TRIANGLE, function (){});
@@ -93,5 +93,5 @@ Tessellator.Geometry.registerCustomGeometry(Tessellator.INDICES, Tessellator.TRI
 Tessellator.Geometry.registerCustomGeometry(Tessellator.TEXTURE, Tessellator.TRIANGLE, function (g, add, arg){
     if (!arg.get("textureBounds")){
         g.dispose();
-    }
+    };
 });

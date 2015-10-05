@@ -29,7 +29,7 @@
 
 Tessellator.Model.prototype.setPointLight = function (){
     return this.add(Tessellator.new.apply(Tessellator.PointLight, arguments));
-}
+};
 
 Tessellator.PointLight = function (){
     if (arguments.length === 1 || arguments.length === 2){
@@ -40,7 +40,7 @@ Tessellator.PointLight = function (){
             this.range = range;
         }else{
             this.range = Tessellator.float(range);
-        }
+        };
     }else if (arguments.length === 3 || arguments.length === 4){
         this.pos = Tessellator.vec3(arguments[0], arguments[1], arguments[2]);
         var range = arguments[3];
@@ -49,14 +49,14 @@ Tessellator.PointLight = function (){
             this.range = range;
         }else{
             this.range = Tessellator.float(range);
-        }
+        };
     }else{
         throw "invalid arguments in Tessellator.PointLight";
-    }
+    };
     
     this.type = Tessellator.LIGHTING_POINT;
     this.subtype = Tessellator.LIGHTING;
-}
+};
 
 Tessellator.PointLight.prototype.set = function (lighting, index, matrix){
     if (this.color.tween) this.color.tween.update();
@@ -76,19 +76,19 @@ Tessellator.PointLight.prototype.set = function (lighting, index, matrix){
         lighting[7 + index] = Math.abs(this.range.x);
     }else{
         lighting[0 + index] = 3;
-    }
+    };
     
     return 2;
-}
+};
 
 Tessellator.PointLight.prototype.applyLighting = function (matrix, index, renderer){
     this.set(renderer.lightingTexture.data, index[0] * 4 * 4, matrix);
     
     if (index[0]++ * 4 * 4 >= renderer.lightingTexture.data.length){
         throw "too many lights!";
-    }
-}
+    };
+};
 
 Tessellator.PointLight.prototype.init = function (interpreter){
     this.color = interpreter.get("color");
-}
+};

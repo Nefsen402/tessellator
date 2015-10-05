@@ -37,20 +37,20 @@ Tessellator.Model.prototype.start = function (type, drawType){
     this.add(start);
     
     return start.geometry;
-}
+};
 
 Tessellator.Start = function (tessellator, shapeType, drawType) {
     this.drawType = drawType;
     this.shapeType = shapeType;
-}
+};
 
 Tessellator.Start.prototype.init = function (interpreter){
     var geometry = new Tessellator.Geometry(this.shapeType, interpreter);
     
     if (this.shapeType === Tessellator.LINE){
         interpreter.set("draw", Tessellator.LINE);
-    }
+    };
     
     interpreter.set("currentGeometry", geometry);
     return null;
-}
+};

@@ -29,17 +29,17 @@
 
 Tessellator.Model.prototype.setUniform = function (key, value){
     return this.add(new Tessellator.Model.UniformSetter(key, value));
-}
+};
 
 Tessellator.Model.UniformSetter = function (key, value){
     this.key = key;
     this.value = value;
-}
+};
 
 Tessellator.Model.UniformSetter.prototype.init = function (init){
     init.flush();
-}
+};
 
 Tessellator.Model.UniformSetter.prototype.apply = function (matrix){
     matrix.set(this.key, this.value);
-}
+};

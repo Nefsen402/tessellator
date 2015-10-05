@@ -32,20 +32,20 @@ Tessellator.Camera = function (view){
     this.subtype = Tessellator.CAMERA;
     
     this.view = view;
-}
+};
 
 Tessellator.Camera.prototype.apply = function (render){
     this.view.apply(render);
-}
+};
 
 Tessellator.Camera.prototype.applyLighting = function (matrix){
     if (this.view.applyLighting) this.view.applyLighting(matrix);
-}
+};
 
 Tessellator.Camera.prototype.init = function (interpreter){
     this.view.init(interpreter);
-}
+};
 
 Tessellator.Camera.prototype.postInit = function (interpreter){
     this.view.postInit(renderer);
-}
+};

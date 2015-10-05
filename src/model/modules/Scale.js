@@ -32,8 +32,8 @@ Tessellator.Model.prototype.scale = function (){
         return this.add(arguments[0]);
     }else{
         return this.add(Tessellator.new.apply(Tessellator.Scale, arguments));
-    }
-}
+    };
+};
 
 Tessellator.Scale = function (){
     this.type = Tessellator.SCALE;
@@ -50,23 +50,23 @@ Tessellator.Scale = function (){
         this.coords = Tessellator.vec3(arguments);
     }else{
         throw "invalid arguments in Tessellator.scale()";
-    }
-}
+    };
+};
 
 Tessellator.Scale.prototype.apply = function (render){
     var m = render.get("mvMatrix");
     
     this.set(m);
-}
+};
 
 Tessellator.Scale.prototype.applyLighting = function (matrix){
     this.set(matrix);
-}
+};
 
 Tessellator.Scale.prototype.set = function (m){
     m.scale(this.coords);
-}
+};
 
 Tessellator.Scale.prototype.init = function (interpreter){
     interpreter.flush();
-}
+};

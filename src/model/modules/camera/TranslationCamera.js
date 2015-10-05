@@ -37,29 +37,29 @@ Tessellator.TranslationCamera = function (view, x, y, z){
         this.pos = x;
     }else{
         this.pos = Tessellator.vec3(x, y, z);
-    }
-}
+    };
+};
 
 Tessellator.TranslationCamera.prototype.applyLighting = function (matrix){
     if (this.view.applyLighting) this.view.applyLighting(matrix);
     
     this.set(matrix);
-}
+};
 
 Tessellator.TranslationCamera.prototype.apply = function (render){
     this.view.apply(render);
     
     this.set(render.exists("mvMatrix") ? render.get("mvMatrix") : render.get("pMatrix"));
-}
+};
 
 Tessellator.TranslationCamera.prototype.set = function (m){
     m.translate(this.pos.clone().negate());
-}
+};
 
 Tessellator.TranslationCamera.prototype.init = function (interpreter){
     this.view.init(interpreter);
-}
+};
 
 Tessellator.TranslationCamera.prototype.postInit = function (interpreter){
     this.view.postInit(interpreter);
-}
+};

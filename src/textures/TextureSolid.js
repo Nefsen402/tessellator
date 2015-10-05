@@ -29,13 +29,13 @@
 
 Tessellator.prototype.createTextureSolid = function (){
     return new Tessellator.TextureSolid(this, Tessellator.getColor(arguments).multiply(255));
-}
+};
 
 Tessellator.TextureSolid = function (tessellator, color){
     var data = new Uint8Array(4);
     data.set(color);
     
     this.super(tessellator, 1, 1, Tessellator.RGBA, Tessellator.UNSIGNED_BYTE, data, Tessellator.TEXTURE_FILTER_NEAREST);
-}
+};
 
 Tessellator.copyProto(Tessellator.TextureSolid, Tessellator.TextureData);

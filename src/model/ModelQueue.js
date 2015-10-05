@@ -31,30 +31,30 @@ Tessellator.ModelQueue = function (){
     this.render = true;
     this.model = [];
     this.length = 0;
-}
+};
 
 Tessellator.ModelQueue.prototype.apply = function (matrix, mod, renderer){
     renderer.renderModel(matrix, this);
-}
+};
 
-Tessellator.ModelQueue.finish = function (){}
+Tessellator.ModelQueue.finish = function (){};
 
 Tessellator.ModelQueue.prototype.destroy = function (i){
     if (isNaN(i)){
         i = this.model.indexOf(i);
-    }
+    };
     
     this.model.splice(i, 1);
     this.length--;
-}
+};
 
 Tessellator.ModelQueue.prototype.remove = function (i){
     if (isNaN(i)){
         i = this.model.indexOf(i);
-    }
+    };
     
     this.model[i] = {realModel: this.model[i]};
-}
+};
 
 Tessellator.ModelQueue.prototype.readd = function (i){
     if (isNaN(i)){
@@ -63,18 +63,18 @@ Tessellator.ModelQueue.prototype.readd = function (i){
                 i = ii;
                 
                 break;
-            }
-        }
+            };
+        };
         
         if (isNaN(i)){
             return;
-        }
-    }
+        };
+    };
     
     if (this.model[i].realModel){
         this.model[i] = this.model[i].realModel;
-    }
-}
+    };
+};
 
 Tessellator.ModelQueue.prototype.readdFirst = function (){
     for (var i = 0; i < this.model.length; i++){
@@ -82,9 +82,9 @@ Tessellator.ModelQueue.prototype.readdFirst = function (){
             this.model[i] = this.model[i].realModel;
             
             break;
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.ModelQueue.prototype.readdLast = function (){
     for (var i = this.model.length - 1; i >= 0; i--){
@@ -92,19 +92,19 @@ Tessellator.ModelQueue.prototype.readdLast = function (){
             this.model[i] = this.model[i].realModel;
             
             break;
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.ModelQueue.prototype.get = function (i){
     return this.model[i];
-}
+};
 
 Tessellator.ModelQueue.prototype.add = function (mod){
     if (mod.constructor !== Tessellator.Model){
         throw "cannot add a non-model to a model queue";
-    }
+    };
     
     this.model.push.apply(this.model, arguments);
     this.length += arguments.length;
-}
+};

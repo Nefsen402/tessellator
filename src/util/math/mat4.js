@@ -40,8 +40,8 @@ Tessellator.mat4 = function (){
             pos += arg.length;
         }else{
             array[pos++] = arg;
-        }
-    }
+        };
+    };
     
     if (pos === 0){
         array[ 0] = 1;
@@ -57,13 +57,13 @@ Tessellator.mat4 = function (){
             throw "too little information";
         }else if (pos > array.length){
             throw "too much information";
-        }
-    }
+        };
+    };
     
     array.__proto__ = Tessellator.mat4.prototype;
     
     return array;
-}
+};
 
 Tessellator.mat4.prototype = Object.create(Float32Array.prototype);
 Tessellator.mat4.prototype.constructor = Tessellator.mat4;
@@ -92,11 +92,11 @@ Tessellator.mat4.prototype.random = function (scale){
     this[15] = (Math.random() * 2 - 1) * scale;
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.clone = function (){
     return Tessellator.mat4(this);
-}
+};
 
 Tessellator.mat4.prototype.copy = function (copy){
     if (copy.length === 16){
@@ -143,15 +143,14 @@ Tessellator.mat4.prototype.copy = function (copy){
         this[15] = 1;
     }else{
         throw "invalid arguments";
-    }
+    };
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.multiply = function (mat){
     if (mat.length === 16){
-        var
-            x00 = this[ 0],
+        var x00 = this[ 0],
             x01 = this[ 1],
             x02 = this[ 2],
             x03 = this[ 3],
@@ -205,8 +204,7 @@ Tessellator.mat4.prototype.multiply = function (mat){
         this[14] = y30 * x02 + y31 * x12 + y32 * x22 + y33 * x32;
         this[15] = y30 * x03 + y31 * x13 + y32 * x23 + y33 * x33;
     }else if (mat.length === 9){
-        var
-            x00 = this[ 0],
+        var x00 = this[ 0],
             x01 = this[ 1],
             x02 = this[ 2],
             x03 = this[ 3],
@@ -246,8 +244,7 @@ Tessellator.mat4.prototype.multiply = function (mat){
         this[10] = y20 * x02 + y21 * x12 + y22 * x22;
         this[11] = y20 * x03 + y21 * x13 + y22 * x23;
     }else if (mat.length === 4){
-        var
-            x00 = this[ 0],
+        var x00 = this[ 0],
             x01 = this[ 1],
             x02 = this[ 2],
             x03 = this[ 3],
@@ -273,14 +270,13 @@ Tessellator.mat4.prototype.multiply = function (mat){
         this[ 7] = y10 * x03 + y11 * x13;
     }else{
         throw "invalid arguments";
-    }
+    };
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.transpose = function (){
-    var
-        x01 = this[ 1],
+    var x01 = this[ 1],
         x02 = this[ 2],
         x03 = this[ 3],
         
@@ -313,11 +309,10 @@ Tessellator.mat4.prototype.transpose = function (){
     this[14] = x23;
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.invert = function (){
-    var
-        x00 = this[ 0],
+    var x00 = this[ 0],
         x01 = this[ 1],
         x02 = this[ 2],
         x03 = this[ 3],
@@ -334,8 +329,7 @@ Tessellator.mat4.prototype.invert = function (){
         x32 = this[14],
         x33 = this[15];
     
-    var
-        y00 = x00 * x11 - x01 * x10,
+    var y00 = x00 * x11 - x01 * x10,
         y01 = x00 * x12 - x02 * x10,
         y02 = x00 * x13 - x03 * x10,
         y03 = x01 * x12 - x02 * x11,
@@ -368,11 +362,10 @@ Tessellator.mat4.prototype.invert = function (){
     this[15] = (x20 * y03 - x21 * y01 + x22 * y00) / d;
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.adjoint = function(joint) {
-    var
-        a00 = joint[ 0],
+    var a00 = joint[ 0],
         a01 = joint[ 1],
         a02 = joint[ 2],
         a03 = joint[ 3],
@@ -408,12 +401,12 @@ Tessellator.mat4.prototype.adjoint = function(joint) {
     this[15] =  (a00 * (a11 * a22 - a12 * a21) - a10 * (a01 * a22 - a02 * a21) + a20 * (a01 * a12 - a02 * a11));
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.translate = function (vec3){
     if (vec3.tween){
         vec3.tween.update();
-    }
+    };
     
     this[12] += this[ 0] * vec3[0] + this[ 4] * vec3[1] + this[ 8] * vec3[2];
     this[13] += this[ 1] * vec3[0] + this[ 5] * vec3[1] + this[ 9] * vec3[2];
@@ -421,7 +414,7 @@ Tessellator.mat4.prototype.translate = function (vec3){
     this[15] += this[ 3] * vec3[0] + this[ 7] * vec3[1] + this[11] * vec3[2];
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.identity = function (){
     this[ 0] = 1;
@@ -445,12 +438,12 @@ Tessellator.mat4.prototype.identity = function (){
     this[15] = 1;
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.scale = function (vec3){
     if (vec3.tween){
         vec3.tween.update();
-    }
+    };
     
     this[ 0] *= vec3[0];
     this[ 1] *= vec3[0];
@@ -468,20 +461,19 @@ Tessellator.mat4.prototype.scale = function (vec3){
     this[11] *= vec3[2];
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.rotate = function (rot, vec3){
     if (rot.tween){
         rot.tween.update();
-    }
+    };
     
     if (vec3.tween){
         vec3.tween.update();
-    }
+    };
     
     //normalize
-    var
-        x = vec3[0],
+    var x = vec3[0],
         y = vec3[1],
         z = vec3[2],
         
@@ -490,8 +482,7 @@ Tessellator.mat4.prototype.rotate = function (rot, vec3){
     y /= l;
     z /= l;
     
-    var
-        s = Math.sin(rot[0]),
+    var s = Math.sin(rot[0]),
         c = Math.cos(rot[0]),
         t = 1 - c,
         
@@ -536,18 +527,17 @@ Tessellator.mat4.prototype.rotate = function (rot, vec3){
     this[11] = a03 * b20 + a13 * b21 + a23 * b22;
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.rotateX = function (rad) {
     if (rad.tween){
         rad.tween.update();
-    }
+    };
     
     var s = Math.sin(rad[0]),
         c = Math.cos(rad[0]);
     
-    var
-        x10 = this[4],
+    var x10 = this[4],
         x11 = this[5],
         x12 = this[6],
         x13 = this[7];
@@ -562,19 +552,18 @@ Tessellator.mat4.prototype.rotateX = function (rad) {
     this[11] = this[11] * c - x13 * s;
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.rotateY = function (rad) {
     if (rad.tween){
         rad.tween.update();
-    }
+    };
     
     var s = Math.sin(rad[0]),
         c = Math.cos(rad[0]);
     
     //cache values
-    var
-        x00 = this[0],
+    var x00 = this[0],
         x01 = this[1],
         x02 = this[2],
         x03 = this[3];
@@ -589,19 +578,18 @@ Tessellator.mat4.prototype.rotateY = function (rad) {
     this[11] = x03 * s + this[11] * c;
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.rotateZ = function (rad) {
     if (rad.tween){
         rad.tween.update();
-    }
+    };
     
     var s = Math.sin(rad[0]),
         c = Math.cos(rad[0]);
     
     //cache values
-    var
-        x00 = this[0],
+    var x00 = this[0],
         x01 = this[1],
         x02 = this[2],
         x03 = this[3];
@@ -616,7 +604,7 @@ Tessellator.mat4.prototype.rotateZ = function (rad) {
     this[7] = this[7] * c - x03 * s;
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.rotateVec = function (vec, up){
     if (vec.tween) vec.tween.update();
@@ -626,8 +614,7 @@ Tessellator.mat4.prototype.rotateVec = function (vec, up){
     var x = up.clone().cross(z).normalize();
     var y = z.clone().cross(x).normalize();
     
-    var
-        x00 = this[ 0],
+    var x00 = this[ 0],
         x01 = this[ 1],
         x02 = this[ 2],
         x03 = this[ 3],
@@ -656,7 +643,7 @@ Tessellator.mat4.prototype.rotateVec = function (vec, up){
     this[11] = x[2] * x03 + y[2] * x13 + z[2] * x23;
     
     return this;
-}
+};
 
 Tessellator.mat4.prototype.align = function (v1, v2){
     if (v1.tween) v1.tween.update();
@@ -670,20 +657,20 @@ Tessellator.mat4.prototype.align = function (v1, v2){
     
     if (v[0] === 0 && v[1] === 0 && v[2] === 0){
         v = Tessellator.vec3(1, 0, 0);
-    }
+    };
     
     this.rotate(Math.acos(c[0]), v);
     return this;
-}
+};
 
 Tessellator.mat4.prototype.toString = function (){
     var str = ["mat4("];
     
     for (var i = 0; i < 15; i++){
         str.push(this[i], ", ");
-    }
+    };
     
     str.push(this[15], ")");
     
     return str.join("");
-}
+};

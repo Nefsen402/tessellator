@@ -39,12 +39,12 @@ Tessellator.FragmentedArray = function (size){
         for (var i = 0; i < this.elements; i++){
             this.buffer = arguments[i];
             this.length += arguments[i];
-        }
+        };
     }else{
         this.incrementSize = size || 8;
         this.buffer = null;
         this.elements = 0;
-    }
+    };
 };
 
 Tessellator.FragmentedArray.prototype.isEmpty = function (){
@@ -62,7 +62,7 @@ Tessellator.FragmentedArray.prototype.instance = function (value, copies){
     
     for (var i = 0; i < a.length; a++){
         a[i] = value;
-    }
+    };
     
     this.push(a);
 };
@@ -71,7 +71,7 @@ Tessellator.FragmentedArray.prototype.removeElement = function (index){
     this.length -= this.buffer[index].length;
     for (var i = index; i < this.elements; i++){
         this.buffer[i] = this.buffer[i + 1];
-    }
+    };
     
     this.elements--;
 };
@@ -82,13 +82,13 @@ Tessellator.FragmentedArray.prototype.push = function (arg){
             this.buffer = new Array(this.incrementSize);
         }else if (this.buffer.length === this.elements){
             this.buffer.length += this.incrementSize;
-        }
+        };
         
         this.buffer[this.elements] = arg;
         
         this.length += arg.length;
         this.elements++;
-    }
+    };
 };
 
 Tessellator.FragmentedArray.prototype.offset = function (off){
@@ -100,21 +100,21 @@ Tessellator.FragmentedArray.prototype.offset = function (off){
         }else{
             for (var i = 0, k = e.length; i < k; i++){
                 e[i] += off;
-            }
-        }
-    }
+            };
+        };
+    };
 };
 
 Tessellator.FragmentedArray.prototype.get = function (index){
     if (index < 0 || index > this.length){
         throw "index is out of range to access fragmented array";
-    }
+    };
     
     var i, pos = this.length;
     
     for (i = this.elements - 1; pos > index; i--){
         pos -= this.buffer[i].length;
-    }
+    };
     
     var e = this.buffer[i + 1];
     
@@ -122,7 +122,7 @@ Tessellator.FragmentedArray.prototype.get = function (index){
         return e.get(index - pos);
     }else{
         return e[index - pos];
-    }
+    };
 };
 
 Tessellator.FragmentedArray.prototype.set = function (index, value){
@@ -130,7 +130,7 @@ Tessellator.FragmentedArray.prototype.set = function (index, value){
     
     for (i = this.elements - 1; pos > index; i--){
         pos -= this.buffer[i].length;
-    }
+    };
     
     var e = this.buffer[i + 1];
     
@@ -138,7 +138,7 @@ Tessellator.FragmentedArray.prototype.set = function (index, value){
         return e.set(index - pos, value);
     }else{
         return e[index - pos] = value;
-    }
+    };
 };
 
 Tessellator.FragmentedArray.prototype.write = function (array, pos){
@@ -149,10 +149,10 @@ Tessellator.FragmentedArray.prototype.write = function (array, pos){
             e.write(array, pos);
         }else{
             array.set(e, pos);
-        }
+        };
         
         pos += e.length;
-    }
+    };
 };
 
 Tessellator.FragmentedArray.prototype.compress = function (){

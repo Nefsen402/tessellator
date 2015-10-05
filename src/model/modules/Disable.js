@@ -29,12 +29,12 @@
 
 Tessellator.Model.prototype.disable = function (e){
     return this.add(new Tessellator.Disable(e));
-}
+};
 
 Tessellator.Disable = function (arg){
     this.type = Tessellator.DISABLE;
     this.arg = arg;
-}
+};
 
 
 Tessellator.Disable.prototype.apply = function (render){
@@ -42,8 +42,8 @@ Tessellator.Disable.prototype.apply = function (render){
         render.set("lights", render.renderer.noLightingTexture);
     }else{
         render.disable(this.arg)
-    }
-}
+    };
+};
 
 
 Tessellator.Disable.prototype.init = function (interpreter){
@@ -57,5 +57,5 @@ Tessellator.Disable.prototype.init = function (interpreter){
         return null;
     }else{
         interpreter.flush();
-    }
-}
+    };
+};

@@ -40,8 +40,7 @@ Tessellator.Geometry.registerCustomGeometry(Tessellator.QUAD, Tessellator.TRIANG
         var off = add ? add.positions.length / 3 : 0;
         
         for (var i = 0; i < k.length; i += 4){
-            var
-                i0 = k[i + 0],
+            var i0 = k[i + 0],
                 i1 = k[i + 1],
                 i2 = k[i + 2],
                 i3 = k[i + 3];
@@ -55,15 +54,15 @@ Tessellator.Geometry.registerCustomGeometry(Tessellator.QUAD, Tessellator.TRIANG
                 i2 + off,
                 i3 + off
             ]);
-        }
+        };
         
         g.indices = newIndices;
         
         if (add && add.positions.length){
             if (add.normals.length){
                 g.generateNormals();
-            }
-        }
+            };
+        };
     }else{
         var off = add ? add.positions.length / 3 : 0;
         
@@ -90,10 +89,10 @@ Tessellator.Geometry.registerCustomGeometry(Tessellator.QUAD, Tessellator.TRIANG
                     ];
                 }else{
                     bounds = tb.bounds.subarray(i * 2, (i + 4) * 2);
-                }
+                };
                 
                 g.colors.push(bounds);
-            }
-        }
-    }
+            };
+        };
+    };
 });

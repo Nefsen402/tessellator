@@ -29,19 +29,19 @@
 
 Tessellator.Model.prototype.setSpecularReflection = function (reflection){
     this.add(new Tessellator.SpecularLight(reflection));
-}
+};
 
 Tessellator.SpecularLight = function (intensity){
     this.type = Tessellator.LIGHTING_SPECULAR;
     this.subtype = Tessellator.LIGHTING;
     
     this.intensity = isNaN(intensity) ? intensity : Tessellator.float(intensity);
-}
+};
 
 Tessellator.SpecularLight.prototype.init = function (interpreter){
     interpreter.flush();
-}
+};
 
 Tessellator.SpecularLight.prototype.apply = function (render){
     render.set("specular", this.intensity.x);
-}
+};

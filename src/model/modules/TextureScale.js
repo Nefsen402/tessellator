@@ -32,23 +32,23 @@ Tessellator.Model.prototype.scaleTexture = function (){
         return this.add(new Tessellator.TextureScale(arguments[0], arguments[0]));
     }else{
         return this.add(new Tessellator.TextureScale(arguments[0], arguments[1]));
-    }
-}
+    };
+};
 
 Tessellator.TextureScale = function (scaleX, scaleY) {
     this.type = Tessellator.TEXTURE_SCALE;
     
     this.scaleX = scaleX;
     this.scaleY = scaleY;
-}
+};
 
 Tessellator.TextureScale.prototype.init = function (interpreter){
     if (interpreter.get("textureBounds") && interpreter.get("textureBounds").bounds){
         for (var i = 0, k = interpreter.get("textureBounds").bounds.length / 2; i < k; i++){
             interpreter.get("textureBounds").bounds[i * 2] *= this.scaleX;
             interpreter.get("textureBounds").bounds[i * 2 + 1] *= this.scaleY;
-        }
-    }
+        };
+    };
     
     return null;
-}
+};

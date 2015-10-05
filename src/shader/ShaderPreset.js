@@ -32,8 +32,8 @@ Tessellator.ShaderPreset = function (){
         this.configureCreate(arguments[0], arguments[1]);
     }else{
         this.create = arguments[0];
-    }
-}
+    };
+};
 
 Tessellator.ShaderPreset.prototype.configureCreate = function (type, code){
     this.shaders = [];
@@ -43,16 +43,16 @@ Tessellator.ShaderPreset.prototype.configureCreate = function (type, code){
         for (var i = 0; i < this.shaders.length; i++){
             if (this.shaders[i][0] === tessellator){
                 return this.shaders[i][1];
-            }
-        }
+            };
+        };
         
         var shader = new Tessellator.Shader(tessellator, type).load(code);
         
         this.shaders.push([tessellator, shader]);
         
         return shader;
-    }
-}
+    };
+};
 
 Tessellator.ShaderPreset.prototype.configureDrawDependant = function (svert1, sfrag1, svert2, sfrag2, svert3, sfrag3){
     this.create = function (tessellator){
@@ -68,18 +68,18 @@ Tessellator.ShaderPreset.prototype.configureDrawDependant = function (svert1, sf
                 tessellator.createShaderProgram(svert2, sfrag2),
             ]
         );
-    }
+    };
     
     return this;
-}
+};
 
 Tessellator.ShaderPreset.prototype.configureStandardPair = function (svert, sfrag){
     this.create = function (tessellator) {
         return tessellator.createShaderProgram(svert, sfrag);
-    }
+    };
     
     return this;
-}
+};
 
 Tessellator.PIXEL_SHADER_VERTEX_SHADER = new Tessellator.ShaderPreset(Tessellator.VERTEX_SHADER, "precision lowp float;attribute vec2 position;uniform vec2 aspect;varying vec2 texturePos;void main(void){texturePos=(position+1.0)/2.0;gl_Position=vec4(position*(aspect+1.),0.0,1.0);}");
 Tessellator.ATLAS_ANIMATION_VERTEX_SHADER = new Tessellator.ShaderPreset(Tessellator.VERTEX_SHADER, "precision lowp float;attribute vec2 position;attribute vec2 textureCoord;varying vec2 texturePos;void main(void){texturePos=textureCoord;gl_Position=vec4(position,0.0,1.0);}");

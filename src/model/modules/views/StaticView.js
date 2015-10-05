@@ -32,7 +32,7 @@ Tessellator.StaticView = function (x, y){
     
     this.x = x || Tessellator.LEFT;
     this.y = y || Tessellator.TOP;
-}
+};
 
 Tessellator.StaticView.prototype.apply = function (render){
     var window = render.get("window");
@@ -43,13 +43,13 @@ Tessellator.StaticView.prototype.apply = function (render){
         xoff = this.x.value;
     }else{
         xoff = this.x;
-    }
+    };
     
     if (isNaN(this.y)){
         yoff = this.y.value;
     }else{
         yoff = this.y;
-    }
+    };
     
     render.set("pMatrix", Tessellator.mat4(
         2 / window[0], 0, 0, 0,
@@ -57,8 +57,8 @@ Tessellator.StaticView.prototype.apply = function (render){
         0, 0, 0, 0,
         xoff, yoff, -1, 1
     ));
-}
+};
 
 Tessellator.StaticView.prototype.init = function (interpreter){
     interpreter.flush();
-}
+};

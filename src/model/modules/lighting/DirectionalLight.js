@@ -29,7 +29,7 @@
 
 Tessellator.Model.prototype.setDirectionalLight = function (){
     return this.add(Tessellator.new.apply(Tessellator.DirectionalLight, arguments));
-}
+};
 
 Tessellator.DirectionalLight = function (){
     if (arguments.length === 1){
@@ -38,13 +38,13 @@ Tessellator.DirectionalLight = function (){
         this.vec = Tessellator.vec3(arguments);
     }else{
         throw "invalid arguments in Tessellator.DirectionalLight";
-    }
+    };
     
     this.type = Tessellator.LIGHTING_DIRECTIONAL;
     this.subtype = Tessellator.LIGHTING;
     
     this.render = true;
-}
+};
 
 Tessellator.DirectionalLight.prototype.set = function (lighting, index, matrix){
     if (this.color.tween) this.color.tween.update();
@@ -64,8 +64,8 @@ Tessellator.DirectionalLight.prototype.set = function (lighting, index, matrix){
         lighting.set(pos, 8 + index);
     }else{
         lighting[12 + index] = 0;
-    }
-}
+    };
+};
 
 Tessellator.DirectionalLight.prototype.applyLighting = function (matrix, index, renderer){
     if (this.render){
@@ -73,9 +73,9 @@ Tessellator.DirectionalLight.prototype.applyLighting = function (matrix, index, 
         
         if (index[0]++ * 4 * 4 >= renderer.lightingTexture.data.length){
             throw "too many lights!";
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.DirectionalLight.prototype.init = function (interpreter){
     this.tessellator = interpreter.tessellator;
@@ -83,14 +83,14 @@ Tessellator.DirectionalLight.prototype.init = function (interpreter){
     
     if (this.shadowMap){
         this.createShadow.apply(this, this.shadowMap);
-    }
-}
+    };
+};
 
 Tessellator.DirectionalLight.prototype.apply = function (matrix){
     if (this.shadowMap){
         matrix.set("shadowMap", this.shadowMap);
-    }
-}
+    };
+};
 
 Tessellator.DirectionalLight.prototype.createShadow = function (model, x, y, z, resolution){
     if (this.tessellator){
@@ -102,5 +102,5 @@ Tessellator.DirectionalLight.prototype.createShadow = function (model, x, y, z, 
         ]);
     }else{
         this.shadowMap = [model, x, y, z, resolution];
-    }
-}
+    };
+};

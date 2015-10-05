@@ -29,7 +29,7 @@
 
 Tessellator.prototype.createVideoTexture = function (src, filter, autoPlay){
     return new Tessellator.TextureVideo(this, src, filter, autoPlay);
-}
+};
 
 Tessellator.prototype.loadVideoTexture = Tessellator.prototype.createVideoTexture;
 
@@ -60,7 +60,7 @@ Tessellator.TextureVideo = function (tessellator, src, filter, autoPlay){
             
             if (!self.filter){
                 self.filter = Tessellator.getAppropriateTextureFilter(self.width, self.height);
-            }
+            };
             
             self.setReady();
         });
@@ -73,7 +73,7 @@ Tessellator.TextureVideo = function (tessellator, src, filter, autoPlay){
             
             if (!self.filter){
                 self.filter = Tessellator.getAppropriateTextureFilter(self.width, self.height);
-            }
+            };
             
             self.setReady();
         });
@@ -84,7 +84,7 @@ Tessellator.TextureVideo = function (tessellator, src, filter, autoPlay){
         
         if (!this.filter){
             this.filter = Tessellator.getAppropriateTextureFilter(this.width, this.height);
-        }
+        };
         
         this.setReady();
     }else if (src){
@@ -94,11 +94,11 @@ Tessellator.TextureVideo = function (tessellator, src, filter, autoPlay){
         
         if (!this.filter){
             this.filter = Tessellator.getAppropriateTextureFilter(this.width, this.height);
-        }
+        };
         
         this.setReady();
-    }
-}
+    };
+};
 
 Tessellator.copyProto(Tessellator.TextureVideo, Tessellator.Texture);
 
@@ -110,62 +110,62 @@ Tessellator.TextureVideo.prototype.setReady = function (){
         
         if (!this.volumeLevel){
             this.mute();
-        }
+        };
         
         if (this.paused === null){
             this.play();
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.TextureVideo.prototype.play = function (){
     this.paused = false;
     
     if (this.isReady()){
         this.video.play();
-    }
-}
+    };
+};
 
 Tessellator.TextureVideo.prototype.pause = function (){
     this.paused = true;
     
     if (this.isReady()){
         this.video.pause();
-    }
-}
+    };
+};
 
 Tessellator.TextureVideo.prototype.toogle = function (){
     if (this.paused){
         this.play();
     }else{
         this.pause();
-    }
-}
+    };
+};
 
 Tessellator.TextureVideo.prototype.loop = function (){
     return this.video.loop;
-}
+};
 
 Tessellator.TextureVideo.prototype.looping = function (loop){
     this.video.loop = loop;
-}
+};
 
 Tessellator.TextureVideo.prototype.mute = function (){
     this.video.volume = 0;
-}
+};
 
 Tessellator.TextureVideo.prototype.volume = function (level){
     this.volumeLevel = level;
     this.unmute();
-}
+};
 
 Tessellator.TextureVideo.prototype.unmute = function (){
     if (!this.volumeLevel){
         this.volumeLevel = 1;
-    }
+    };
     
     this.video.volume = this.volumeLevel;
-}
+};
 
 Tessellator.TextureVideo.prototype.configure = function (target, track){
     var gl = this.tessellator.GL;
@@ -180,9 +180,9 @@ Tessellator.TextureVideo.prototype.configure = function (target, track){
                     this.filter(this.tessellator, this);
                 }else{
                     gl.bindTexture(gl.TEXTURE_2D, this.texture);
-                }
-            }
-        }
+                };
+            };
+        };
         
         if (this.autoUpdate || !this.isTracking(track)){
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
@@ -190,8 +190,8 @@ Tessellator.TextureVideo.prototype.configure = function (target, track){
             
             this.track(track);
             return true;
-        }
-    }
+        };
+    };
     
     return false;
-}
+};

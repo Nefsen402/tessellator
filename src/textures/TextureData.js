@@ -40,7 +40,7 @@ Tessellator.TextureData = function (tessellator, width, height, dataType, storeT
     
     if (!this.filter){
         this.filter = Tessellator.getAppropriateTextureFilter(this.width, this.height);
-    }
+    };
     
     {
         var dataStorageType = Uint8Array;
@@ -49,24 +49,24 @@ Tessellator.TextureData = function (tessellator, width, height, dataType, storeT
             if (this.filter.name.indexOf("LINEAR") >= 0){
                 if (!tessellator.extensions.get("OES_texture_float_linear")){
                     throw "floating point linear textures not supported. Support for a non-linear texture filter may be possibe";
-                }
+                };
             }else{
                 if (!tessellator.extensions.get("OES_texture_float")){
                     throw "floating point textures not supported!";
-                }
-            }
+                };
+            };
             
             dataStorageType = Float32Array;
         }else if (storeType === Tessellator.FLOAT16){
             if (this.filter.name.indexOf("LINEAR") >= 0){
                 if (!tessellator.extensions.get("OES_texture_half_float_linear")){
                     throw "half floating point linear textures not supported. Support for a non-linear texture filter may be possibe";
-                }
+                };
             }else{
                 if (!tessellator.extensions.get("OES_texture_half_float")){
                     throw "half floating point textures not supported!";
-                }
-            }
+                };
+            };
             
             dataStorageType = Uint16Array;
         }else if (storeType === Tessellator.UNSIGNED_SHORT_4_4_4_4){
@@ -75,7 +75,7 @@ Tessellator.TextureData = function (tessellator, width, height, dataType, storeT
             dataStorageType = Uint16Array;
         }else if (storeType === Tessellator.UNSIGNED_SHORT_5_6_5){
             dataStorageType = Uint16Array;
-        }
+        };
         
         if (!this.data){
             if (dataType === Tessellator.ALPHA){
@@ -88,15 +88,15 @@ Tessellator.TextureData = function (tessellator, width, height, dataType, storeT
                 this.data = new dataStorageType(this.width * this.height * 3);
             }else if (dataType === Tessellator.RGBA){
                 this.data = new dataStorageType(this.width * this.height * 4);
-            }
-        }
+            };
+        };
         
         this.dataType = tessellator.glConst(dataType);
         this.storeType = tessellator.glConst(storeType);
-    }
+    };
     
     this.setReady();
-}
+};
 
 Tessellator.copyProto(Tessellator.TextureData, Tessellator.Texture);
 
@@ -112,15 +112,15 @@ Tessellator.TextureData.prototype.configure = function (target, track){
                     this.filter(this.tessellator, this);
                 }else{
                     gl.bindTexture(gl.TEXTURE_2D, this.texture);
-                }
-            }
-        }
+                };
+            };
+        };
         
         if (!this.isTracking(track)){
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
             this.tessellator.GL.texImage2D(this.tessellator.glConst(target), 0, this.dataType, this.width, this.height, 0, this.dataType, this.storeType, this.data);
             
             this.track(track);
-        }
-    }
-}
+        };
+    };
+};

@@ -74,12 +74,11 @@ Tessellator.OrthographicView = function (){
         this.nearView = arguments[5];
     }else{
         throw "invalid arguments!";
-    }
-}
+    };
+};
 
 Tessellator.OrthographicView.prototype.apply = function (render){
-    var
-        left = this.left,
+    var left = this.left,
         right = this.right,
         up = this.up,
         down = this.down;
@@ -97,14 +96,13 @@ Tessellator.OrthographicView.prototype.apply = function (render){
             
             left *= aspect;
             right *= aspect;
-        }
-    }
+        };
+    };
     
     render.set("nearView", this.nearView);
     render.set("farView", this.farView);
     
-    var
-        dx = 1 / (left - right),
+    var dx = 1 / (left - right),
         dy = 1 / (up - down),
         dz = 1 / (this.nearView - this.farView);
     
@@ -114,9 +112,9 @@ Tessellator.OrthographicView.prototype.apply = function (render){
         0, 0, 2 * dz, 0,
         (left + right) * dx, (down + up) * dy, (this.farView + this.nearView) * dz, 1
     ));
-}
+};
 
 
 Tessellator.OrthographicView.prototype.init = function (interpreter){
     interpreter.flush();
-}
+};

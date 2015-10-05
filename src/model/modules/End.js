@@ -29,12 +29,12 @@
 
 Tessellator.Model.prototype.end = function (indices){
     return this.add(new Tessellator.End(indices));
-}
+};
 
 Tessellator.End = function (indices){
     this.type = Tessellator.END;
     this.indices = indices;
-}
+};
 
 Tessellator.End.prototype.init = function (interpreter){
     var geometry = interpreter.getr("currentGeometry");
@@ -42,7 +42,7 @@ Tessellator.End.prototype.init = function (interpreter){
     
     if (this.indices){
         geometry.indices.push(this.indices);
-    }
+    };
     
     if (cached){
         cached.convert();
@@ -57,14 +57,14 @@ Tessellator.End.prototype.init = function (interpreter){
                 cached.createObject(interpreter.tessellator, interpreter.get("draw"), Tessellator.STATIC);
                 
                 return cached;
-            }
-        }
+            };
+        };
     }else{
         interpreter.set("cachedGeometry", geometry)
-    }
+    };
     
     return null;
-}
+};
 
 Tessellator.Initializer.prototype.flush = function (){
     var cache = this.getr("cachedGeometry");
@@ -73,5 +73,5 @@ Tessellator.Initializer.prototype.flush = function (){
         cache.generateNormals();
         cache.createObject(this.tessellator, this.get("draw"), Tessellator.STATIC);
         this.model.push(cache);
-    }
-}
+    };
+};

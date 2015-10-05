@@ -29,20 +29,20 @@
 
 Tessellator.Model.prototype.enable = function (e){
     return this.add(new Tessellator.Enable(e));
-}
+};
 
 Tessellator.Enable = function (arg){
     this.type = Tessellator.ENABLE;
     this.arg = arg;
-}
+};
 
 Tessellator.Enable.prototype.apply = function (render){
     if (this.arg === Tessellator.LIGHTING){
         render.set("lights", render.renderer.lightingTexture);
     }else{
         render.enable(this.arg);
-    }
-}
+    };
+};
 
 Tessellator.Enable.prototype.init = function (interpreter){
     if (this.arg === Tessellator.NORMAL){
@@ -55,9 +55,9 @@ Tessellator.Enable.prototype.init = function (interpreter){
         return null;
     }else{
         interpreter.flush();
-    }
-}
+    };
+};
 
 Tessellator.Enable.prototype.applyLighting = function (){
     return this.arg === Tessellator.LIGHTING;
-}
+};

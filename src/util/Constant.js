@@ -60,7 +60,7 @@ Tessellator.Constant.create = function (name, value){
         c.value = value;
         
         return c;
-    }
+    };
 };
 
 { //webgl 1.0
@@ -410,7 +410,7 @@ Tessellator.Constant.create = function (name, value){
     Tessellator.CONTEXT_LOST_WEBGL = new Tessellator.Constant("CONTEXT_LOST_WEBGL",  0x9242);
     Tessellator.UNPACK_COLORSPACE_CONVERSION_WEBGL = new Tessellator.Constant("UNPACK_COLORSPACE_CONVERSION_WEBGL",  0x9243);
     Tessellator.BROWSER_DEFAULT_WEBGL = new Tessellator.Constant("BROWSER_DEFAULT_WEBGL",  0x9244);
-}
+};
 { //webgl 2.0
     Tessellator.READ_BUFFER = new Tessellator.Constant("READ_BUFFER",  0x0C02);
     Tessellator.UNPACK_ROW_LENGTH = new Tessellator.Constant("UNPACK_ROW_LENGTH",  0x0CF2);
@@ -685,7 +685,7 @@ Tessellator.Constant.create = function (name, value){
     Tessellator.TEXTURE_IMMUTABLE_FORMAT = new Tessellator.Constant("TEXTURE_IMMUTABLE_FORMAT",  0x912F);
     Tessellator.MAX_ELEMENT_INDEX = new Tessellator.Constant("MAX_ELEMENT_INDEX",  0x8D6B);
     Tessellator.TEXTURE_IMMUTABLE_LEVELS = new Tessellator.Constant("TEXTURE_IMMUTABLE_LEVELS",  0x82DF);
-}
+};
 { //tessellator
     Tessellator.COLOR = Tessellator.Constant.create("COLOR");
     Tessellator.VERTEX = Tessellator.Constant.create("VERTEX");
@@ -830,4 +830,4 @@ Tessellator.Constant.create = function (name, value){
         "AMBER": Tessellator.COLOR_AMBER,
         "CLEAR": Tessellator.COLOR_CLEAR,
     };
-}
+};

@@ -38,24 +38,24 @@ Tessellator.Initializer = function (tessellator, inheritFrom){
     if (inheritFrom){
         for (var o in inheritFrom.attribs){
             this.attribs[o] = inheritFrom.attribs[o];
-        }
+        };
     }else{
         for (var o in Tessellator.Initializer.defaults){
             this.attribs[o] = Tessellator.Initializer.defaults[o](this);
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.Initializer.prototype.get = function (key){
     return this.attribs[key];
-}
+};
 
 Tessellator.Initializer.prototype.getr = function (key){
     var value = this.attribs[key];
     this.attribs[key] = null;
     
     return value;
-}
+};
 
 Tessellator.Initializer.prototype.getd = function (key, def){
     var value = this.attribs[key];
@@ -64,20 +64,20 @@ Tessellator.Initializer.prototype.getd = function (key, def){
         value = def;
         
         this.attribs[key] = value;
-    }
+    };
     
     return value;
-}
+};
 
 Tessellator.Initializer.prototype.set = function (key, value){
     return this.attribs[key] = value;
-}
+};
 
 Tessellator.Initializer.defaults = {};
 
 Tessellator.Initializer.setDefault = function (key, value){
     Tessellator.Initializer.defaults[key] = value;
-}
+};
 
 Tessellator.Initializer.prototype.push = function (action){
     if (action.init){
@@ -88,14 +88,14 @@ Tessellator.Initializer.prototype.push = function (action){
                 this.model.push(push);
             }else{
                 this.model.push(action);
-            }
-        }
+            };
+        };
         
         return push;
     }else{
         this.model.push(action);
-    }
-}
+    };
+};
 
 
 Tessellator.Initializer.prototype.finish = function (){
@@ -104,10 +104,10 @@ Tessellator.Initializer.prototype.finish = function (){
     for (var i = 0; i < this.model.length; i++){
         if (this.model[i].postInit){
             this.model[i].postInit(this);
-        }
-    }
+        };
+    };
     
     return this.model;
-}
+};
 
-Tessellator.Initializer.prototype.flush = function (){}
+Tessellator.Initializer.prototype.flush = function (){};

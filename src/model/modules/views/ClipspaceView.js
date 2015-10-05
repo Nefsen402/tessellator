@@ -29,12 +29,12 @@
 
 Tessellator.ClipSpaceView = function (){
     this.type = Tessellator.VIEW;
-}
+};
 
 Tessellator.ClipSpaceView.prototype.apply = function (render){
     render.set("pMatrix", Tessellator.mat4().identity());
-}
+};
 
 Tessellator.ClipSpaceView.prototype.init = function (interpreter){
     interpreter.flush();
-}
+};

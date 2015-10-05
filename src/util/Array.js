@@ -41,32 +41,32 @@ Tessellator.Array = function (){
             this.incrementSize = arguments[0];
             this.buffer = new Float64Array(this.incrementSize);
             this.length = 0;
-        }
+        };
     }else{
         this.incrementSize = 256;
         this.buffer = new Float64Array(this.incrementSize);
         this.length = 0;
-    }
-}
+    };
+};
 
 Tessellator.Array.prototype.isEmpty = function (){
     return this.length === 0;
-}
+};
 
 Tessellator.Array.prototype.clear = function (){
     this.buffer = new Float64Array(this.incrementSize);
     this.length = 0;
-}
+};
 
 Tessellator.Array.prototype.instance = function (value, copies){
     var a = new Float32Array(copies);
     
     for (var i = 0; i < a.length; a++){
         a[i] = value;
-    }
+    };
     
     this.push(a);
-}
+};
 
 Tessellator.Array.prototype.push = function (){
     var size = 0;
@@ -78,15 +78,15 @@ Tessellator.Array.prototype.push = function (){
             size += arg.length;
         }else{
             size++;
-        }  
-    }
+        };  
+    };
     
     if (size > 0){
         if (this.buffer.length < this.length + size){
             var newArray = new Float64Array(this.length + size + this.incrementSize);
             newArray.set(this.buffer, 0);
             this.buffer = newArray;
-        }
+        };
         
         var pos = this.length;
         this.length += size;
@@ -99,65 +99,65 @@ Tessellator.Array.prototype.push = function (){
                     arg.write(this.buffer, pos);
                 }else{
                     this.buffer.set(arg, pos);
-                }
+                };
                 
                 pos += arg.length;
             }else{
                 this.buffer[pos++] = arg;
-            }
-        }
-    }
-}
+            };
+        };
+    };
+};
 
 Tessellator.Array.prototype.offset = function (off){
     for (var i = 0; i < this.length; i++){
         this.buffer[i] += off;
-    }
-}
+    };
+};
 
 Tessellator.Array.prototype.get = function (index){
     return this.buffer[index];
-}
+};
 
 Tessellator.Array.prototype.set = function (index, value){
     this.buffer[index] = value;
-}
+};
 
 Tessellator.Array.prototype.write = function (array, pos){
     array.set(this.buffer.subarray(0, this.length), pos);
-}
+};
 
-Tessellator.Array.prototype.compress = function (){}
+Tessellator.Array.prototype.compress = function (){};
 
 Tessellator.Array.prototype.combine = function (func){
     if (this.buffer.constructor === func){
         return this.buffer.subarray(0, this.length);
-    }
+    };
     
     return new (func || Float32Array)(this.buffer.subarray(0, this.length));
-}
+};
 
 Tessellator.Array.prototype.iterator = function (start){
     return new Tessellator.Array.Iterator(this, start);
-}
+};
 
 Tessellator.Array.Iterator = function (array, start){
     this.array = array;
     this.index = start || 0;
-}
+};
 
 Tessellator.Array.Iterator.prototype.hasNext = function (){
     return this.index < this.array.length;
-}
+};
 
 Tessellator.Array.Iterator.prototype.hasPrevious = function (){
     return this.index > 0;
-}
+};
 
 Tessellator.Array.Iterator.prototype.next = function (){
     return this.array.buffer[this.index++];
-}
+};
 
 Tessellator.Array.Iterator.prototype.previous = function (){
     return this.array.buffer[this.index--];
-}
+};

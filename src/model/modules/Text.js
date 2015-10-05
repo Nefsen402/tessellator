@@ -44,7 +44,7 @@ Tessellator.createHandle.push(function () {
     
     for (var attrib in Tessellator.DEFAULT_FONT_SHEET){
         this.DEFAULT_FONT_SHEET[attrib] = Tessellator.DEFAULT_FONT_SHEET[attrib];
-    }
+    };
 });
 
 Tessellator.Initializer.setDefault("fontSheet", function (interpreter) {
@@ -53,7 +53,7 @@ Tessellator.Initializer.setDefault("fontSheet", function (interpreter) {
 
 Tessellator.Model.prototype.drawText = function (text, x, y){
     return this.add (new Tessellator.Text(this, text, x, y));
-}
+};
 
 Tessellator.Text = function (matrix, text, x, y){
     this.type = Tessellator.TEXT;
@@ -62,7 +62,7 @@ Tessellator.Text = function (matrix, text, x, y){
     this.text = text;
     this.x = x;
     this.y = y;
-}
+};
 
 
 Tessellator.Text.prototype.init = function (interpreter){
@@ -72,7 +72,7 @@ Tessellator.Text.prototype.init = function (interpreter){
         if (!fontSheet.texture){
             fontSheet.texture = interpreter.tessellator.createTexture(fontSheet.src, fontSheet.filter);
             fontSheet.texture.disposable = false;
-        }
+        };
         
         var vertexTable = [];
         var textureCoordTable = [];
@@ -84,7 +84,7 @@ Tessellator.Text.prototype.init = function (interpreter){
         if (this.x !== undefined && this.y !== undefined){
             xOrigin = this.x;
             yOrigin = this.y;
-        }
+        };
         
         var xOffset = xOrigin;
         var yOffset = yOrigin;
@@ -110,14 +110,14 @@ Tessellator.Text.prototype.init = function (interpreter){
                         k++;
                     }else{
                         break w;
-                    }
+                    };
                 }else if (this.text.charAt(j) === '\n' ||
                           this.text.charAt(j) === '\r'){
                     break main;
                 }else{
                     break w;
-                }
-            }
+                };
+            };
             
             var code = this.text.charCodeAt(j);
             
@@ -125,7 +125,7 @@ Tessellator.Text.prototype.init = function (interpreter){
             
             if (fontSheet.widthTable){
                 charWidth = fontSheet.widthTable[code];
-            }
+            };
             
             if (this.text.charAt(j) === ' '){
                 k++;
@@ -135,8 +135,8 @@ Tessellator.Text.prototype.init = function (interpreter){
                 
                 if (fontSheet.widthTable){
                     charWidth = fontSheet.widthTable[code];
-                }
-            }
+                };
+            };
             
             var cX = code % fontSheet.width;
             var cY = fontSheet.height - Math.floor(code / fontSheet.height);
@@ -174,10 +174,10 @@ Tessellator.Text.prototype.init = function (interpreter){
                     0, 0, -1,
                     0, 0, -1,
                 ]);
-            }
+            };
             
             xOffset += charWidth;
-        }
+        };
         
         this.matrix.bindTexture(fontSheet.texture);
         this.matrix.setMask(interpreter.get("color"));
@@ -193,7 +193,7 @@ Tessellator.Text.prototype.init = function (interpreter){
         this.matrix.start(Tessellator.QUAD);
         this.matrix.setVertex(vertexTable);
         this.matrix.end();
-    }
+    };
     
     return null;
-}
+};

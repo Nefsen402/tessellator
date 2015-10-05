@@ -29,7 +29,7 @@
 
 Tessellator.prototype.createTextureQueue = function (){
     return Tessellator.new.apply(Tessellator.TextureQueue, arguments);
-}
+};
 
 Tessellator.TextureQueue = function (){
     this.textures = Array.prototype.slice.call(arguments);
@@ -38,7 +38,7 @@ Tessellator.TextureQueue = function (){
     this.texture = this.textures[this.textureIndex];
     
     this.loaded = true;
-}
+};
 
 Tessellator.TextureQueue.prototype.frame = function (frame){
     this.textureIndex = frame;
@@ -54,8 +54,8 @@ Tessellator.TextureQueue.prototype.frame = function (frame){
         });
         
         self.texture = new Tessellator.TextureDummy();
-    }
-}
+    };
+};
 
 Tessellator.TextureQueue.prototype.nextTexture = function (){
     if (this.textureIndex = this.textures.length - 1){
@@ -63,8 +63,8 @@ Tessellator.TextureQueue.prototype.nextTexture = function (){
         this.texture = this.textures[0];
     }else{
         this.texture = this.textures[++this.textureIndex];
-    }
-}
+    };
+};
 
 Tessellator.TextureQueue.prototype.play = function (frequency){
     var self = this;
@@ -72,30 +72,30 @@ Tessellator.TextureQueue.prototype.play = function (frequency){
     this.interval = window.setInterval(function (){
         self.nextTexture();
     }, frequency);
-}
+};
 
 Tessellator.TextureQueue.prototype.stop = function (){
     if (this.interval){
         window.clearInterval(this.interval);
         
         delete this.interval;
-    }
-}
+    };
+};
 
 Tessellator.TextureQueue.prototype.configure = function (target, track){
     this.texture.configure(target, track);
-}
+};
 
 Tessellator.TextureQueue.prototype.bind = function (render){
     this.texture.bind(render);
-}
+};
 
 Tessellator.TextureQueue.prototype.dispose = function (){
     this.stop();
     
     for (var i = 0, k = this.textures.length; i < k; i++){
         this.textures[i].dispose();
-    }
+    };
     
     this.tessellator.resources.remove(this);
-}
+};

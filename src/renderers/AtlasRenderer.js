@@ -29,7 +29,7 @@
 
 Tessellator.AtlasRenderer = function (tessellator){
     this.super(Tessellator.ATLAS_SHADER.create(tessellator));
-}
+};
 
 Tessellator.copyProto(Tessellator.AtlasRenderer, Tessellator.FullScreenRenderer);
 
@@ -56,18 +56,18 @@ Tessellator.AtlasRenderer.prototype.renderRaw = function (render, atlas){
                 render.set("mask", texture.mask);
             }else{
                 render.set("mask", this.NO_MASK);
-            }
+            };
             
             if (ii > 0){
                 render.enable(gl.BLEND);
-            }
+            };
             
             render.set("sampler", texture.texture);
             this.super.renderRaw(render);
-        }
+        };
         
         if (ii > 1){
             render.disable(gl.BLEND);
-        }
-    }
-}
+        };
+    };
+};

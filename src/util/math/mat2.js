@@ -39,8 +39,8 @@ Tessellator.mat2 = function (){
             pos += arg.length;
         }else{
             array[pos++] = arg;
-        }
-    }
+        };
+    };
     
     if (pos === 0){
         array[0] = 1;
@@ -52,8 +52,8 @@ Tessellator.mat2 = function (){
             throw "too little information";
         }else if (pos > array.length){
             throw "too much information";
-        }
-    }
+        };
+    };
     
     array.__proto__ = Tessellator.mat2.prototype;
     return array;
@@ -67,7 +67,7 @@ Tessellator.mat2.prototype.identity = function (scale){
         scale = 1;
     }else if (scale.tween){
         scale.tween.update();
-    }
+    };
     
     this[0] = scale[0];
     this[1] = 0;
@@ -79,8 +79,7 @@ Tessellator.mat2.prototype.identity = function (scale){
 };
 
 Tessellator.mat2.prototype.invert = function (){
-    var
-        a0 = this[0],
+    var a0 = this[0],
         a1 = this[1],
         a2 = this[2],
         a3 = this[3],
@@ -110,8 +109,7 @@ Tessellator.mat2.prototype.adjoint = function (){
 };
 
 Tessellator.mat2.prototype.multiply = function (mat){
-    var
-        a0 = this[0],
+    var a0 = this[0],
         a1 = this[1],
         a2 = this[2],
         a3 = this[3],
@@ -143,10 +141,9 @@ Tessellator.mat2.prototype.rotate = function (rad){
         if (rad.tween) rad.tween.update();
         
         rad = Tessellator.float.forValue(rad);
-    }
+    };
     
-    var
-        a0 = this[0],
+    var a0 = this[0],
         a1 = this[1],
         a2 = this[2],
         a3 = this[3],
@@ -165,7 +162,7 @@ Tessellator.mat2.prototype.rotate = function (rad){
 Tessellator.mat2.prototype.scale = function (s){
     if (s.tween){
         s.tween.update();
-    }
+    };
     
     this[0] *= s[0];
     this[1] *= s[0];
@@ -186,8 +183,7 @@ Tessellator.mat2.prototype.clone = function (){
 };
 
 Tessellator.mat2.prototype.transpose = function (){
-    var
-        x01 = this[1],
+    var x01 = this[1],
         x10 = this[2];
     
     this[1] = x10;

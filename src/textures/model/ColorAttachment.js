@@ -32,18 +32,18 @@ Tessellator.TextureModel.AttachmentColor = function (filter, index, quality, cha
     this.index = index || 0;
     this.quality = quality;
     this.channels = channels || Tessellator.RGBA;
-}
+};
 
 Tessellator.copyProto(Tessellator.TextureModel.AttachmentColor, Tessellator.Texture);
 
 Tessellator.TextureModel.AttachmentColor.prototype.setup = function (texture){
     if (this.tessellator && this.tessellator !== texture.tessellator){
         throw "cannot mix resources between multiple contexts";
-    }
+    };
     
     if (!this.tessellator){
         this.super(texture.tessellator);
-    }
+    };
     
     if (!this.quality){
         this.quality = texture.tessellator.GL.UNSIGNED_BYTE;
@@ -52,10 +52,10 @@ Tessellator.TextureModel.AttachmentColor.prototype.setup = function (texture){
             texture.tessellator.extensions.get("OES_texture_float");
         }else if (this.quality === Tessellator.FLOAT16){
             texture.tessellator.extensions.get("OES_texture_half_float");
-        }
+        };
         
         this.quality = texture.tessellator.glConst(this.quality);
-    }
+    };
     
     this.channels = this.tessellator.glConst(this.channels);
     this.width = texture.width;
@@ -63,20 +63,20 @@ Tessellator.TextureModel.AttachmentColor.prototype.setup = function (texture){
     
     if (!this.filter){
         this.filter = Tessellator.getAppropriateTextureFilter(texture.width, texture.height);
-    }
+    };
     
     if (texture.buffers){
         texture.buffers.push(texture.tessellator.GL.COLOR_ATTACHMENT0 + this.index);
-    }
+    };
     
     if (this.index === 0){
         texture.bindingAttachment = this;
-    }
+    };
     
     this.dispose();
     this.clearTracking();
     this.setReady();
-}
+};
 
 Tessellator.TextureModel.AttachmentColor.prototype.configure = function (parent, target, track){
     var gl = parent.tessellator.GL;
@@ -86,26 +86,26 @@ Tessellator.TextureModel.AttachmentColor.prototype.configure = function (parent,
     if (!track || track.constructor === Tessellator.RenderMatrix){
         if (track){
             track.dirty();
-        }
+        };
         
         track = null;
         
         if (!this.isTracking(track)){
             gl.bindTexture(gl.TEXTURE_2D, this.texture = gl.createTexture());
             this.filter(parent.tessellator, this);
-        }
+        };
         
         tex = this.texture;
-    }
+    };
     
     if (!this.isTracking(track)){
         if (!tex){
             tex = track.glTexture;
-        }
+        };
         
         gl.texImage2D(parent.tessellator.glConst(target), 0, this.channels, this.width, this.height, 0, this.channels, this.quality, null);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + this.index, parent.tessellator.glConst(target), tex, 0);
         
         this.track(track);
-    }
-}
+    };
+};

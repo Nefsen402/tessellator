@@ -48,7 +48,7 @@ Tessellator.FullScreenRenderer = function (shader){
     
     this.object.upload();
     this.object.useOES();
-}
+};
 
 Tessellator.copyProto(Tessellator.FullScreenRenderer, Tessellator.RendererAbstract);
 
@@ -56,7 +56,7 @@ Tessellator.FullScreenRenderer.prototype.setAspect = function(aspect){
     this.aspect = aspect;
     
     return this;
-}
+};
 
 Tessellator.FullScreenRenderer.prototype.unifyAspect = function (matrix){
     if (this.aspect){
@@ -65,10 +65,10 @@ Tessellator.FullScreenRenderer.prototype.unifyAspect = function (matrix){
         if (!g){
             if (!isNaN(this.aspect.getAspect())){
                 g = this.aspect.getAspect();
-            }
+            };
         }else{
             g = this.aspect;
-        }
+        };
         
         if (g){
             var window = matrix.get("window");
@@ -82,11 +82,11 @@ Tessellator.FullScreenRenderer.prototype.unifyAspect = function (matrix){
             matrix.set("aspect", aspect);
         }else{
             matrix.set("aspect", Tessellator.vec2());
-        }
+        };
     }else{
         matrix.set("aspect", Tessellator.vec2());
-    }
-}
+    };
+};
 
 Tessellator.FullScreenRenderer.prototype.renderRaw = function (matrix){
     this.unifyAspect(matrix);
@@ -94,4 +94,4 @@ Tessellator.FullScreenRenderer.prototype.renderRaw = function (matrix){
     matrix.disable(Tessellator.DEPTH_TEST);
     
     this.object.render(matrix);
-}
+};

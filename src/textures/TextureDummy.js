@@ -32,8 +32,8 @@ Tessellator.TextureDummy = function (ready){
     
     if (ready){
         this.setReady();
-    }
-}
+    };
+};
 
 Tessellator.extend(Tessellator.TextureDummy, Tessellator.Texture);
 

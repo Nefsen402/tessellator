@@ -55,12 +55,12 @@ Tessellator.PerspectiveView = function (){
         this.aspectRatio = arguments[3];
     }else{
         throw "too many arguments!";
-    }
+    };
     
     if (this.farView < this.nearView){
         console.error("The perspective far view is shorter then the near view. This is probably not intentional. " + this.farView + ":" + this.nearView);
-    }
-}
+    };
+};
 
 Tessellator.PerspectiveView.prototype.apply = function (render){
     var aspectRatio = this.aspectRatio;
@@ -70,10 +70,9 @@ Tessellator.PerspectiveView.prototype.apply = function (render){
     
     if (!aspectRatio){
         aspectRatio = render.get("window").aspect();
-    }
+    };
     
-    var
-        f = 1 / Math.tan(this.FOV / 2),
+    var f = 1 / Math.tan(this.FOV / 2),
         nf = this.nearView - this.farView;
     
     render.set("pMatrix", Tessellator.mat4(
@@ -82,8 +81,8 @@ Tessellator.PerspectiveView.prototype.apply = function (render){
         0, 0, (this.farView + this.nearView) / nf, -1,
         0, 0, (2 * this.farView * this.nearView) / nf, 0
     ));
-}
+};
             
 Tessellator.PerspectiveView.prototype.init = function (interpreter){
     interpreter.flush();
-}
+};

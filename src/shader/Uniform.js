@@ -29,7 +29,7 @@
 
 Tessellator.Program.I1_UNIFY_FUNC = function (){
     this.shader.tessellator.GL.uniform1i(this.location, this.value);
-}
+};
 
 Tessellator.Program.F1_UNIFY_FUNC = function (){
     var value;
@@ -38,46 +38,46 @@ Tessellator.Program.F1_UNIFY_FUNC = function (){
         value = this.value[0];
     }else{
         value = this.value;
-    }
+    };
     
     this.shader.tessellator.GL.uniform1f(this.location, value);
-}
+};
 
 Tessellator.Program.UNIFY_WINDOW = function (){
     if (this.location){
         this.shader.tessellator.GL.uniform2fv(this.location, this.value);
-    }
-}
+    };
+};
 
 Tessellator.Program.UNIFY_WINDOW.configure = function (value){
     this.value = value;
     
     this.shader.tessellator.GL.viewport(0, 0, this.value[0], this.value[1]);
-}
+};
 
 Tessellator.Program.F1V_UNIFY_FUNC = function (){
     this.shader.tessellator.GL.uniform1fv(this.location, this.value);
-}
+};
 
 Tessellator.Program.F2V_UNIFY_FUNC = function (){
     this.shader.tessellator.GL.uniform2fv(this.location, this.value);
-}
+};
 
 Tessellator.Program.F3V_UNIFY_FUNC = function (){
     this.shader.tessellator.GL.uniform3fv(this.location, this.value);
-}
+};
 
 Tessellator.Program.F4V_UNIFY_FUNC = function (){
     this.shader.tessellator.GL.uniform4fv(this.location, this.value);
-}
+};
 
 Tessellator.Program.MAT4_UNIFY_FUNC = function (){
     this.shader.tessellator.GL.uniformMatrix4fv(this.location, false, this.value);
-}
+};
 
 Tessellator.Program.MAT3_UNIFY_FUNC = function (){
     this.shader.tessellator.GL.uniformMatrix3fv(this.location, false, this.value);
-}
+};
 
 Tessellator.Program.MAT2_UNIFY_FUNC = function (){
     this.shader.tessellator.GL.uniformMatrix2fv(this.location, false, this.value);
@@ -93,22 +93,22 @@ Tessellator.Program.BIND_TEXTURE_2D = function (render){
         this.value.bind();
     }else{
         gl.bindTexture(gl.TEXTURE_2D, null);
-    }
-}
+    };
+};
 
 Tessellator.Program.BIND_TEXTURE_2D.map = function (matrix){
     Tessellator.Program.textureUnit++;
-}
+};
 
 Tessellator.Program.BIND_TEXTURE_2D.startMap = function (matrix, value){
     if (value && this.inherit && value.lastFrameUpdate !== this.shader.tessellator.frame){
         value.lastFrameUpdate = this.shader.tessellator.frame;
         
         value.configure(Tessellator.TEXTURE_2D, matrix);
-    }
+    };
     
     Tessellator.Program.textureUnit = -1;
-}
+};
 
 Tessellator.Program.BIND_TEXTURE_CUBE = function (render){
     var gl = this.shader.tessellator.GL;
@@ -120,36 +120,36 @@ Tessellator.Program.BIND_TEXTURE_CUBE = function (render){
         this.value.bind();
     }else{
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
-    }
-}
+    };
+};
 
 Tessellator.Program.BIND_TEXTURE_CUBE.map = function (matrix){
     Tessellator.Program.textureUnit++;
-}
+};
 
 Tessellator.Program.BIND_TEXTURE_CUBE.startMap = function (matrix, value){
     if (value && this.inherit && value.lastFrameUpdate !== this.shader.tessellator.frame){
         value.lastFrameUpdate = this.shader.tessellator.frame;
         
         value.configure(Tessellator.TEXTURE_CUBE_MAP, matrix);
-    }
+    };
     
     Tessellator.Program.textureUnit = -1;
-}
+};
 
 Tessellator.Program.MV_MATRIX_UNIFY_FUNC = function (){
     this.shader.tessellator.GL.uniformMatrix4fv(this.location, false, this.value);
     
     if (this.shader.uniforms.nMatrix){
         this.shader.tessellator.GL.uniformMatrix3fv(this.shader.uniforms.nMatrix.location, false, Tessellator.Program.lightNormalCache.normalFromMat4(this.value));
-    }
-}
+    };
+};
 
 Tessellator.Program.lightNormalCache = Tessellator.mat3();
 
 Tessellator.Program.DEFAULT_CONFIG = function (value){
     this.value = value;
-}
+};
 
 Tessellator.Program.DEFAULT_UNIFORM_INHERITER = {};
 
@@ -180,5 +180,5 @@ Tessellator.Program.DEFAULT_UNIFORM_INHERITER = {};
 for (var o in Tessellator.Program.DEFAULT_UNIFORM_INHERITER){
     if (!Tessellator.Program.DEFAULT_UNIFORM_INHERITER[o].configure){
         Tessellator.Program.DEFAULT_UNIFORM_INHERITER[o].configure = Tessellator.Program.DEFAULT_CONFIG;
-    }
-}
+    };
+};

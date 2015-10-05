@@ -41,15 +41,15 @@ Tessellator.Model.prototype.setVertex = function (){
             this.end();
         }else{
             this.add(new Tessellator.Vertex(arguments));
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.Vertex = function (vertices){
     this.type = Tessellator.VERTEX;
     
     this.vertices = vertices;
-}
+};
 
 Tessellator.Vertex.prototype.init = function (interpreter){
     if (this.vertices.length){
@@ -57,7 +57,7 @@ Tessellator.Vertex.prototype.init = function (interpreter){
         
         if (!geometry){
             throw "cannot add vertices to a non existing shape";
-        }
+        };
         
         if (geometry.type === Tessellator.INDICES){
             geometry.indices.push(this.vertices);
@@ -72,12 +72,12 @@ Tessellator.Vertex.prototype.init = function (interpreter){
                 
                 for (var i = 0; i < k; i++){
                     geometry.colors.push(c);
-                }
-            }
+                };
+            };
             
             geometry.addPositions(this.vertices);
-        }
-    }
+        };
+    };
     
     return null;
-}
+};

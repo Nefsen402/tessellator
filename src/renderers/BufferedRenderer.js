@@ -40,7 +40,7 @@ Tessellator.BufferedRenderer = function (shader, renderer, res, bufferAttachment
         renderer = shader;
         
         shader = shader.tessellator.createPixelShader(Tessellator.PIXEL_SHADER_PASS);
-    }
+    };
     
     this.super(shader);
     
@@ -56,14 +56,14 @@ Tessellator.BufferedRenderer = function (shader, renderer, res, bufferAttachment
         
         this.bufferAttachments = [
             new Tessellator.TextureModel.AttachmentColor(),
-            this.rendererAttachment,
-        ]
+            this.rendererAttachment
+        ];
         
         if (includeDepth){
             this.bufferAttachments.push(new Tessellator.TextureModel.AttachmentDepth());
-        }
-    }
-}
+        };
+    };
+};
 
 Tessellator.copyProto(Tessellator.BufferedRenderer, Tessellator.FullScreenRenderer);
 
@@ -72,12 +72,12 @@ Tessellator.BufferedRenderer.prototype.setResolutionScale = function (res){
         this.res = res;
     }else{
         this.res = Tessellator.vec2(res);
-    }
-}
+    };
+};
 
 Tessellator.BufferedRenderer.prototype.setRenderer = function (renderer){
     this.rendererAttachment.renderer = renderer;
-}
+};
 
 Tessellator.BufferedRenderer.prototype.renderRaw = function (render, arg){
     if (this.rendererAttachment.renderer){
@@ -88,7 +88,7 @@ Tessellator.BufferedRenderer.prototype.renderRaw = function (render, arg){
         
         if (!aspect){
             aspect = Tessellator.vec2(1);
-        }
+        };
         
         if (!this.buffer){
             this.buffer = new Tessellator.TextureModel(this.tessellator,
@@ -102,7 +102,7 @@ Tessellator.BufferedRenderer.prototype.renderRaw = function (render, arg){
                 window[0] * this.res[0] * (aspect[0] + 1),
                 window[1] * this.res[1] * (aspect[1] + 1)
             );
-        }
+        };
         
         this.rendererAttachment.arg = arg;
         
@@ -113,5 +113,5 @@ Tessellator.BufferedRenderer.prototype.renderRaw = function (render, arg){
         render.disable(Tessellator.DEPTH_TEST);
     
         this.object.render(render);
-    }
-}
+    };
+};
