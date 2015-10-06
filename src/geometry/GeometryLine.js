@@ -27,23 +27,14 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.Geometry.registerCustomGeometry(Tessellator.LINES, Tessellator.LINES, function (g, add, arg){
-    if (arg.get("textureBounds")){
-        throw "cannot bind a texture to Tessellator.LINES";
-    };
-    
-    if (g.indices.length){
-        if (add){
-            g.indices.offset(add.positions.length / 3);
-        };
-    }else{
-        var off = add ? add.positions.length / 3 : 0;
+Tessellator.Geometry.registerCustomGeometry(Tessellator.LINES, Tessellator.LINES, function (g){
+    if (!g.indices.length){
         var k = g.positions.length / 3;
         
         for (var i = 0; i < k; i += 2){
             g.indices.push([
-                i + 0 + off,
-                i + 1 + off
+                i + 0,
+                i + 1
             ]);
         };
     };

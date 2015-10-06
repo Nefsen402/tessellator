@@ -27,17 +27,10 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.Geometry.registerCustomGeometry(Tessellator.QUAD, Tessellator.TRIANGLE, function (g, add, arg){
-    var indices = g.indices;
-    var vertices = g.positions;
-    
-    var tb = arg.get("textureBounds");
-    
-    if (indices.length){
-        var newIndices = Tessellator.Array();
-        var k = g.indices.combine(Uint32Array);
-        
-        var off = add ? add.positions.length / 3 : 0;
+Tessellator.Geometry.registerCustomGeometry(Tessellator.QUAD, Tessellator.TRIANGLE, function (g){
+    if (g.indices.length){
+        var newIndices = new Tessellator.Array();
+        var k = g.indices.combine(Uint16Array);
         
         for (var i = 0; i < k.length; i += 4){
             var i0 = k[i + 0],
@@ -46,53 +39,28 @@ Tessellator.Geometry.registerCustomGeometry(Tessellator.QUAD, Tessellator.TRIANG
                 i3 = k[i + 3];
             
             newIndices.push([
-                i0 + off,
-                i1 + off,
-                i2 + off,
+                i0,
+                i1,
+                i2,
                 
-                i0 + off,
-                i2 + off,
-                i3 + off
+                i0,
+                i2,
+                i3
             ]);
         };
         
         g.indices = newIndices;
-        
-        if (add && add.positions.length){
-            if (add.normals.length){
-                g.generateNormals();
-            };
-        };
     }else{
-        var off = add ? add.positions.length / 3 : 0;
-        
-        for (var i = 0, k = vertices.length / 3; i < k; i += 4){
+        for (var i = 0, k = g.positions.length / 3; i < k; i += 4){
             g.indices.push([
-                0 + i + off,
-                1 + i + off,
-                2 + i + off,
+                0 + i,
+                1 + i,
+                2 + i,
                 
-                0 + i + off,
-                2 + i + off,
-                3 + i + off
+                0 + i,
+                2 + i,
+                3 + i
             ]);
-            
-            if (tb){
-                var bounds;
-                
-                if (tb.defaultBounds){
-                    bounds = [
-                                   0,            0,
-                        tb.bounds[0],            0,
-                        tb.bounds[0], tb.bounds[1],
-                                   0, tb.bounds[1]
-                    ];
-                }else{
-                    bounds = tb.bounds.subarray(i * 2, (i + 4) * 2);
-                };
-                
-                g.colors.push(bounds);
-            };
         };
     };
 });

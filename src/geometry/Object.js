@@ -98,10 +98,10 @@ Tessellator.Object.prototype.setAttribute = function (){
         
         this.attribs[name] = {
             name: name,
-            dataSize: (isNaN(arguments[1]) ? arguments[1].value : arguments[1]),
+            dataSize: Tessellator.Object.dataSize[arguments[1]],
             buffer: arguments[2],
             normalize: arguments[3] || false,
-            stride: arguments[4] || arguments[1].value,
+            stride: arguments[4] || Tessellator.Object.dataSize[arguments[1]],
             offset: arguments[5] || 0,
         };
     }else{
@@ -182,7 +182,7 @@ Tessellator.Object.prototype.bindAttributes = function (shader){
                 if (bound !== oo.buffer){
                     bound = oo.buffer;
                     
-                    gl.bindBuffer(this.tessellator.glConst(oo.buffer.type), bound.value);
+                    gl.bindBuffer(oo.buffer.type, bound.value);
                 };
                 
                 gl.enableVertexAttribArray(shader.attribs[o]);
@@ -196,7 +196,7 @@ Tessellator.Object.prototype.bindAttributes = function (shader){
     };
     
     if (this.indices){
-        gl.bindBuffer(this.tessellator.glConst(this.indices.buffer.type), this.indices.buffer.value);
+        gl.bindBuffer(this.indices.buffer.type, this.indices.buffer.value);
     };
 };
 
@@ -307,15 +307,15 @@ Tessellator.Object.prototype.render = function (shader){
     
     if (this.instancinginstance && this.instances){
         if (this.indices){
-            this.instancinginstance.drawElementsInstancedANGLE(this.tessellator.glConst(this.renderType), this.items, gl[Tessellator.Object.dataTypes[this.indices.buffer.dataType.name]], 0, this.instances);
+            this.instancinginstance.drawElementsInstancedANGLE(this.renderType, this.items, gl[Tessellator.Object.dataTypes[this.indices.buffer.dataType.name]], 0, this.instances);
         }else{
-            this.instancinginstance.drawArraysInstancedANGLE(this.tessellator.glConst(this.renderType), 0, this.items, this.instances);
+            this.instancinginstance.drawArraysInstancedANGLE(this.renderType, 0, this.items, this.instances);
         };
     }else{
         if (this.indices){
-            gl.drawElements(this.tessellator.glConst(this.renderType), this.items, gl[Tessellator.Object.dataTypes[this.indices.buffer.dataType.name]], 0);
+            gl.drawElements(this.renderType, this.items, gl[Tessellator.Object.dataTypes[this.indices.buffer.dataType.name]], 0);
         }else{
-            gl.drawArrays(this.tessellator.glConst(this.renderType), 0, this.items);
+            gl.drawArrays(this.renderType, 0, this.items);
         };
     };
     
@@ -381,8 +381,8 @@ Tessellator.Object.Buffer.prototype.subData = function (tessellator, value, off)
     }else{
         var gl = tessellator.GL;
         
-        gl.bindBuffer(tessellator.glConst(this.type), this.value);
-        gl.bufferSubData(tessellator.glConst(this.type), off * Tessellator.Object.dataTypeSizes[this.dataType.name], value.combine(this.dataType));
+        gl.bindBuffer(this.type, this.value);
+        gl.bufferSubData(this.type, off * Tessellator.Object.dataTypeSizes[this.dataType.name], value.combine(this.dataType));
     };
 };
 
@@ -391,8 +391,8 @@ Tessellator.Object.Buffer.prototype.upload = function (tessellator){
     
     if (!this.uploaded && this.value.length){ 
         var buf = gl.createBuffer();
-        gl.bindBuffer(tessellator.glConst(this.type), buf);
-        gl.bufferData(tessellator.glConst(this.type), this.value.combine(this.dataType), tessellator.glConst(this.readHint));
+        gl.bindBuffer(this.type, buf);
+        gl.bufferData(this.type, this.value.combine(this.dataType), this.readHint);
         
         this.length = this.value.length;
         this.uploaded = true;
@@ -433,6 +433,18 @@ Tessellator.Object.dataTypeSizes = {
     "Float32Array": 4,
     "Float64Array": 8,
 };
+
+Tessellator.Object.dataSize = {
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4
+};
+
+Tessellator.Object.dataSize[Tessellator.FLOAT] = 1;
+Tessellator.Object.dataSize[Tessellator.VEC2] = 2;
+Tessellator.Object.dataSize[Tessellator.VEC3] = 3;
+Tessellator.Object.dataSize[Tessellator.VEC4] = 4;
 
 Tessellator.Object.registerTypeExtension = function (type, ext){
     Tessellator.Object.typeExtensions.push([type, ext]);

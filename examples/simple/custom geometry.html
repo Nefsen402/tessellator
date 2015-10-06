@@ -1,0 +1,38 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="/Tessellator.multifile"></script>
+    
+    <script>
+        var tessellator = new Tessellator("gl");
+        
+        var model = tessellator.createModel();
+        
+        model.clear("black");
+        model.setView(new Tessellator.ClipSpaceView());
+        model.bindTexture("/textures/crate1.jpg");
+        
+        model.setVertex(Tessellator.POLYGON, [
+            .5, -.5, 0,
+            .5, .5, 0,
+            -.5, .5, 0,
+            -.5, -.5, 0,
+            -.3, -.5, 0,
+            0, -1, 0,
+            0.3, -0.5, 0,
+            0.3, 0, 0,
+            -0.3, 0, 0,
+            -0.3, -.1, 0,
+            -.4, -.1, 0,
+            -.4, .1, 0,
+            .4, .1, 0,
+        ]);
+        
+        model.finish();
+        
+        
+        var renderLoop = new Tessellator.RenderLoop(new Tessellator.ModelRenderer(model));
+    </script>
+</html>

@@ -85,18 +85,19 @@ Tessellator.TextureCubeMap.prototype.configure = function (target, track){
     };
 };
 
-Tessellator.POS_X = Tessellator.Constant.create("TEXTURE_CUBE_MAP_POSITIVE_X", Tessellator.vec3(-1, 0, 0));
-Tessellator.NEG_X = Tessellator.Constant.create("TEXTURE_CUBE_MAP_NEGATIVE_X", Tessellator.vec3(1, 0, 0));
-Tessellator.POS_Y = Tessellator.Constant.create("TEXTURE_CUBE_MAP_POSITIVE_Y", Tessellator.vec3(0, 1, 0));
-Tessellator.NEG_Y = Tessellator.Constant.create("TEXTURE_CUBE_MAP_NEGATIVE_Y", Tessellator.vec3(0, -1, 0));
-Tessellator.POS_Z = Tessellator.Constant.create("TEXTURE_CUBE_MAP_POSITIVE_Z", Tessellator.vec3(0, 0, 1));
-Tessellator.NEG_Z = Tessellator.Constant.create("TEXTURE_CUBE_MAP_NEGATIVE_Z", Tessellator.vec3(0, 0, -1));
+Tessellator.TextureCubeMap.mapPos = {};
+Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_POSITIVE_X] = Tessellator.vec3(-1, 0, 0);
+Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_NEGATIVE_X] = Tessellator.vec3(1, 0, 0);
+Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_POSITIVE_Y] = Tessellator.vec3(0, 1, 0);
+Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_NEGATIVE_Y] = Tessellator.vec3(0, -1, 0);
+Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_POSITIVE_Z] = Tessellator.vec3(0, 0, 1);
+Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_NEGATIVE_Z] = Tessellator.vec3(0, 0, -1);
 
 Tessellator.TextureCubeMap.INDEX_LOOKUP = [
-    Tessellator.POS_X,
-    Tessellator.NEG_X,
-    Tessellator.POS_Y,
-    Tessellator.NEG_Y,
-    Tessellator.POS_Z,
-    Tessellator.NEG_Z
+    Tessellator.TEXTURE_CUBE_MAP_POSITIVE_X,
+    Tessellator.TEXTURE_CUBE_MAP_NEGATIVE_X,
+    Tessellator.TEXTURE_CUBE_MAP_POSITIVE_Y,
+    Tessellator.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+    Tessellator.TEXTURE_CUBE_MAP_POSITIVE_Z,
+    Tessellator.TEXTURE_CUBE_MAP_NEGATIVE_Z
 ];

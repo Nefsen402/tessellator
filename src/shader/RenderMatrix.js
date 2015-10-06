@@ -163,19 +163,19 @@ Tessellator.RenderMatrix.prototype.unifyGLAttributes = function (){
     var t = this.tessellator;
     
     if (!this.changes.GL_BLEND_FUNC || this.changes.GL_BLEND_FUNC > this.index){
-        t.GL.blendFunc(t.glConst(this.glBlendFunc[0]), t.glConst(this.glBlendFunc[1]));
+        t.GL.blendFunc(this.glBlendFunc[0], this.glBlendFunc[1]);
         
         this.changes.GL_BLEND_FUNC = this.index;
     };
     
     if (!this.changes.GL_DEPTH_MASK || this.changes.GL_DEPTH_MASK > this.index){
-        t.GL.depthMask(t.glConst(this.glDepthMask));
+        t.GL.depthMask(this.glDepthMask);
         
         this.changes.GL_DEPTH_MASK = this.index;
     };
     
     if (!this.changes.GL_DEPTH_FUNC || this.changes.GL_DEPTH_FUNC > this.index){
-        t.GL.depthFunc(t.glConst(this.glDepthFunc));
+        t.GL.depthFunc(this.glDepthFunc);
         
         this.changes.GL_DEPTH_FUNC = this.index;
     };
@@ -232,19 +232,15 @@ Tessellator.RenderMatrix.prototype.lineWidth = function (value){
 };
 
 Tessellator.RenderMatrix.prototype.isEnabled = function (value){
-    return this.enabled[this.tessellator.glConst(value)];
+    return this.enabled[value];
 };
 
 Tessellator.RenderMatrix.prototype.enable = function (value){
-    value = this.tessellator.glConst(value);
-    
     this.enabled[value] = true;
     this.dirty(value);
 };
 
 Tessellator.RenderMatrix.prototype.disable = function (value){
-    value = this.tessellator.glConst(value);
-    
     this.enabled[value] = false;
     this.dirty(value);
 };

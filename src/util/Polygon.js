@@ -53,26 +53,24 @@ Tessellator.Polygon.prototype.convert2D = function (normal){
     var right, backward;
     
     if (Math.abs(normal[0]) > Math.abs(normal[2])){
-        right = up.cross(Tessellator.vec3(0, 0, 1));
+        right = up.clone().cross(Tessellator.vec3(0, 0, 1));
     }else{
-        right = up.cross(Tessellator.vec3(1, 0, 0));
+        right = up.clone().cross(Tessellator.vec3(1, 0, 0));
     };
     right.normalize();
     backward = right.clone().cross(up);
     
-    var mat = Tessellator.mat4(
-        right[0], up[0], backward[0], 0,
-        right[1], up[1], backward[1], 0,
-        right[2], up[2], backward[2], 0,
-        0, 0, 0, 1
+    var mat = Tessellator.mat3(
+        backward[0], right[0], up[0],
+        backward[1], right[1], up[1],
+        backward[2], right[2], up[2]
     );
     
     var poly = this.vertices;
     var dPoly = new Float32Array(poly.length / 3 * 2);
     
     for (var i = 0; i < poly.length / 3; i++){
-        var v = Tessellator.vec4(poly[i * 3], poly[i * 3 + 1], poly[i * 3 + 2], 1);
-        v.multiply(mat);
+        var v = Tessellator.vec3(poly[i * 3], poly[i * 3 + 1], poly[i * 3 + 2]).multiply(mat);
         
         dPoly[i * 2] = v[0];
         dPoly[i * 2 + 1] = v[1];
@@ -81,24 +79,30 @@ Tessellator.Polygon.prototype.convert2D = function (normal){
     this.vertices = dPoly;
 };
 
-Tessellator.Polygon.prototype.convertToTriangles = function (off){
+Tessellator.Polygon.prototype.convertToTriangles = function (off, avl){
     var poly = this.vertices;
-    var points = poly.length / 2;
     
     off = off || 0;
     
-    if (points <= 2){
-        throw "not a complete polygon";
-    };
-    
     var indices = new Tessellator.Array(16);
     
-    var avl = new Array(points);
-    for (var i = 0; i < points; i++){
-        avl[i] = i;
+    if (!avl){
+        avl = new Array(poly.length / 2);
+        
+        for (var i = 0; i < avl.length; i++){
+            avl[i] = i;
+        };
+    }else if (avl.constructor !== Array){
+        var arr = new Array(avl);
+        
+        for (var i = 0; i < avl.length; i++){
+            arr[i] = avl[i];
+        };
+        
+        avl = arr;
     };
     
-    for (var i = 0; i < avl.length > 3; i++){
+    main:for (var i = 0; avl.length > 3 && i < avl.length; i++){
         var i0 = avl[(i + 0) % avl.length],
             i1 = avl[(i + 1) % avl.length],
             i2 = avl[(i + 2) % avl.length],
@@ -107,29 +111,17 @@ Tessellator.Polygon.prototype.convertToTriangles = function (off){
             bx = poly[i1 * 2],  by = poly[i1 * 2 + 1],
             cx = poly[i2 * 2],  cy = poly[i2 * 2 + 1];
         
-        if ((ay - by) * (cx - bx) + (bx - ax) * (cy - by) >= 0){
+        if ((bx - ax) * (cy - by) - (by - ay) * (cx - bx) >= 0){
+            var area = -by * cx + ay * (-bx + cx) + ax * (by - cy) + bx * cy;
+            
             for (var ii = 0; ii < avl.length; (ii === i - 1) ? ii += 3 : ii++){
-                var p = avl[ii],
+                var p = avl[ii];
                 
-                    v0x = cx              - ax,
-                    v0y = cy              - ay,
-                    v1x = bx              - ax,
-                    v1y = by              - ay,
-                    v2x = poly[p * 2 + 0] - ax,
-                    v2y = poly[p * 2 + 1] - ay,
+                var s = (ay * cx - ax * cy + (cy - ay) * poly[p * 2] + (ax - cx) * poly[p * 2 + 1]) / area;
+                var t = (ax * by - ay * bx + (ay - by) * poly[p * 2] + (bx - ax) * poly[p * 2 + 1]) / area;
                 
-                    dot00 = v0x * v0x + v0y * v0y,
-                    dot01 = v0x * v1x + v0y * v1y,
-                    dot02 = v0x * v2x + v0y * v2y,
-                    dot11 = v1x * v1x + v1y * v1y,
-                    dot12 = v1x * v2x + v1y * v2y;
-                
-                var d = dot00 * dot11 - dot01 * dot01;
-                var u = (dot11 * dot02 - dot01 * dot12) / d;
-                var v = (dot00 * dot12 - dot01 * dot02) / d;
-                
-                if (u >= 0 && v >= 0 && u + v < 1){
-                    break;
+                if (s >= 0 && t >= 0 && s + t < 1){
+                    continue main;
                 };
             };
             

@@ -27,14 +27,13 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.Geometry = function (type, arg){
+Tessellator.Geometry = function (type){
     this.positions = new Tessellator.FragmentedArray();
     this.colors = new Tessellator.FragmentedArray();
     this.normals = new Tessellator.FragmentedArray();
     this.indices = new Tessellator.FragmentedArray();
     
     this.type = type || Tessellator.TRIGANGLE;
-    this.conversionArg = arg;
     this.disposed = false;
 };
 
@@ -107,16 +106,56 @@ Tessellator.Geometry.prototype.addPositions = function (pos){
     };
 };
 
+Tessellator.Geometry.prototype.generateTextureCoordinates = function (x, y){
+    this.convert();
+    
+    if (this.colors.isEmpty() && this.type === Tessellator.TRIANGLE){
+        var tex = new Float32Array(this.positions.length / 3 * 2);
+        
+        var indices = this.indices.combine();
+        
+        for (var i = 0; i < indices.length / 3; i++){
+            var ia = indices[i * 3 + 0],
+                ib = indices[i * 3 + 1],
+                ic = indices[i * 3 + 2];
+            
+            if ((i % 2) === 0){
+                tex[ia * 2 + 0] = 0;
+                tex[ia * 2 + 1] = 0;
+                
+                tex[ib * 2 + 0] = x;
+                tex[ib * 2 + 1] = 0;
+                
+                tex[ic * 2 + 0] = x;
+                tex[ic * 2 + 1] = y;
+            }else{
+                tex[ia * 2 + 0] = 0;
+                tex[ia * 2 + 1] = 0;
+                
+                tex[ib * 2 + 0] = x;
+                tex[ib * 2 + 1] = y;
+                
+                tex[ic * 2 + 0] = 0;
+                tex[ic * 2 + 1] = y;
+            };
+        };
+        
+        this.colors.push(tex);
+    };
+};
+
 Tessellator.Geometry.prototype.generateNormals = function (){
     this.convert();
     
     if (this.normals.isEmpty() && this.type === Tessellator.TRIANGLE){
         var normals = new Float32Array(this.positions.length);
         
-        for (var i = 0; i < this.indices.length; i += 3){
-            var ia = this.indices.get(i + 0),
-                ib = this.indices.get(i + 1),
-                ic = this.indices.get(i + 2);
+        var indices = this.indices.combine();
+        
+        for (var i = 0; i < indices.length; i += 3){
+            var ia = indices[i + 0],
+                ib = indices[i + 1],
+                ic = indices[i + 2];
             
             var x1 = this.positions.get(ia * 3 + 0),
                 y1 = this.positions.get(ia * 3 + 1),
@@ -212,8 +251,21 @@ Tessellator.Geometry.prototype.canConvertTo = function (to){
 
     return false;
 };
+Tessellator.Geometry.prototype.canConvertTo = function (to){
+    var g = Tessellator.Geometry.CUSTOM_GEOMETRY_REGISTER;
+    
+    for (var i = 0; i < g.length; i++){
+        var converter = g[i];
+        
+        if (converter[0] === this.type && converter[1] === to){
+            return true;
+        };
+    };
 
-Tessellator.Geometry.prototype.convert = function (adding){
+    return false;
+};
+
+Tessellator.Geometry.prototype.convert = function (){
     var g = Tessellator.Geometry.CUSTOM_GEOMETRY_REGISTER;
     
     for (var i = 0; i < g.length; i++){
@@ -222,7 +274,7 @@ Tessellator.Geometry.prototype.convert = function (adding){
         if (converter[0] === this.type){
             this.type = converter[1];
             
-            converter[2](this, adding, this.conversionArg);
+            converter[2](this);
             
             return true;
         };
@@ -232,20 +284,23 @@ Tessellator.Geometry.prototype.convert = function (adding){
 };
 
 Tessellator.Geometry.prototype.add = function (newGeometry, arg){
-    if (newGeometry.canConvertTo(this.type)){
-        newGeometry.convert(this);
+    if (this.type === newGeometry.type){
+        newGeometry.indices.compress();
+        newGeometry.indices.offset(this.positions.length / 3);
         
-        if (!newGeometry.disposed){
-            this.positions.push(newGeometry.positions);
-            this.colors.push(newGeometry.colors);
-            this.normals.push(newGeometry.normals);
-            this.indices.push(newGeometry.indices);
-        };
+        this.forceAdd(newGeometry);
         
         return true;
     };
     
     return false;
+};
+
+Tessellator.Geometry.prototype.forceAdd = function (newGeometry){
+    this.positions.push(newGeometry.positions);
+    this.colors.push(newGeometry.colors);
+    this.normals.push(newGeometry.normals);
+    this.indices.push(newGeometry.indices);
 };
 
 Tessellator.Geometry.registerCustomGeometry = function (from, to, editor){

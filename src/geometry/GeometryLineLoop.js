@@ -27,30 +27,27 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.Geometry.registerCustomGeometry(Tessellator.LINE_LOOP, Tessellator.LINES, function (g, add, arg){
+Tessellator.Geometry.registerCustomGeometry(Tessellator.LINE_LOOP, Tessellator.LINES, function (g){
   if (g.indices.length){
-      var off = add ? add.positions.length / 3 : 0;
-  
       var ii = g.indices.combine(Uint16Array);
       var k = ii.length;
       var newIndices = new Tessellator.Array();
       
       for (var i = 1; i <= k; i++){
           newIndices.push([
-              ii[i - 1] + off,
-              ii[i % k] + off,
+              ii[i - 1],
+              ii[i % k],
           ]);
       };
       
       g.indices = newIndices;
   }else{
       var k = g.positions.length / 3;
-      var off = add ? add.positions.length / 3 : 0;
       
       for (var i = 1; i <= k; i++){
           g.indices.push([
-              i - 1 + off,
-              i % k + off,
+              i - 1,
+              i % k,
           ]);
       };
   };

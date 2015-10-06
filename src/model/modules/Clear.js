@@ -28,26 +28,24 @@
  */
 
 Tessellator.Model.prototype.clear = function (){
-    this.add(new Tessellator.Clear(Tessellator.COLOR_BUFFER_BIT.gl | Tessellator.DEPTH_BUFFER_BIT.gl, Tessellator.getColor(arguments)));
+    this.add(new Tessellator.Clear(Tessellator.COLOR_BUFFER_BIT | Tessellator.DEPTH_BUFFER_BIT, Tessellator.getColor(arguments)));
 };
 
 Tessellator.Model.prototype.clearColor = function (){
-    this.add(new Tessellator.Clear(Tessellator.COLOR_BUFFER_BIT.glTessellator.getColor(arguments)));
+    this.add(new Tessellator.Clear(Tessellator.COLOR_BUFFER_BIT, Tessellator.getColor(arguments)));
 };
 
 Tessellator.Model.prototype.clearDepth = function (){
-    this.add(new Tessellator.Clear(Tessellator.DEPTH_BUFFER_BIT.gl));
+    this.add(new Tessellator.Clear(Tessellator.DEPTH_BUFFER_BIT));
 };
 
 Tessellator.Clear = function (clearCode, color) {
-    this.type = Tessellator.CLEAR;
-    
     this.clearCode = clearCode;
     this.color = color;
 };
 
 Tessellator.Clear.prototype.apply = function (render){
-    if ((this.clearCode & Tessellator.COLOR_BUFFER_BIT.gl) !== 0){
+    if ((this.clearCode & Tessellator.COLOR_BUFFER_BIT) !== 0){
         if (this.color){
             render.tessellator.GL.clearColor(this.color[0], this.color[1], this.color[2], this.color[3]);
         }else{

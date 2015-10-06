@@ -34,12 +34,12 @@ Tessellator.TextureModelCubeMap = function (tessellator, size, model, pos, filte
     this.renderer = new Tessellator.ModelCubeRenderer(tessellator, model, pos);
     
     for (var i = 0; i < Tessellator.TextureCubeMap.INDEX_LOOKUP.length; i++){
-        var dir = Tessellator.TextureCubeMap.INDEX_LOOKUP[i];
+        var dir = Tessellator.TextureCubeMap.mapPos[Tessellator.TextureCubeMap.INDEX_LOOKUP[i]];
         
         var texture = new Tessellator.TextureModel(this.tessellator, size, size, [
             new Tessellator.TextureModel.AttachmentDepth(),
             new Tessellator.TextureModel.AttachmentColor(),
-            new Tessellator.TextureModel.AttachmentRenderer(this.renderer, dir.value)
+            new Tessellator.TextureModel.AttachmentRenderer(this.renderer, dir)
         ]);
         
         this.set(dir, texture);

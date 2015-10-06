@@ -32,28 +32,46 @@ Tessellator.Model.prototype.end = function (indices){
 };
 
 Tessellator.End = function (indices){
-    this.type = Tessellator.END;
     this.indices = indices;
 };
 
 Tessellator.End.prototype.init = function (interpreter){
     var geometry = interpreter.getr("currentGeometry");
     var cached = interpreter.get("cachedGeometry");
+    var extra = interpreter.get("extraGeometry");
+    
+    if (geometry === extra){
+        return;
+    };
     
     if (this.indices){
         geometry.indices.push(this.indices);
     };
     
-    if (cached){
-        cached.convert();
+    if (extra){
+        geometry.forceAdd(extra);
         
+        interpreter.set("extraGeometry", null);
+    };
+    
+    geometry.convert();
+    geometry.generateNormals();
+    
+    {
+        var tex = interpreter.get("textureBounds");
+        
+        if (tex && tex.defaultBounds){
+            geometry.generateTextureCoordinates(tex.bounds[0], tex.bounds[1]);
+        };
+    };
+    
+    if (cached){
         if (cached.disposed){
             interpreter.set("cachedGeometry", geometry);
         }else if (!cached.add(geometry)){
             interpreter.set("cachedGeometry", geometry);
             
             if (cached){
-                cached.generateNormals();
                 cached.createObject(interpreter.tessellator, interpreter.get("draw"), Tessellator.STATIC);
                 
                 return cached;
@@ -70,7 +88,6 @@ Tessellator.Initializer.prototype.flush = function (){
     var cache = this.getr("cachedGeometry");
     
     if (cache){
-        cache.generateNormals();
         cache.createObject(this.tessellator, this.get("draw"), Tessellator.STATIC);
         this.model.push(cache);
     };

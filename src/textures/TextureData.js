@@ -91,8 +91,8 @@ Tessellator.TextureData = function (tessellator, width, height, dataType, storeT
             };
         };
         
-        this.dataType = tessellator.glConst(dataType);
-        this.storeType = tessellator.glConst(storeType);
+        this.dataType = dataType;
+        this.storeType = storeType;
     };
     
     this.setReady();
@@ -118,7 +118,7 @@ Tessellator.TextureData.prototype.configure = function (target, track){
         
         if (!this.isTracking(track)){
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
-            this.tessellator.GL.texImage2D(this.tessellator.glConst(target), 0, this.dataType, this.width, this.height, 0, this.dataType, this.storeType, this.data);
+            this.tessellator.GL.texImage2D(target, 0, this.dataType, this.width, this.height, 0, this.dataType, this.storeType, this.data);
             
             this.track(track);
         };

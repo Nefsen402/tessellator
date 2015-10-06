@@ -142,7 +142,7 @@ Tessellator.Program.prototype.load = function (){
                     name = uniform.name;
                 };
                 
-                var inherit = Tessellator.Program.DEFAULT_UNIFORM_INHERITER[this.tessellator.tessConst(uniform.type)];
+                var inherit = Tessellator.Program.DEFAULT_UNIFORM_INHERITER[uniform.type];
                 
                 this.uniforms[name] = {
                     tessellator: this.tessellator,
@@ -156,7 +156,7 @@ Tessellator.Program.prototype.load = function (){
                     location: gl.getUniformLocation(this.shader, name),
                     shader: this,
                     size: uniform.size,
-                    type: this.tessellator.tessConst(uniform.type),
+                    type: uniform.type,
                     edits: 0,
                 };
                 

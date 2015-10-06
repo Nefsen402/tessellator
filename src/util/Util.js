@@ -74,24 +74,6 @@
 
 Tessellator.copyProto = Tessellator.extend;
 
-Tessellator.prototype.glConst = function (c){
-    if (c.constructor === Array){
-        for (var i = 0; i < c.length; i++){
-            c[i] = this.glConst(c[i]);
-        };
-        
-        return c;
-    }else if (c.constructor === Tessellator.Constant){
-        return c.gl;
-    }else{
-        return c;
-    };
-};
-
-Tessellator.prototype.tessConst = function (c){
-    return Tessellator.Constant.VALUE_NAME[c];
-};
-
 Tessellator.Extensions = function (tessellator){
     this.extensions = {};
     this.tessellator = tessellator;

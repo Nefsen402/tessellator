@@ -142,7 +142,7 @@ Tessellator.Texture.prototype.dispose = function (){
 };
 
 Tessellator.Texture.prototype.bind = function (){
-    this.tessellator.GL.bindTexture(this.tessellator.glConst(this.type), this.isReady() ? this.texture : null);
+    this.tessellator.GL.bindTexture(this.type, this.isReady() ? this.texture : null);
 };
 
 Tessellator.Texture.prototype.update = function (){
@@ -150,53 +150,53 @@ Tessellator.Texture.prototype.update = function (){
 };
 
 Tessellator.TEXTURE_FILTER_NEAREST = function TEXTURE_FILTER_NEAREST (tessellator, texture){
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MAG_FILTER, tessellator.GL.NEAREST);
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MIN_FILTER, tessellator.GL.NEAREST);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_MAG_FILTER, tessellator.GL.NEAREST);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_MIN_FILTER, tessellator.GL.NEAREST);
 };
 
 Tessellator.TEXTURE_FILTER_LINEAR = function TEXTURE_FILTER_LINEAR (tessellator, texture){
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MAG_FILTER, tessellator.GL.LINEAR);
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MIN_FILTER, tessellator.GL.LINEAR);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_MAG_FILTER, tessellator.GL.LINEAR);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_MIN_FILTER, tessellator.GL.LINEAR);
 };
 
 Tessellator.TEXTURE_FILTER_MIPMAP_NEAREST = function TEXTURE_FILTER_MIPMAP_NEAREST (tessellator, texture){
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MAG_FILTER, tessellator.GL.NEAREST);
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MIN_FILTER, tessellator.GL.LINEAR_MIPMAP_NEAREST);
-    tessellator.GL.generateMipmap(tessellator.glConst(texture.type));
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_MAG_FILTER, tessellator.GL.NEAREST);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_MIN_FILTER, tessellator.GL.LINEAR_MIPMAP_NEAREST);
+    tessellator.GL.generateMipmap(texture.type);
 };
 
 Tessellator.TEXTURE_FILTER_MIPMAP_LINEAR = function TEXTURE_FILTER_MIPMAP_LINEAR (tessellator, texture){
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MAG_FILTER, tessellator.GL.LINEAR);
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_MIN_FILTER, tessellator.GL.LINEAR_MIPMAP_NEAREST);
-    tessellator.GL.generateMipmap(tessellator.glConst(texture.type));
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_MAG_FILTER, tessellator.GL.LINEAR);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_MIN_FILTER, tessellator.GL.LINEAR_MIPMAP_NEAREST);
+    tessellator.GL.generateMipmap(texture.type);
 };
 
 Tessellator.TEXTURE_FILTER_LINEAR_CLAMP = function TEXTURE_FILTER_LINEAR_CLAMP (tessellator, texture){
     Tessellator.TEXTURE_FILTER_LINEAR(tessellator, texture);
     
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.CLAMP_TO_EDGE);
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.CLAMP_TO_EDGE);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.CLAMP_TO_EDGE);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.CLAMP_TO_EDGE);
 };
 
 Tessellator.TEXTURE_FILTER_NEAREST_CLAMP = function TEXTURE_FILTER_NEAREST_CLAMP (tessellator, texture){
     Tessellator.TEXTURE_FILTER_NEAREST(tessellator, texture);
     
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.CLAMP_TO_EDGE);
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.CLAMP_TO_EDGE);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.CLAMP_TO_EDGE);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.CLAMP_TO_EDGE);
 };
 
 Tessellator.TEXTURE_FILTER_LINEAR_REPEAT = function TEXTURE_FILTER_LINEAR_REPEAT (tessellator, texture){
     Tessellator.TEXTURE_FILTER_LINEAR(tessellator, texture);
     
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.REPEAT);
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.REPEAT);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.REPEAT);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.REPEAT);
 };
 
 Tessellator.TEXTURE_FILTER_NEAREST_REPEAT = function TEXTURE_FILTER_NEAREST_REPEAT (tessellator, texture){
     Tessellator.TEXTURE_FILTER_NEAREST(tessellator, texture);
     
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.REPEAT);
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.REPEAT);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.REPEAT);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.REPEAT);
 };
 
 Tessellator.TEXTURE_FILTER_NEAREST_ANISOTROPY = function (tessellator, texture){
@@ -209,7 +209,7 @@ Tessellator.TEXTURE_FILTER_NEAREST_ANISOTROPY = function (tessellator, texture){
     Tessellator.TEXTURE_FILTER_NEAREST(tessellator, texture);
     
     var max = tessellator.GL.getParameter(f.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), f.TEXTURE_MAX_ANISOTROPY_EXT, max);
+    tessellator.GL.texParameteri(texture.type, f.TEXTURE_MAX_ANISOTROPY_EXT, max);
 };
 
 Tessellator.TEXTURE_FILTER_LINEAR_ANISOTROPY = function (tessellator, texture){
@@ -222,7 +222,7 @@ Tessellator.TEXTURE_FILTER_LINEAR_ANISOTROPY = function (tessellator, texture){
     Tessellator.TEXTURE_FILTER_LINEAR(tessellator, texture);
     
     var max = tessellator.GL.getParameter(f.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), f.TEXTURE_MAX_ANISOTROPY_EXT, max);
+    tessellator.GL.texParameteri(texture.type, f.TEXTURE_MAX_ANISOTROPY_EXT, max);
 };
 
 Tessellator.TEXTURE_FILTER_NEAREST_ANISOTROPY = function (tessellator, texture){
@@ -235,7 +235,7 @@ Tessellator.TEXTURE_FILTER_NEAREST_ANISOTROPY = function (tessellator, texture){
     Tessellator.TEXTURE_FILTER_NEAREST(tessellator, texture);
     
     var max = tessellator.GL.getParameter(f.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
-    tessellator.GL.texParameteri(tessellator.glConst(texture.type), f.TEXTURE_MAX_ANISOTROPY_EXT, max);
+    tessellator.GL.texParameteri(texture.type, f.TEXTURE_MAX_ANISOTROPY_EXT, max);
 };
 
 Tessellator.DEFAULT_TEXTURE_FILTER = Tessellator.TEXTURE_FILTER_NEAREST;

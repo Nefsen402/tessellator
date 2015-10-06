@@ -193,7 +193,7 @@ Tessellator.Shader.prototype.create = function (type){
     if (this.shader){
         throw "shader is already initialized!";
     }else{
-        this.type = this.tessellator.glConst(type);
+        this.type = type;
         this.shader = this.tessellator.GL.createShader(this.type);
     };
     

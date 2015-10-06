@@ -39,23 +39,11 @@ Tessellator.StaticView.prototype.apply = function (render){
     
     var yoff, xoff;
     
-    if (isNaN(this.x)){
-        xoff = this.x.value;
-    }else{
-        xoff = this.x;
-    };
-    
-    if (isNaN(this.y)){
-        yoff = this.y.value;
-    }else{
-        yoff = this.y;
-    };
-    
     render.set("pMatrix", Tessellator.mat4(
         2 / window[0], 0, 0, 0,
         0, 2 / window[1], 0, 0,
         0, 0, 0, 0,
-        xoff, yoff, -1, 1
+        this.x, this.y, -1, 1
     ));
 };
 

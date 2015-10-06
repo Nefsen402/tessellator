@@ -62,7 +62,9 @@ Tessellator.Vertex.prototype.init = function (interpreter){
         if (geometry.type === Tessellator.INDICES){
             geometry.indices.push(this.vertices);
         }else if (geometry.type === Tessellator.TEXTURE){
-            geometry.colors.push(this.vertices);
+            if (interpreter.get("textureBounds")){
+                geometry.colors.push(this.vertices);
+            }
         }else if (geometry.type === Tessellator.NORMAL){
             geometry.normals.push(this.vertices);
         }else{

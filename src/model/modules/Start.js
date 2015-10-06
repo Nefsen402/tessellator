@@ -52,5 +52,14 @@ Tessellator.Start.prototype.init = function (interpreter){
     };
     
     interpreter.set("currentGeometry", geometry);
+    
+    if (
+        geometry.type === Tessellator.INDICES || 
+        geometry.type === Tessellator.TEXTURE ||
+        geometry.type === Tessellator.NORMAL
+    ){
+        interpreter.set("extraGeometry", geometry);
+    };
+    
     return null;
 };

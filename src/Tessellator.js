@@ -154,18 +154,14 @@ var Tessellator = function (canvas){
     this.maxTextures = this.GL.getParameter(this.GL.MAX_TEXTURE_IMAGE_UNITS);
     this.maxAttributes = this.GL.getParameter(this.GL.MAX_VERTEX_ATTRIBS);
     
-    this.GL.blendFunc(Tessellator.BLEND_DEFAULT[0], Tessellator.BLEND_DEFAULT[1]);
-    
     this.forceCanvasResize();
     
     //used when textures are referenced through strings. Not recommended.
     this.textureCache = {};
-    this.unusedTextureID = [];
     
     this.frame = 0;
     
-    this.contextID = Tessellator.contexts;
-    Tessellator.contexts++;
+    this.contextID = Tessellator.contexts++;
     
     this.resources = [];
     this.resources.total = 0;
@@ -185,7 +181,7 @@ var Tessellator = function (canvas){
     };
 };
 
-Tessellator.VERSION = "5g beta";
+Tessellator.VERSION = "6a beta";
 
 Tessellator.VENDORS = [
     "",

@@ -88,8 +88,8 @@ Tessellator.TextureModel.AttachmentDepthTexture.prototype.configure = function (
             tex = track.glTexture;
         };
         
-        gl.texImage2D(parent.tessellator.glConst(target), 0, gl.DEPTH_COMPONENT, this.width, this.height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, parent.tessellator.glConst(target), tex, 0);
+        gl.texImage2D(target, 0, gl.DEPTH_COMPONENT, this.width, this.height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, target, tex, 0);
         
         this.track(track);
     };

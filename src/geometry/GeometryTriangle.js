@@ -27,71 +27,14 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.Geometry.registerCustomGeometry(Tessellator.TRIANGLE, Tessellator.TRIANGLE, function (g, add, arg){
-    var tb = arg.get("textureBounds");
-    
-    if (g.indices.length){
-        var k = g.indices.length;
-        
-        if (add && add.positions.length){
-            if (add.normals.length){
-                g.generateNormals();
-            };
-            
-            g.indices.offset(add.positions.length / 3);
-        };
-        
-        if (tb){
-            for (var i = 0; i < k; i += 3){
-                var bounds;
-                
-                if (textureBounds.defaultBounds){
-                    bounds = [
-                                   0,            0,
-                        tb.bounds[0],            0,
-                        tb.bounds[1], tb.bounds[1]
-                    ];
-                }else{
-                    bounds = tb.bounds.subarray(i * 6, (i + 1) * 6);
-                };
-                
-                this.shape.colors.push(bounds);
-            };
-        };
-    }else{
-        var k = g.positions.length / 3;
-        var off = add ? add.positions.length / 3 : 0;
-        
-        for (var i = 0; i < k; i += 3){
+Tessellator.Geometry.registerCustomGeometry(Tessellator.TRIANGLE, Tessellator.TRIANGLE, function (g){
+    if (!g.indices.length){
+        for (var i = 0; i < g.positions.length / 3; i += 3){
             g.indices.push([
-                i + 0 + off,
-                i + 1 + off,
-                i + 2 + off
+                i + 0,
+                i + 1,
+                i + 2
             ]);
-            
-            if (tb){
-                var bounds;
-                
-                if (textureBounds.defaultBounds){
-                    bounds = [
-                                   0,            0,
-                        tb.bounds[0],            0,
-                        tb.bounds[1], tb.bounds[1],
-                    ];
-                }else{
-                    bounds = tb.bounds.subarray(i * 6, (i + 1) * 6);
-                };
-                
-                this.shape.colors.push(bounds);
-            };
         };
-    };
-});
-
-Tessellator.Geometry.registerCustomGeometry(Tessellator.NORMAL, Tessellator.TRIANGLE, function (){});
-Tessellator.Geometry.registerCustomGeometry(Tessellator.INDICES, Tessellator.TRIANGLE, function (){});
-Tessellator.Geometry.registerCustomGeometry(Tessellator.TEXTURE, Tessellator.TRIANGLE, function (g, add, arg){
-    if (!arg.get("textureBounds")){
-        g.dispose();
     };
 });

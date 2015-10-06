@@ -27,32 +27,16 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
  
- Tessellator.Geometry.registerCustomGeometry(Tessellator.POLYGON, Tessellator.TRIANGLES, function (g, add, arg){
-  if (g.indices.length){
-      var off = add ? add.positions.length / 3 : 0;
-      
-      var ii = g.indices.combine(Uint16Array);
-      var ip = g.positions.combine();
-      var k = ii.length;
-      var pos = new Tessellator.Array();
-      
-      for (var i = 0; i < k; i++){
-          pos.push([
-              ip[ii[i - 2] * 3 + 0],
-              ip[ii[i - 2] * 3 + 1],
-              ip[ii[i - 2] * 3 + 2]
-          ]);
-      };
-      
-      var poly = new Tessellator.Polygon(pos.combine());
-      poly.convert2D(poly.getNormal());
-      
-      g.positions = pos;
-      g.indices = poly.convertToTriangles(add ? add.positions.length / 3 : 0);
-  }else{
-      var poly = new Tessellator.Polygon(g.positions.combine());
-      poly.convert2D(poly.getNormal());
-      
-      g.indices.push(poly.convertToTriangles(add ? add.positions.length / 3 : 0));
-  };
+ Tessellator.Geometry.registerCustomGeometry(Tessellator.POLYGON, Tessellator.TRIANGLES, function (g){
+    if (g.indices.length){
+        var poly = new Tessellator.Polygon(g.positions.combine());
+        poly.convert2D(poly.getNormal());
+        
+        g.indices = poly.convertToTriangles(0, g.indices.combine(Uint16Array));
+    }else{
+        var poly = new Tessellator.Polygon(g.positions.combine());
+        poly.convert2D(poly.getNormal());
+        
+        g.indices.push(poly.convertToTriangles());
+    };
 });

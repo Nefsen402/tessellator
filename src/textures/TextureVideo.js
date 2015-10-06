@@ -186,7 +186,7 @@ Tessellator.TextureVideo.prototype.configure = function (target, track){
         
         if (this.autoUpdate || !this.isTracking(track)){
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-            gl.texImage2D(this.tessellator.glConst(target), 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video);
+            gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video);
             
             this.track(track);
             return true;

@@ -27,32 +27,29 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
  
- Tessellator.Geometry.registerCustomGeometry(Tessellator.TRIANGLE_FAN, Tessellator.TRIANGLES, function (g, add, arg){
+ Tessellator.Geometry.registerCustomGeometry(Tessellator.TRIANGLE_FAN, Tessellator.TRIANGLES, function (g){
   if (g.indices.length){
-      var off = add ? add.positions.length / 3 : 0;
-      
       var ii = g.indices.combine(Uint16Array);
       var k = ii.length;
       var newIndices = new Tessellator.Array();
       
       for (var i = 2; i < k; i++){
           newIndices.push([
-              ii[0] + off, 
-              ii[i - 1] + off,
-              ii[i - 0] + off
+              ii[0], 
+              ii[i - 1],
+              ii[i - 0]
           ]);
       };
       
       g.indices = newIndices;
   }else{
       var k = g.positions.length / 3;
-      var off = add ? add.positions.length / 3 : 0;
       
       for (var i = 2; i < k; i++){
           g.indices.push([
-              0 + off, 
-              i - 1 + off,
-              i - 0 + off
+              0, 
+              i - 1,
+              i - 0
           ]);
       };
   };

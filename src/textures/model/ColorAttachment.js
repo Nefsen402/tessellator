@@ -53,11 +53,8 @@ Tessellator.TextureModel.AttachmentColor.prototype.setup = function (texture){
         }else if (this.quality === Tessellator.FLOAT16){
             texture.tessellator.extensions.get("OES_texture_half_float");
         };
-        
-        this.quality = texture.tessellator.glConst(this.quality);
     };
     
-    this.channels = this.tessellator.glConst(this.channels);
     this.width = texture.width;
     this.height = texture.height;
     
@@ -103,8 +100,8 @@ Tessellator.TextureModel.AttachmentColor.prototype.configure = function (parent,
             tex = track.glTexture;
         };
         
-        gl.texImage2D(parent.tessellator.glConst(target), 0, this.channels, this.width, this.height, 0, this.channels, this.quality, null);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + this.index, parent.tessellator.glConst(target), tex, 0);
+        gl.texImage2D(target, 0, this.channels, this.width, this.height, 0, this.channels, this.quality, null);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + this.index, target, tex, 0);
         
         this.track(track);
     };
