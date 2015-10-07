@@ -414,6 +414,60 @@ Tessellator.vec2.prototype.random = function (scale){
     return this;
 };
 
+Tessellator.vec2.prototype.asin = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.asin(this[0]);
+    this[1] = Math.asin(this[1]);
+    
+    return this;
+};
+
+Tessellator.vec2.prototype.acos = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.acos(this[0]);
+    this[1] = Math.acos(this[1]);
+    
+    return this;
+};
+
+Tessellator.vec2.prototype.atan = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.atan(this[0]);
+    this[1] = Math.atan(this[1]);
+    
+    return this;
+};
+
+Tessellator.vec2.prototype.sin = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.sin(this[0]);
+    this[1] = Math.sin(this[1]);
+    
+    return this;
+};
+
+Tessellator.vec2.prototype.cos = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.cos(this[0]);
+    this[1] = Math.cos(this[1]);
+    
+    return this;
+};
+
+Tessellator.vec2.prototype.tan = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.tan(this[0]);
+    this[1] = Math.tan(this[1]);
+    
+    return this;
+};
+
 Tessellator.vec2.prototype.aspect = function (){
     if (this.tween) this.tween.update();
     

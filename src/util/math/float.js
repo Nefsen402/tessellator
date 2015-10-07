@@ -299,6 +299,62 @@ Tessellator.float.prototype.toString = function (){
     return "float(" + this[0] + ")";
 };
 
+Tessellator.float.prototype.asin = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.asin(this[0]);
+    
+    return this;
+};
+
+Tessellator.float.prototype.acos = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.acos(this[0]);
+    
+    return this;
+};
+
+Tessellator.float.prototype.atan = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.atan(this[0]);
+    
+    return this;
+};
+
+Tessellator.float.prototype.sin = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.sin(this[0]);
+    
+    return this;
+};
+
+Tessellator.float.prototype.cos = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.cos(this[0]);
+    
+    return this;
+};
+
+Tessellator.float.prototype.tan = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.tan(this[0]);
+    
+    return this;
+};
+
+Tessellator.float.prototype.atan = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.atan(this[0]);
+    
+    return this;
+};
+
 if (Object.defineProperty) (function (){
     var getSwizzle = function (vec, s){
         if (vec.tween) vec.tween.update();

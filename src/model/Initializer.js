@@ -27,10 +27,10 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.Initializer = function (tessellator, inheritFrom){
+Tessellator.Initializer = function (tessellator, model, inheritFrom){
     this.tessellator = tessellator;
     
-    this.model = [];
+    this.model = model;
     this.finished = false;
     
     this.attribs = {};
@@ -85,29 +85,30 @@ Tessellator.Initializer.prototype.push = function (action){
         
         if (push !== null){
             if (push){
-                this.model.push(push);
+                this.put(push);
             }else{
-                this.model.push(action);
+                this.put(action);
             };
         };
         
         return push;
     }else{
-        this.model.push(action);
+        this.put(action);
     };
 };
 
+Tessellator.Initializer.prototype.put = function (item){
+    this.model.model.push(item);
+};
 
 Tessellator.Initializer.prototype.finish = function (){
     this.flush();
     
-    for (var i = 0; i < this.model.length; i++){
-        if (this.model[i].postInit){
-            this.model[i].postInit(this);
+    for (var i = 0; i < this.model.model.length; i++){
+        if (this.model.model[i].postInit){
+            this.model.model[i].postInit(this);
         };
     };
-    
-    return this.model;
 };
 
 Tessellator.Initializer.prototype.flush = function (){};

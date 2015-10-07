@@ -101,6 +101,6 @@ Tessellator.DirectionalLight.prototype.createShadow = function (model, x, y, z, 
             new Tessellator.TextureModel.AttachmentRenderer(this.shadowRenderer, model)
         ]);
     }else{
-        this.shadowMap = [model, x, y, z, resolution];
+        this.shadowMap = arguments;
     };
 };

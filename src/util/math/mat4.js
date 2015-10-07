@@ -659,7 +659,7 @@ Tessellator.mat4.prototype.align = function (v1, v2){
         v = Tessellator.vec3(1, 0, 0);
     };
     
-    this.rotate(Math.acos(c[0]), v);
+    this.rotate(c.acos(), v);
     return this;
 };
 

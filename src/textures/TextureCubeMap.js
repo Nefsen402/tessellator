@@ -86,8 +86,8 @@ Tessellator.TextureCubeMap.prototype.configure = function (target, track){
 };
 
 Tessellator.TextureCubeMap.mapPos = {};
-Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_POSITIVE_X] = Tessellator.vec3(-1, 0, 0);
-Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_NEGATIVE_X] = Tessellator.vec3(1, 0, 0);
+Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_POSITIVE_X] = Tessellator.vec3(1, 0, 0);
+Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_NEGATIVE_X] = Tessellator.vec3(-1, 0, 0);
 Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_POSITIVE_Y] = Tessellator.vec3(0, 1, 0);
 Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_NEGATIVE_Y] = Tessellator.vec3(0, -1, 0);
 Tessellator.TextureCubeMap.mapPos[Tessellator.TEXTURE_CUBE_MAP_POSITIVE_Z] = Tessellator.vec3(0, 0, 1);

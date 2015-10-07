@@ -27,19 +27,27 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.TextureModelCubeMap = function (tessellator, size, model, pos, filter){
+Tessellator.TextureModelCubeMap = function (shader, size, model, pos, filter){
+    var tessellator;
+    
+    if (shader.constructor === Tessellator){
+        tessellator = shader;
+    }else{
+        tessellator = shader.tessellator;
+    };
+    
     this.super(tessellator, filter);
     
     this.model = model;
-    this.renderer = new Tessellator.ModelCubeRenderer(tessellator, model, pos);
+    this.renderer = new Tessellator.ModelCubeRenderer(shader, model, pos);
     
     for (var i = 0; i < Tessellator.TextureCubeMap.INDEX_LOOKUP.length; i++){
-        var dir = Tessellator.TextureCubeMap.mapPos[Tessellator.TextureCubeMap.INDEX_LOOKUP[i]];
+        var dir = Tessellator.TextureCubeMap.INDEX_LOOKUP[i];
         
         var texture = new Tessellator.TextureModel(this.tessellator, size, size, [
             new Tessellator.TextureModel.AttachmentDepth(),
-            new Tessellator.TextureModel.AttachmentColor(),
-            new Tessellator.TextureModel.AttachmentRenderer(this.renderer, dir)
+            new Tessellator.TextureModel.AttachmentColor(Tessellator.TEXTURE_FILTER_LINEAR_CLAMP),
+            new Tessellator.TextureModel.AttachmentRenderer(this.renderer, Tessellator.TextureCubeMap.mapPos[dir])
         ]);
         
         this.set(dir, texture);
@@ -47,3 +55,7 @@ Tessellator.TextureModelCubeMap = function (tessellator, size, model, pos, filte
 };
 
 Tessellator.extend(Tessellator.TextureModelCubeMap, Tessellator.TextureCubeMap);
+
+Tessellator.TextureModelCubeMap.prototype.setPos = function (pos){
+    this.renderer.setPos(pos);
+};

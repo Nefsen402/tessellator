@@ -199,6 +199,20 @@ Tessellator.TEXTURE_FILTER_NEAREST_REPEAT = function TEXTURE_FILTER_NEAREST_REPE
     tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.REPEAT);
 };
 
+Tessellator.TEXTURE_FILTER_LINEAR_MIRRORED_REPEAT = function TEXTURE_FILTER_LINEAR_MIRRORED_REPEAT (tessellator, texture){
+    Tessellator.TEXTURE_FILTER_LINEAR(tessellator, texture);
+    
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.MIRRORED_REPEAT);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.MIRRORED_REPEAT);
+};
+
+Tessellator.TEXTURE_FILTER_NEAREST_MIRRORED_REPEAT = function TEXTURE_FILTER_NEAREST_MIRRORED_REPEAT (tessellator, texture){
+    Tessellator.TEXTURE_FILTER_NEAREST(tessellator, texture);
+    
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_S, tessellator.GL.MIRRORED_REPEAT);
+    tessellator.GL.texParameteri(texture.type, tessellator.GL.TEXTURE_WRAP_T, tessellator.GL.MIRRORED_REPEAT);
+};
+
 Tessellator.TEXTURE_FILTER_NEAREST_ANISOTROPY = function (tessellator, texture){
     var f = tessellator.extensions.get("EXT_texture_filter_anisotropic");
     

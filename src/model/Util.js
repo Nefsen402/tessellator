@@ -151,7 +151,11 @@ Tessellator.Model.prototype.drawCuboid = function (){
             w = arguments[3] / 2,
             vec = arguments[4];
         
-        var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+        var mat = Tessellator.mat4().translate(Tessellator.vec3(x, y, z)).align(vec, Tessellator.vec3(0, 1, 0));
+        
+        x = 0;
+        y = 0;
+        z = 0;
         
         this.start(Tessellator.LINE);
         this.setVertex(Tessellator.vec3(x - w, y - w, z - w).multiply(mat));
@@ -192,7 +196,7 @@ Tessellator.Model.prototype.drawCuboid = function (){
             zz = arguments[5],
             vec = arguments[6];
         
-        var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+        var mat = Tessellator.mat4().translate(Tessellator.vec3(x, y, z)).align(vec, Tessellator.vec3(0, 1, 0));
         
         this.start(Tessellator.LINE);
         this.setVertex(Tessellator.vec3(x , y , z ).multiply(mat));
@@ -254,7 +258,11 @@ Tessellator.Model.prototype.fillCuboid = function (){
             w = arguments[3] / 2,
             vec = arguments[4];
         
-        var mat = Tessellator.mat3().align(vec, Tessellator.vec3(0, 1, 0));
+        var mat = Tessellator.mat4().translate(Tessellator.vec3(x, y, z)).align(vec, Tessellator.vec3(0, 1, 0));
+        
+        x = 0;
+        y = 0;
+        z = 0;
         
         this.start(Tessellator.QUAD);
         this.setVertex(Tessellator.vec3(x - w, y - w, z + w).multiply(mat));

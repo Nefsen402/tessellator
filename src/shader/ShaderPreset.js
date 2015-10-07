@@ -170,8 +170,8 @@ Tessellator.MODEL_VIEW_SHADER = new Tessellator.ShaderPreset().configureDrawDepe
     Tessellator.MODEL_VIEW_FRAGMENT_SHADER_COLOR
 );
 
-Tessellator.DEPTH_MAP_VERTEX_SHADER = "attribute vec3 position;uniform mat4 mvMatrix;uniform mat4 pMatrix;varying vec4 vecp;varying lowp float hasNormal;void main(void){vecp=pMatrix*mvMatrix*vec4(position,1.0);gl_Position=vecp;}";
-Tessellator.DEPTH_MAP_FRAGMENT_SHADER = "precision lowp float;varying vec4 vecp;void main(void){float depth=(vecp.z/vecp.w+1.0)/2.0;gl_FragColor=vec4(depth,depth,depth,1);}";
+Tessellator.DEPTH_MAP_VERTEX_SHADER = "attribute vec3 position;uniform mat4 mvMatrix;uniform mat4 pMatrix;varying vec4 vecp;varying lowp float hasNormal;void main(void){vecp=mvMatrix*vec4(position,1.0);gl_Position=pMatrix*vecp;}";
+Tessellator.DEPTH_MAP_FRAGMENT_SHADER = "precision highp float;varying vec4 vecp;uniform vec2 viewBounds;vec4 packFloat(float value){vec4 res=fract(value*vec4(256.0*256.0*256.0,256.0*256.0,256.0,1.0));res-=res.xxyz*vec4(0.0,vec3(1.0/256.0));return res;}void main(void){gl_FragColor=packFloat((length(vecp)-viewBounds.x)/(viewBounds.y-viewBounds.x));}";
 
 Tessellator.DEPTH_MAP_SHADER = new Tessellator.ShaderPreset().configureStandardPair(
     Tessellator.DEPTH_MAP_VERTEX_SHADER,

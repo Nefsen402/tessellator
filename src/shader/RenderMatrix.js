@@ -33,7 +33,6 @@ Tessellator.RenderMatrix = function (renderer, parent){
     
     this.renderer = renderer;
     this.tessellator = renderer.tessellator;
-    this.parent = parent;
     
     if (parent){
         this.copyMatrix(parent);

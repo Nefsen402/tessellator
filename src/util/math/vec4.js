@@ -513,6 +513,72 @@ Tessellator.vec4.prototype.random = function (scale){
     return this;
 };
 
+Tessellator.vec4.prototype.asin = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.asin(this[0]);
+    this[1] = Math.asin(this[1]);
+    this[2] = Math.asin(this[2]);
+    this[3] = Math.asin(this[3]);
+    
+    return this;
+};
+
+Tessellator.vec4.prototype.acos = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.acos(this[0]);
+    this[1] = Math.acos(this[1]);
+    this[2] = Math.acos(this[2]);
+    this[3] = Math.acos(this[3]);
+    
+    return this;
+};
+
+Tessellator.vec4.prototype.atan = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.atan(this[0]);
+    this[1] = Math.atan(this[1]);
+    this[2] = Math.atan(this[2]);
+    this[3] = Math.atan(this[3]);
+    
+    return this;
+};
+
+Tessellator.vec4.prototype.sin = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.sin(this[0]);
+    this[1] = Math.sin(this[1]);
+    this[2] = Math.sin(this[2]);
+    this[3] = Math.sin(this[3]);
+    
+    return this;
+};
+
+Tessellator.vec4.prototype.cos = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.cos(this[0]);
+    this[1] = Math.cos(this[1]);
+    this[2] = Math.cos(this[2]);
+    this[3] = Math.cos(this[3]);
+    
+    return this;
+};
+
+Tessellator.vec4.prototype.tan = function (){
+    if (this.tween) this.tween.cancel();
+    
+    this[0] = Math.tan(this[0]);
+    this[1] = Math.tan(this[1]);
+    this[2] = Math.tan(this[2]);
+    this[3] = Math.tan(this[3]);
+    
+    return this;
+};
+
 Tessellator.vec4.prototype.createTween = function (){
     return this.tween = new Tessellator.Tween(this);
 };

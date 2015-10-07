@@ -31,32 +31,53 @@ Tessellator.ModelCubeRenderer = function (shader, model, pos){
     this.super(shader);
     
     this.model = model;
-    this.pos = pos;
+    this.pos = pos ? pos : Tessellator.vec3(0);
 };
 
 Tessellator.extend(Tessellator.ModelCubeRenderer, Tessellator.ModelRenderer);
+
+Tessellator.ModelCubeRenderer.prototype.setPos = function (pos){
+    this.pos = pos;
+};
 
 Tessellator.ModelCubeRenderer.prototype.init = function (matrix){
     return this.super.init(matrix, this.model);
 };
 
 Tessellator.ModelCubeRenderer.prototype.renderRaw = function (matrix, side){
-    var mat = matrix.get("mvMatrix");
-    mat.translate(this.pos);
+    if (this.applyViewMatrix){
+        this.tessellator.GL.clearColor(0, 0, 0, 0);
+        this.tessellator.GL.clear(Tessellator.COLOR_BUFFER_BIT | Tessellator.DEPTH_BUFFER_BIT);
+        
+        var nearView = this.applyViewMatrix[0],
+            farView = this.applyViewMatrix[1],
+            nf = nearView - farView;
+        
+        matrix.set("pMatrix", Tessellator.mat4(
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, (farView + nearView) / nf, -1,
+            0, 0, (2 * farView * nearView) / nf, 0
+        ));
+        
+        matrix.set("viewBounds", this.applyViewMatrix);
+    };
     
+    var mat = matrix.get("mvMatrix");
     var up;
     
     if (side[1] === 1){
-        side = Tessellator.vec3(0, 1, 0);
+        side = Tessellator.vec3(0, -1, 0);
         up = Tessellator.vec3(0, 0, -1);
     }else if (side[1] === -1){
-        side = Tessellator.vec3(0, -1, 0);
+        side = Tessellator.vec3(0, 1, 0);
         up = Tessellator.vec3(0, 0, 1);
     }else{
-        up = Tessellator.vec3(0, 1, 0);
+        up = Tessellator.vec3(0, -1, 0);
     };
     
     mat.rotateVec(side, up);
+    mat.translate(this.pos);
     
     this.renderModel(matrix, this.model);
 };

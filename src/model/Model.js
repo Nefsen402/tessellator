@@ -38,8 +38,6 @@ Tessellator.prototype.createModel = function (renderer){
 Tessellator.prototype.createMatrix = Tessellator.prototype.createModel;
 
 Tessellator.Model = function (tessellator, renderer){
-    this.type = Tessellator.MODEL;
-    
     this.render = false;
     this.disposable = true;
     this.disposed = false;
@@ -134,13 +132,14 @@ Tessellator.Model.prototype.createModel = function (renderer) {
 Tessellator.Model.prototype.createMatrix = Tessellator.Model.prototype.createModel;
 
 Tessellator.Model.prototype.configureDrawing = function (){
-    var matrix = this.matrixStack[this.matrixStack.length - 1];
+    var model = this.matrixStack[this.matrixStack.length - 1];
     
-    if (!matrix.isDrawing()){
-        matrix.disposeShallow();
+    if (!model.isDrawing()){
+        model.disposeShallow();
         this.disposed = false;
         
-        matrix.actions = new Tessellator.Initializer(matrix.tessellator, matrix.parent ? matrix.parent.actions : null);
+        model.model = [];
+        model.actions = new Tessellator.Initializer(model.tessellator, model, model.parent ? model.parent.actions : null);
     };
 };
 
@@ -155,19 +154,32 @@ Tessellator.Model.prototype.add = function (action){
     return action;
 };
 
+Tessellator.Model.prototype.adds = function (action){
+    if (!action){
+        throw "null pointer";
+    };
+    
+    this.model.push(action);
+};
+
+Tessellator.Model.prototype.addl = function (action){
+    if (!action){
+        throw "null pointer";
+    };
+    
+    this.model.splice(0, 0, action);
+};
+
 Tessellator.Model.prototype.isDrawing = function (){
     return this.actions && this.actions.constructor === Tessellator.Initializer;
 };
 
 Tessellator.Model.prototype.finish = function (){
-    if (this.matrixStack.length > 1){
-        throw "cannot finish a model with items in the matrixStack!";
-    };
-    
     this.disposed = false;
     
     if (this.isDrawing()){
-        this.model = this.actions.finish();
+        this.actions.finish();
+        
         this.actions = {
             attribs: this.actions.attribs
         };
@@ -214,7 +226,7 @@ Tessellator.Model.prototype.disposeShallow = function (){
         for (var i = 0, k = this.model.length; i < k; i++){
             var mod = this.model[i];
             
-            if (mod.type !== Tessellator.MODEL && mod.type !== Tessellator.MODEL_FRAGMENT){
+            if (mod.constructor !== Tessellator.Model && mod.constructor !== Tessellator.Model.Fragment){
                 if (mod.disposable){
                     if (mod.disposable){
                         mod.dispose();

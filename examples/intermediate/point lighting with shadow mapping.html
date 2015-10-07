@@ -1,0 +1,90 @@
+<html>
+    <script src="../../build/Tessellator.js" type="text/javascript"></script>
+    
+    <body style="margin:0px;background:black;">
+        <canvas style="width:100%;height:100%;" id="maincanvas"></canvas>
+    </body>
+    
+    <script type="text/javascript">
+        var tessellator = new Tessellator("maincanvas");
+        
+        var scene = tessellator.createModel();
+        scene.translate(0, 0, -6);
+        
+        scene.setColor(0.1);
+        scene.setAmbientLight();
+        scene.setColor("white");
+        
+        scene.push();
+            scene.translate(0, 1, 0);
+            scene.translate(Tessellator.vec3().createTween().rad(0, -0.1, Tessellator.vec3(2, 0, 0), Tessellator.vec3(0, 0, 2)).getVec())
+            scene.translate(Tessellator.vec3().createTween().sin(Tessellator.vec3(0, 1, 0), 0.2).getVec());
+            
+            scene.disable(Tessellator.LIGHTING);
+            scene.fillSphere(0, 0, 0, 0.1);
+            var light = scene.setPointLight(0, 0, 0, 10);
+        scene.pop();
+        
+        /*scene.push();
+            scene.translate(3, 2, 0);
+            scene.disable(Tessellator.LIGHTING);
+            scene.fillSphere(0, 0, 0, 0.1);
+            scene.setPointLight(0, 0, 0).createShadow(scene, 100, 0.1, 1024);
+        scene.pop();*/
+        
+        scene.push();
+        scene.translate(Tessellator.vec3(0, 1, 0).createTween().cos(Tessellator.vec3(0, 1, 0), 0.2).getVec());
+        scene.rotate(Tessellator.float().createTween().dir(0.001).getVec(), Tessellator.vec3(0, 1, 0));
+        scene.rotate(Tessellator.float().createTween().sin(Tessellator.float(0.7), 0.05).getVec(), Tessellator.vec3(1));
+        scene.fillTorus(0, 0, 0, 1, 0.3, Tessellator.vec3(0, 1, 0), 100);
+        scene.pop();
+        
+        scene.fillCube(2, -0.75, -3, .5);
+        scene.fillCube(-2, -0.75, -1.5, .5);
+        scene.fillCube(-2, -0.25, -1.5, .5, Tessellator.vec3(1, 1, 1));
+        scene.fillCilinder(0, .5, 0, 0.3, 3, 100);
+        
+        scene.bindTexture("/textures/tile2.jpg");
+        scene.scaleTexture(20);
+        scene.fillRect(-10, -10, 1, 20, 20, Tessellator.vec3(0, 1, 0));
+        scene.finish();
+        
+        var model = tessellator.createModel();
+        model.clear();
+        model.setView(new Tessellator.PerspectiveView());
+        
+        model.enable(Tessellator.LIGHTING);
+        
+        light.createShadow(scene, 100, 0.1, 1024);
+        
+        model.add(scene);
+        model.finish();
+        
+        var rendererCube = new Tessellator.FullScreenTextureRenderer(tessellator.createPixelShader(Tessellator.PIXEL_SHADER_CUBE_MAP), light.shadowMap).setUniformSetter(function (matrix){
+            matrix.set("perspective", Tessellator.mat4().rotate(Tessellator.float(Math.PI / -4), Tessellator.vec3(1, 0, 0)));
+        });
+        
+        rendererCube.setAspect(1);
+        
+        var shader = new Tessellator.ShaderPreset().configureDrawDependant(
+            "../../src/glsl/ModelFragLightVertColor.glsl",
+            "../../src/glsl/ModelFragLightFragColor.glsl",
+            "../../src/glsl/ModelFragLightVertTexture.glsl",
+            "../../src/glsl/ModelFragLightFragTexture.glsl",
+            Tessellator.MODEL_VIEW_VERTEX_SHADER_COLOR,
+            Tessellator.MODEL_VIEW_FRAGMENT_SHADER_COLOR
+        ).create(tessellator);
+        
+        var rendererNormal = new Tessellator.ModelRenderer(shader, model);
+        
+        var renderLoop = new Tessellator.RenderLoop(rendererNormal);
+        
+        onkeydown = function (){
+            if (renderLoop.item.renderer === rendererNormal){
+                renderLoop.setRenderer(rendererCube);
+            }else{
+                renderLoop.setRenderer(rendererNormal)
+            }
+        }
+    </script>
+</html>

@@ -89,6 +89,6 @@ Tessellator.Initializer.prototype.flush = function (){
     
     if (cache){
         cache.createObject(this.tessellator, this.get("draw"), Tessellator.STATIC);
-        this.model.push(cache);
+        this.put(cache);
     };
 };

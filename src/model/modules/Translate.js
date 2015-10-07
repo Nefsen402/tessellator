@@ -36,8 +36,6 @@ Tessellator.Model.prototype.translate = function(){
 };
 
 Tessellator.Translate = function (){
-    this.type = Tessellator.TRANSLATE;
-    
     if (arguments.length === 0){
         this.pos = Tessellator.vec3(0, 0, 0);
     }else if (arguments.length === 1){
