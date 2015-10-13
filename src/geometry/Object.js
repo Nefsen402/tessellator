@@ -173,9 +173,10 @@ Tessellator.Object.prototype.bindAttributes = function (shader){
     var gl = this.tessellator.GL;
     
     var bound = null;
+    var sa = shader.getAttributes();
     
     for (var o in this.attribs){
-        if (shader.attribs[o] !== undefined){
+        if (sa[o] !== undefined){
             var oo = this.attribs[o];
             
             if (oo.buffer.uploaded){
@@ -185,11 +186,11 @@ Tessellator.Object.prototype.bindAttributes = function (shader){
                     gl.bindBuffer(oo.buffer.type, bound.value);
                 };
                 
-                gl.enableVertexAttribArray(shader.attribs[o]);
-                gl.vertexAttribPointer(shader.attribs[o], oo.dataSize, gl[Tessellator.Object.dataTypes[oo.buffer.dataType.name]], oo.normalize, oo.stride * Tessellator.Object.dataTypeSizes[oo.buffer.dataType.name], oo.offset * Tessellator.Object.dataTypeSizes[oo.buffer.dataType.name]);
+                gl.enableVertexAttribArray(sa[o]);
+                gl.vertexAttribPointer(sa[o], oo.dataSize, gl[Tessellator.Object.dataTypes[oo.buffer.dataType.name]], oo.normalize, oo.stride * Tessellator.Object.dataTypeSizes[oo.buffer.dataType.name], oo.offset * Tessellator.Object.dataTypeSizes[oo.buffer.dataType.name]);
                 
                 if (oo.divisor !== undefined && this.instancinginstance){
-                    this.instancinginstance.vertexAttribDivisorANGLE(shader.attribs[o], oo.divisor);
+                    this.instancinginstance.vertexAttribDivisorANGLE(sa[o], oo.divisor);
                 };
             };
         };
@@ -201,14 +202,16 @@ Tessellator.Object.prototype.bindAttributes = function (shader){
 };
 
 Tessellator.Object.prototype.disableAttributes = function (shader){
-    for (var o in shader.attribs){
+    var sa = shader.getAttributes();
+    
+    for (var o in sa){
         var oo = this.attribs[o];
         
         if (oo){
-            this.tessellator.GL.disableVertexAttribArray(shader.attribs[o]);
+            this.tessellator.GL.disableVertexAttribArray(sa[o]);
             
             if (oo.divisor !== undefined && this.instancinginstance){
-                this.instancinginstance.vertexAttribDivisorANGLE(shader.attribs[o], 0);
+                this.instancinginstance.vertexAttribDivisorANGLE(sa[o], 0);
             };
         };
     };
@@ -272,7 +275,7 @@ Tessellator.Object.prototype.render = function (shader){
             return;
         };
         
-        shader.preUnify(matrix);
+        shader.getUniforms().preUnify(shader, matrix);
         
         if (!shader.set(matrix.renderer, matrix, this)){
             return;
@@ -323,10 +326,6 @@ Tessellator.Object.prototype.render = function (shader){
         this.oesinsance.bindVertexArrayOES(null);
     }else{
         this.disableAttributes(shader);
-    };
-    
-    if (matrix){
-        shader.postSet(matrix.renderer, matrix, this);
     };
 };
 

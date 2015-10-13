@@ -28,6 +28,10 @@
  */
 
 Tessellator.FullScreenTextureRenderer = function (shader){
+    if (shader.constructor === Tessellator){
+        shader = tessellator.createPixelShader(Tessellator.PIXEL_SHADER_PASS);
+    }
+    
     this.super(shader);
     
     if (arguments.length > 1){

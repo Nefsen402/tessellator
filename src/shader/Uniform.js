@@ -40,59 +40,57 @@ Tessellator.Program.F1_UNIFY_FUNC = function (){
         value = this.value;
     };
     
-    this.shader.tessellator.GL.uniform1f(this.location, value);
+    this.gl.uniform1f(this.location, value);
 };
 
 Tessellator.Program.UNIFY_WINDOW = function (){
     if (this.location){
-        this.shader.tessellator.GL.uniform2fv(this.location, this.value);
+        this.gl.uniform2fv(this.location, this.value);
     };
 };
 
 Tessellator.Program.UNIFY_WINDOW.configure = function (value){
     this.value = value;
     
-    this.shader.tessellator.GL.viewport(0, 0, this.value[0], this.value[1]);
+    this.gl.viewport(0, 0, this.value[0], this.value[1]);
 };
 
 Tessellator.Program.F1V_UNIFY_FUNC = function (){
-    this.shader.tessellator.GL.uniform1fv(this.location, this.value);
+    this.gl.uniform1fv(this.location, this.value);
 };
 
 Tessellator.Program.F2V_UNIFY_FUNC = function (){
-    this.shader.tessellator.GL.uniform2fv(this.location, this.value);
+    this.gl.uniform2fv(this.location, this.value);
 };
 
 Tessellator.Program.F3V_UNIFY_FUNC = function (){
-    this.shader.tessellator.GL.uniform3fv(this.location, this.value);
+    this.gl.uniform3fv(this.location, this.value);
 };
 
 Tessellator.Program.F4V_UNIFY_FUNC = function (){
-    this.shader.tessellator.GL.uniform4fv(this.location, this.value);
+    this.gl.uniform4fv(this.location, this.value);
 };
 
 Tessellator.Program.MAT4_UNIFY_FUNC = function (){
-    this.shader.tessellator.GL.uniformMatrix4fv(this.location, false, this.value);
+    this.gl.uniformMatrix4fv(this.location, false, this.value);
 };
 
 Tessellator.Program.MAT3_UNIFY_FUNC = function (){
-    this.shader.tessellator.GL.uniformMatrix3fv(this.location, false, this.value);
+    this.gl.uniformMatrix3fv(this.location, false, this.value);
 };
 
 Tessellator.Program.MAT2_UNIFY_FUNC = function (){
-    this.shader.tessellator.GL.uniformMatrix2fv(this.location, false, this.value);
+    this.gl.uniformMatrix2fv(this.location, false, this.value);
 };
 
 Tessellator.Program.BIND_TEXTURE_2D = function (render){
-    var gl = this.shader.tessellator.GL;
-    
-    gl.activeTexture(gl.TEXTURE0 + Tessellator.Program.textureUnit);
-    gl.uniform1i(this.location, Tessellator.Program.textureUnit);
+    this.gl.activeTexture(this.gl.TEXTURE0 + Tessellator.Program.textureUnit);
+    this.gl.uniform1i(this.location, Tessellator.Program.textureUnit);
     
     if (this.value){
         this.value.bind();
     }else{
-        gl.bindTexture(gl.TEXTURE_2D, null);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     };
 };
 
@@ -111,15 +109,13 @@ Tessellator.Program.BIND_TEXTURE_2D.startMap = function (matrix, value){
 };
 
 Tessellator.Program.BIND_TEXTURE_CUBE = function (render){
-    var gl = this.shader.tessellator.GL;
-    
-    gl.activeTexture(gl.TEXTURE0 + Tessellator.Program.textureUnit);
-    gl.uniform1i(this.location, Tessellator.Program.textureUnit);
+    this.gl.activeTexture(this.gl.TEXTURE0 + Tessellator.Program.textureUnit);
+    this.gl.uniform1i(this.location, Tessellator.Program.textureUnit);
     
     if (this.value){
         this.value.bind();
     }else{
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+        this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, null);
     };
 };
 
@@ -138,10 +134,10 @@ Tessellator.Program.BIND_TEXTURE_CUBE.startMap = function (matrix, value){
 };
 
 Tessellator.Program.MV_MATRIX_UNIFY_FUNC = function (){
-    this.shader.tessellator.GL.uniformMatrix4fv(this.location, false, this.value);
+    this.gl.uniformMatrix4fv(this.location, false, this.value);
     
-    if (this.shader.uniforms.nMatrix){
-        this.shader.tessellator.GL.uniformMatrix3fv(this.shader.uniforms.nMatrix.location, false, Tessellator.Program.lightNormalCache.normalFromMat4(this.value));
+    if (this.manager.getUniform("nMatrix")){
+        this.gl.uniformMatrix3fv(this.manager.getUniform("nMatrix").location, false, Tessellator.Program.lightNormalCache.normalFromMat4(this.value));
     };
 };
 

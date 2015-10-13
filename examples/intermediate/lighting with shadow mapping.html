@@ -33,11 +33,21 @@
         model.disable(Tessellator.LIGHTING);
         model.setView(new Tessellator.StaticView(Tessellator.RIGHT, Tessellator.BOTTOM));
         
-        model.bindTexture(light.shadowMap);
+        model.bindTexture(new Tessellator.TextureBuffered(tessellator.createPixelShader(Tessellator.PIXEL_SHADER_DEPTH), light.shadowMap));
         model.fillRect(-200, 0, 200, 200);
         model.finish();
         
-        //new Tessellator.RenderLoop(new Tessellator.FullScreenTextureRenderer(tessellator.createPixelShader(Tessellator.PIXEL_SHADER_PASS), light.shadowMap));
-        new Tessellator.RenderLoop(new Tessellator.ModelRenderer(model));
+        //new Tessellator.RenderLoop(new Tessellator.FullScreenTextureRenderer(tessellator.createPixelShader(Tessellator.PIXEL_SHADER_DEPTH), light.shadowMap));
+        
+        var shader = new Tessellator.ShaderPreset().configureDrawDependant(
+            "../../src/glsl/ModelFragLightVertColor.glsl",
+            "../../src/glsl/ModelFragLightFragColor.glsl",
+            "../../src/glsl/ModelFragLightVertTexture.glsl",
+            "../../src/glsl/ModelFragLightFragTexture.glsl",
+            Tessellator.MODEL_VIEW_VERTEX_SHADER_COLOR,
+            Tessellator.MODEL_VIEW_FRAGMENT_SHADER_COLOR
+        ).create(tessellator);
+        
+        new Tessellator.RenderLoop(new Tessellator.ModelRenderer(shader, model));
     </script>
 </html>

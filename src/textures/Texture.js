@@ -132,11 +132,11 @@ Tessellator.Texture.prototype.setDisposable = function (disposable){
 };
 
 Tessellator.Texture.prototype.dispose = function (){
+    this.tessellator.resources.remove(this);
+    this.disposed = true;
+    
     if (this.texture){
         this.tessellator.GL.deleteTexture(this.texture);
-        
-        this.tessellator.resources.remove(this);
-        this.disposed = true;
         this.texture = null;
     };
 };

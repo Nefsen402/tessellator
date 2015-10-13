@@ -91,12 +91,18 @@ Tessellator.Shader.prototype.loadRemote = function (src){
     return this;
 };
 
+Tessellator.Shader.prototype.getSource = function (){
+    return this.source;
+}
+
 Tessellator.Shader.prototype.load = function (source){
     if (!source){
         throw "no source!";
     }else if (!this.shader){
         throw "no shader!";
     };
+    
+    this.source = source;
     
     {
         var gl = this.tessellator.GL;

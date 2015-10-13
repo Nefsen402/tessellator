@@ -90,8 +90,8 @@ Tessellator.SpotLight.prototype.set = function (lighting, index, matrix){
     };
 };
 
-Tessellator.SpotLight.prototype.applyLighting = function (matrix, index, renderer){
-    this.set(renderer.lightingTexture.data, index[0] * 4 * 4, matrix);
+Tessellator.SpotLight.prototype.applyLighting = function (mat, matrix, index, renderer){
+    this.set(renderer.lightingTexture.data, index[0] * 4 * 4, mat);
     
     if (index[0]++ * 4 * 4 >= renderer.lightingTexture.data.length){
         throw "too many lights!";

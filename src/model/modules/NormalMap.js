@@ -27,19 +27,43 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.Model.prototype.setSpecularReflection = function (reflection){
-    this.add(new Tessellator.SpecularLight(reflection));
+Tessellator.Model.prototype.bindNormalMap = function (texture){
+    return this.add(new Tessellator.Model.NormalMap(texture));
 };
 
-Tessellator.SpecularLight = function (intensity){
-    this.intensity = isNaN(intensity) ? intensity : Tessellator.float(intensity);
+Tessellator.Model.NormalMap = function (texture){
+    this.texture = texture;
+    
+    this.disposable = true;
 };
 
-Tessellator.SpecularLight.prototype.init = function (interpreter){
+Tessellator.Model.NormalMap.prototype.dispose = function (){
+    if (this.texture && this.texture.disposable){
+        this.texture.dispose();
+        this.texture = null;
+    };
+};
+
+Tessellator.Model.NormalMap.prototype.init = function (interpreter){
+    if (this.texture){
+        if (interpreter.get("draw") !== Tessellator.TEXTURE){
+            throw "unable to bind a normal map if there is no texture bound first";
+        }
+        
+        if (this.texture.constructor === String){
+            this.texture = interpreter.tessellator.getTexture(this.texture);
+        }
+    };
+    
     interpreter.flush();
 };
 
-Tessellator.SpecularLight.prototype.apply = function (render){
-    render.addDefinition("USE_SPECULAR_REFLECTION");
-    render.set("specular", this.intensity.x);
+Tessellator.Model.NormalMap.prototype.apply = function (render, model, renderer){
+    if (this.texture){
+        render.addDefinition("USE_NORMAL_MAP");
+        
+        render.set("normalTexture", this.texture);
+    }else{
+        render.removeDefinition("USE_NORMAL_MAP");
+    };
 };

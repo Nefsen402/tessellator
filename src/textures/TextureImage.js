@@ -38,6 +38,12 @@ Tessellator.prototype.getTexture = function (src){
     
     if (this.textureCache[src]){
         texture = this.textureCache[src];
+        
+        if (texture.disposed){
+            texture = this.createTexture(src);
+        
+            this.textureCache[src] = texture;
+        }
     }else{
         texture = this.createTexture(src);
         
@@ -130,6 +136,8 @@ Tessellator.TextureImage.prototype.configure = function (target, track){
         
         if (this.autoUpdate || !this.isTracking(track)){
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+            
             gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
             
             this.track(track);

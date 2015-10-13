@@ -91,9 +91,9 @@ Tessellator.Model.prototype.apply = function (matrix, mod, renderer){
     };
 };
 
-Tessellator.Model.prototype.applyLighting = function (matrix, index, renderer){
+Tessellator.Model.prototype.applyLighting = function (mat, matrix, index, renderer){
     if (this.render && !this.renderer){
-        return renderer.setLighting(this, matrix.clone(), index);
+        return renderer.setLighting(this, matrix, mat.clone(), index);
     };
 };
 

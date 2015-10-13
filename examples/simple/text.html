@@ -1,0 +1,59 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    <script>
+        var tessellator = new Tessellator("gl");
+        
+        var model = tessellator.createModel();
+        model.clear("black");
+        
+        //for this example we just want the text to be put on the screen with no 3d
+        //static view sets up the screen where the top left is (0, 0) and the bottom right is (screen width, screen height)
+        model.setView(new Tessellator.StaticView());
+        
+        //drawing the text sets up the geometry to is by default the scale of one unit. Since one unit in this view is one pixel, the text is going to be incredibally small
+        //we are going to be scaleing it so that the text is legable.
+        model.scale(100);
+        
+        model.drawText(model.widthText("Tessellator - By Alexander Orzechowski"), 0, 1);
+        
+        model.drawText("Tessellator - By Alexander Orzechowski");
+        model.drawText("1234567890 !@#$%^&*(){}", 0, 2); //the last two optional paramaters are the x and y positions of the text
+        model.drawText("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 0, 3);
+        
+        //the text does react to Tessellator.Model.setColor()
+        model.setColor("red");
+        model.drawText("abcdefghijklmnopqrstuvwxyz", 0, 4);
+        
+        var dynamic = model.createModel();
+        dynamic.text = "";
+        
+        model.finish();
+        
+        onkeydown = function (e){
+            if (e.which === 8){
+                dynamic.text = dynamic.text.substring(0, dynamic.text.length - 1);
+                
+                dynamic.drawText(dynamic.text, 0, 5);
+                dynamic.finish();
+                
+                e.preventDefault();
+            }
+        }
+        
+        onkeypress = function (e){
+            dynamic.text += String.fromCharCode(e.which);
+            
+            dynamic.drawText(dynamic.text, 0, 5);
+            dynamic.finish();
+        }
+        
+        var renderer = new Tessellator.ModelRenderer(model);
+        
+        var renderLoop = new Tessellator.RenderLoop(renderer);
+    </script>
+</html>

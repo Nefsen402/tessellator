@@ -67,13 +67,15 @@ Tessellator.RendererAbstract.prototype.setUniformSetter = function (setter){
     return this;
 };
 
-Tessellator.RendererAbstract.prototype.init = function (){
+Tessellator.RendererAbstract.prototype.init = function (matrix){
+    matrix.resetDefinitions();
+    
     return this.shader;
 };
 
 Tessellator.RendererAbstract.prototype.configure = function (matrix){
     if (this.shader){
-        this.shader.setInheriter("window", Tessellator.Program.UNIFY_WINDOW);
+        this.shader.getUniforms().setInheriter("window", Tessellator.Program.UNIFY_WINDOW);
         
         matrix.setn("window", Tessellator.vec2(this.tessellator.width, this.tessellator.height));
         matrix.setn("time", (Date.now() - this.startTime) / 1000);

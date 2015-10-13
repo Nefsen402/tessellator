@@ -3,7 +3,7 @@
         <canvas style="width:100%;height:100%" id="gl"></canvas>
     </body>
     
-    <script src="/Tessellator.multifile"></script>
+    <script src="../../build/Tessellator.js"></script>
     
     <script>
         var tessellator = new Tessellator("gl"); //creates the main tessellator object and we are linking our canvas to it.
@@ -22,12 +22,34 @@
         var model = tessellator.createModel(); //creates a model
         model.clear("black"); //clears the rendering target (the screen) to the color black
         model.setView(new Tessellator.PerspectiveView()); //creates a persepective view. You can also set this to a orthographic view.
+        
+        //we are going to apply a light because you cannot see the normal maps without lighting
+        model.enable(Tessellator.LIGHTING);
+        model.setPointLight(0, 0, 0);
+        
         model.translate(0, 0, -6); //by defalt things are going to render right at the camera. This moves the objects back.
         
-        model.rotate(rotation, axis); //rotates the cube with our vectors with tweens
+        //between this example and the Cube.html example. There used to be a 'model.setColor()' call here
+        model.bindTexture("../textures/brick2.jpg"); //bindTexture acceps image url and will simply apply a texture to any geometry being made by the model
         
-        model.setColor("white"); //sets the color of the objects being created with the model.
-        model.drawCube(0, 0, 0, 1); //draws a cube (or as others like to call a wire frame). fillCube will make a solid cube.
+        //the texture is simply too large. Scaleing the texture by a half makes the effect easier to see
+        model.scaleTexture(0.25);
+        
+        model.push();
+            model.bindNormalMap("../textures/brick2 normal.jpg"); //similar to bindTexture, this texture will infuance the normals of the lighing. this needs to be called after bindTexture
+            
+            model.translate(2, 0, 0);
+            model.rotate(rotation, axis);
+            model.fillCube(0, 0, 0, 1);
+        model.pop();
+        
+        //this cube has no normal map. This will show of the difference that the normal map can make
+        model.push();
+            model.translate(-2, 0, 0);
+            model.rotate(rotation, axis);
+            model.fillCube(0, 0, 0, 1);
+        model.pop();
+        
         model.finish(); //finish the model. Tell the renderer that this is ready to be rendered.
         
         var renderer = new Tessellator.ModelRenderer(model); //creates a renderer that will render our model

@@ -1,0 +1,1362 @@
+<html>
+    <body style="margin:0px;">
+        <textarea style="opacity:0;position:absolute;" id="clip"></textarea>
+    </body>
+    
+    <script src="/Tessellator.multifile"></script>
+    
+    <script type="glsl/vert" id="vert">
+        attribute vec2 position;
+        attribute vec2 texPosition;
+        attribute vec3 color;
+        
+        uniform vec2 window;
+        uniform vec2 translate;
+        uniform float scale;
+        
+        varying vec3 mask;
+        varying vec2 tex;
+        
+        void main(){
+            gl_Position = vec4(((position + translate) / window * scale * 2. - 1.) * vec2(1, -1), 0, 1);
+            
+            mask = color;
+            tex = texPosition;
+        }
+    </script>
+    
+    <script type="glsl/frag" id="frag">
+        precision lowp float;
+        
+        uniform sampler2D text;
+        
+        varying vec3 mask;
+        varying vec2 tex;
+        
+        void main(){
+            vec4 c = texture2D(text, tex);
+            c.xyz *= mask;
+            
+            gl_FragColor = c;
+        }
+    </script>
+    
+    <script>
+        var tessellator = new Tessellator(null, {
+            antialias: false
+        });
+        
+        var defaultFont = tessellator.DEFAULT_FONT_SHEET;
+        defaultFont.texture = defaultFont.src(tessellator);
+        
+        var keywords = [
+            "function",
+            "void",
+            "attribute",
+            "varying",
+            "prototype",
+            "else",
+            "if",
+            "while",
+            "for",
+            "do",
+            "uniform",
+            "static",
+            "this",
+            "super",
+            "var",
+            "float",
+            "new",
+            "true",
+            "false",
+            "throw",
+            "return",
+            "volatile",
+            "extends",
+            "implements",
+            "synchronized",
+            "int",
+            "long",
+            "float",
+            
+        ];
+        
+        var specialChar = ".,(){}/*-+^&|[];:=%! "
+        var numerics = "0123456789"
+        
+        var whitespace = " \r\n\t";
+        
+        TextBox = function (){
+            this.font = defaultFont;
+            
+            this.text = new TextBox.Text(this.font);
+            this.selection = new TextBox.Selection();
+            this.scale = 50;
+            this.scroll = 0;
+            this.xOff = 0;
+            
+            this.uiSelectionPos = Tessellator.vec3();
+            
+            this.ui = tessellator.createModel();
+            
+            this.uiSelected = this.ui.createModel();
+            this.uiParentChar = this.ui.createModel();
+            
+            this.uiSelection = this.ui.push();
+                this.ui.translate(this.uiSelectionPos);
+                
+                this.ui.setColor("red");
+                this.ui.fillRect(0, -this.scale, 1, this.scale);
+            this.ui.pop();
+            
+            this.ui.finish();
+            
+            this.updateSelection();
+        }
+        
+        TextBox.Text = function (text, font){
+            if (text && text.constructor === String){
+                this.font = font || defaultFont;
+                this.parseText(text);
+            }else if (text){
+                this.font = text;
+                this.text = [new TextBox.Line(this.font, "")];
+            }else{
+                this.font = defaultFont;
+                this.text = [new TextBox.Line(this.font, "")];
+            }
+        }
+        
+        TextBox.Text.prototype.textWidth = function (selection){
+            if (selection.hasMultilineSelection()){
+                throw "cannot measure multiline selection";
+            }
+            
+            var w = 0;
+            
+            for (var i = selection.startX(); i < Math.min(selection.endX(), this.getLine(selection.xy).length); i++){
+                w += this.font.widthTable[this.getLine(selection.xy).charCodeAt(i)];
+            }
+            
+            return w;
+        }
+        
+        TextBox.Text.prototype.parseText = function (text){
+            this.text = [];
+            
+            var pos = 0;
+            
+            for (var i = 0; i < text.length; i++){
+                if (text.charAt(i) == "\r" && text.charAt(i + 1) == "\n"){
+                    this.text.push(new TextBox.Line(this.font, text.substring(pos, i)));
+                    pos = i + 2;
+                    i++;
+                }else if (text.charAt(i) == "\n" && text.charAt(i + 1) == "\r"){
+                    this.text.push(new TextBox.Line(this.font, text.substring(pos, i)));
+                    pos = i + 2;
+                    i++;
+                }else if (text.charAt(i) == "\r"){
+                    this.text.push(new TextBox.Line(this.font, text.substring(pos, i)));
+                    pos = i + 1;
+                }else if (text.charAt(i) == "\n"){
+                    this.text.push(new TextBox.Line(this.font, text.substring(pos, i)));
+                    pos = i + 1;
+                }
+            }
+            
+            this.text.push(new TextBox.Line(this.font, text.substring(pos)));
+        }
+        
+        TextBox.Text.prototype.subText = function (selection){
+            if (selection.hasMultilineSelection()){
+                var newText = new TextBox.Text(this.font);
+                var text = [];
+                
+                for (var i = selection.startY(); i <= selection.endY(); i++){
+                    if (i === selection.startY()){
+                        text.push(new TextBox.Line(this.font, this.text[i].text.substring(selection.startX())));
+                    }else if (i === selection.endY()){
+                        text.push(new TextBox.Line(this.font, this.text[i].text.substring(0, selection.endX())));
+                    }else{
+                        text.push(this.text[i]);
+                    }
+                }
+                
+                newText.text = text;
+                return newText;
+            }else{
+                return new TextBox.Text(this.text[selection.xy].text.substring(selection.startX(), selection.endX()), this.font);
+            }
+        }
+        
+        TextBox.Text.prototype.toString = function (){
+            var s = new Array(this.length());
+            
+            for (var i = 0; i < this.length(); i++){
+                s[i] = this.getLine(i);
+            }
+            
+            return s.join("\r\n");
+        }
+        
+        TextBox.Text.prototype.insert = function (selection, text){
+            if (selection.hasSelection()){
+                this.delete(selection);
+            }else{
+                selection.confirm(this);
+            }
+            
+            if (text.text.length === 1){
+                var line = this.text[selection.xy];
+                
+                line.setText(line.text.substring(0, selection.startX()) + text.text[0].text + line.text.substring(selection.endX()));
+            }else{
+                var line = this.text[selection.xy];
+                var otext = line.text;
+                
+                for (var i = 0; i < text.length(); i++){
+                    if (i === 0){
+                        line.setText(otext.substring(0, selection.startX()) + text.getLine(i));
+                    }else if (i === text.length() - 1){
+                        this.text.splice(selection.xy + i, 0, new TextBox.Line(this.font, text.getLine(i) + otext.substring(selection.endX())));
+                    }else{
+                        this.text.splice(selection.xy + i, 0, text.text[i]);
+                    }
+                }
+            }
+            
+            return this;
+        } 
+        
+        TextBox.Text.prototype.getLine = function (line){
+            return this.text[line].text;
+        }
+        
+        TextBox.Text.prototype.delete = function (selection){
+            selection.confirm(this);
+        
+            if (!selection.hasMultilineSelection()){
+                var line = this.text[selection.xy];
+                
+                line.setText(line.text.substring(0, selection.startX()) + line.text.substring(selection.endX()));
+            }else{
+                
+                for (var i = selection.startY(), k = selection.endY(); i <= k; i++){
+                    if (i === selection.startY()){
+                        var line = this.text[i];
+                        
+                        line.setText(line.text.substring(0, selection.startX()) + this.getLine(k).substring(selection.endX()));
+                    }else{
+                        k--;
+                        this.text.splice(i, 1);
+                        i--;
+                    }
+                }
+            }
+            
+            selection.joinStart();
+            return this;
+        }
+        
+        TextBox.Text.prototype.length = function (){
+            return this.text.length;
+        }
+        
+        TextBox.prototype.getSelection = function (x, y){
+            if (x < 0){
+                x = 0;
+            }
+            
+            if (y < 0){
+                y = 0;
+            }
+        
+            var yy = Math.min(Math.floor(y / this.scale), this.text.text.length - 1);
+            var xx = 0;
+            
+            var line = this.text.getLine(yy);
+            
+            while (x > 0){
+                var w = this.font.widthTable[line.charCodeAt(xx++)] * this.scale;
+                
+                if (xx < line.length){
+                    var ww = this.font.widthTable[line.charCodeAt(xx)] * this.scale;
+                    
+                    if (x < ww / 2){
+                        xx--;
+                        break;
+                    }else{
+                        x -= w;
+                    }
+                }else{
+                    break;
+                }
+            }
+            
+            return new TextBox.Selection(xx, yy);
+        }
+        
+        TextBox.Selection = function (){
+            if (arguments.length === 2){
+                this.xx = this.yx = arguments[0];
+                this.xy = this.yy = arguments[1];
+            }else if (arguments.length === 4){
+                this.xx = arguments[0];
+                this.xy = arguments[1];
+                this.yx = arguments[2];
+                this.yy = arguments[3];
+            }else if (arguments.length === 1){
+                this.xx = arguments[0].xx;
+                this.xy = arguments[0].xy;
+                this.yx = arguments[0].yx;
+                this.yy = arguments[0].yy;
+            }else{
+                this.xx = 0;
+                this.xy = 0;
+                this.yx = 0;
+                this.yy = 0;
+            }
+        }
+        
+        TextBox.Selection.prototype.all = function (text){
+            this.yx = 0;
+            this.yy = 0;
+            this.xx = text.getLine(text.length() - 1).length;
+            this.xy = text.length() - 1;
+        }
+        
+        TextBox.Selection.prototype.confirm = function (text){
+            if (this.xx > text.getLine(this.xy).length){
+                this.xx = text.getLine(this.xy).length;
+            }
+        }
+        
+        TextBox.Selection.prototype.end = function (text){
+            this.xx = text.getLine(this.xy).length;
+        }
+        
+        TextBox.Selection.prototype.lastEnd = function (text){
+            this.yx = text.getLine(this.yy).length;
+        }
+        
+        TextBox.Selection.prototype.home = function (text){
+            if (text){
+                var line = text.getLine(this.xy);
+                
+                main:for (this.xx = 0; this.xx < line.length; this.xx++){
+                    for (var i = 0; i < whitespace.length; i++){
+                        if (whitespace.charCodeAt(i) === line.charCodeAt(this.xx)){
+                            continue main;
+                        }
+                    }
+                    
+                    break;
+                }
+            }else{
+                this.xx = 0;
+            }
+        }
+        
+        TextBox.Selection.prototype.startX = function (){
+            if (this.xy < this.yy){
+                return this.xx;
+            }else if (this.yy < this.xy){
+                return this.yx;
+            }
+            
+            return Math.min(this.xx, this.yx);
+        }
+        
+        TextBox.Selection.prototype.startY = function (){
+            return Math.min(this.xy, this.yy);
+        }
+        
+        TextBox.Selection.prototype.set = function (e){
+            this.xx = e.xx;
+            this.xy = e.xy;
+            this.yx = e.yx;
+            this.yy = e.yy;
+        }
+        
+        TextBox.Selection.prototype.setFirst = function (e){
+            this.xx = e.xx;
+            this.xy = e.xy;
+        }
+        
+        TextBox.Selection.prototype.setLast = function (e){
+            this.yx = e.yx;
+            this.yy = e.yy;
+        }
+        
+        TextBox.Selection.prototype.endX = function (){
+            if (this.xy < this.yy){
+                return this.yx;
+            }else if (this.yy < this.xy){
+                return this.xx;
+            }
+            
+            return Math.max(this.xx, this.yx);
+        }
+        
+        TextBox.Selection.prototype.back = function (text){
+            this.confirm(text);
+        
+            if (text && this.xx === 0 && this.xy > 0){
+                this.xy--;
+                this.xx = text.getLine(this.xy).length;
+            }else{
+                this.xx = Math.max(this.xx - 1, 0);
+            }
+            
+            return this;
+        }
+        
+        TextBox.Selection.prototype.forward = function (text){
+            this.confirm(text);
+            
+            if (this.xx === text.getLine(this.xy).length && this.xy < text.length() - 1){
+                this.xy++;
+                this.xx = 0;
+            }else{
+                this.xx = Math.min(this.xx + 1, text.getLine(this.xy).length);
+            }
+            
+            return this;
+        }
+        
+        TextBox.Selection.prototype.up = function (){
+            this.xy = Math.max(this.xy - 1, 0);
+        }
+        
+        TextBox.Selection.prototype.down = function (text){
+            this.xy = Math.min(this.xy + 1, text.length() - 1);
+        }
+        
+        TextBox.Selection.prototype.endY = function (){
+            return Math.max(this.xy, this.yy);
+        }
+        
+        TextBox.Selection.prototype.propogate = function (pos){
+            this.xx += pos;
+            this.yx += pos;
+        }
+        
+        TextBox.Selection.prototype.hasSelection = function (){
+            return this.xx != this.yx || this.xy != this.yy;
+        }
+        
+        TextBox.Selection.prototype.invert = function (){
+            var a = this.xx;
+            var b = this.xy;
+            
+            this.xx = this.yx;
+            this.xy = this.yy;
+            this.yx = a;
+            this.yy = b;
+        }
+        
+        TextBox.Selection.prototype.isNormal = function (){
+            return this.xx === this.startX();
+        }
+        
+        TextBox.Selection.prototype.hasMultilineSelection = function (){
+            return this.xy != this.yy;
+        }
+        
+        TextBox.Selection.prototype.joinStart = function (){
+            if (this.xy < this.yy){
+                this.join();
+            }else if (this.yy < this.xy){
+                this.lastJoin();
+            }else if (this.xx < this.yx){
+                this.join();
+            }else{
+                this.lastJoin();
+            }
+        }
+        
+        TextBox.Selection.prototype.joinEnd = function (){
+            if (this.xy < this.yy){
+                this.lastJoin();
+            }else if (this.yy < this.xy){
+                this.join();
+            }else if (this.xx < this.yx){
+                this.lastJoin();
+            }else{
+                this.join();
+            }
+        }
+        
+        TextBox.Selection.prototype.join = function (){
+            this.yx = this.xx;
+            this.yy = this.xy;
+        }
+        
+        TextBox.Selection.prototype.lastJoin = function (){
+            this.xx = this.yx;
+            this.xy = this.yy;
+        }
+        
+        TextBox.Renderer = function (){
+            this.super(tessellator.createShaderProgram(document.getElementById("vert"), document.getElementById("frag")));
+            
+            this.lineNubers = [];
+        }
+        
+        Tessellator.extend(TextBox.Renderer, Tessellator.RendererAbstract);
+        
+        TextBox.Renderer.prototype.renderRaw = function (matrix, textbox){
+            matrix.set("text", textbox.font.texture);
+            matrix.set("scale", textbox.scale);
+            matrix.enable(Tessellator.BLEND);
+            matrix.disable(Tessellator.DEPTH_TEST);
+            matrix.blendFunc(Tessellator.BLEND_DEFAULT);
+            
+            var start = Math.max(Math.floor(textbox.scroll) - 1, 0);
+            var end = Math.min(textbox.text.length(), Math.floor(tessellator.height / textbox.scale + textbox.scroll + 1));
+            
+            for (var i = start; i < end; i++){
+                matrix.set("translate", Tessellator.vec2(0, i - textbox.scroll));
+                
+                //var line = this.lineNubers[i];
+                //if (!line) line = this.lineNubers[i] = new TextBox.Line(textbox.font, i.toString());
+                
+                //line.render(matrix, this);
+                
+                //textbox.xoff = i.toString().length;
+                
+                //matrix.set("translate", Tessellator.vec2(textbox.xoff, i - textbox.scroll));
+                
+                textbox.text.text[i].render(matrix, this);
+            }
+        }
+        
+        TextBox.renderer = new TextBox.Renderer();
+        
+        TextBox.Line = function (font, text){
+            this.font = font;
+            
+            if (text !== undefined){
+                this.setText(text);
+            }
+        }
+        
+        TextBox.Line.prototype.setText = function (text){
+            this.text = text;
+            
+            if (this.object){
+                this.object.dispose();
+                
+                this.object = null;
+            }
+        }
+        
+        TextBox.Line.prototype.createObject = function (){
+            this.object = new Tessellator.Object(tessellator, Tessellator.TRIANGLE);
+            
+            var position = new Tessellator.Array();
+            var texPosition = new Tessellator.Array();
+            var color = new Tessellator.Array();
+            var indices = new Tessellator.Array();
+            
+            var pos = 0;
+            var width = this.font.width, height = this.font.height;
+            
+            var white = [
+                255, 255, 255,
+                255, 255, 255,
+                255, 255, 255,
+                255, 255, 255
+            ];
+            
+            var gray = [
+                200, 200, 200,
+                200, 200, 200,
+                200, 200, 200,
+                200, 200, 200
+            ];
+            
+            var green = [
+                0, 255, 0,
+                0, 255, 0,
+                0, 255, 0,
+                0, 255, 0
+            ];
+            
+            var yellow = [
+                255, 255, 0,
+                255, 255, 0,
+                255, 255, 0,
+                255, 255, 0
+            ];
+            
+            var purple = [
+                255, 0, 255,
+                255, 0, 255,
+                255, 0, 255,
+                255, 0, 255
+            ];
+            
+            var orange = [
+                255, 165, 0,
+                255, 165, 0,
+                255, 165, 0,
+                255, 165, 0
+            ];
+            
+            var textColor = white;
+            var keyword = -1;
+            
+            for (var i = 0; i < this.text.length; i++){
+                var c = this.text.charCodeAt(i);
+                var cwidth = this.font.widthTable[c];
+                var x = (c % width), y = height - Math.floor(c / height);
+                
+                if (c != ' '){
+                    if (--keyword <= -1){
+                        textColor = white;
+                        
+                        if (this.text.charAt(i) == "/" && this.text.charAt(i + 1) == "/"){
+                            keyword = this.text.length - i;
+                            textColor = gray;
+                        }else if (this.text.charAt(i) == "\""){
+                            for (var ii = i + 1; ii < this.text.length; ii++){
+                                var c = this.text.charAt(ii);
+                                
+                                if (c == "\"" && this.text.charAt(ii - 1) != "\\"){
+                                    break;
+                                }
+                            }
+                            
+                            keyword = ii - i;
+                            
+                            textColor = orange;
+                        }else if (this.text.charAt(i) == "'"){
+                            for (var ii = i + 1; ii < this.text.length; ii++){
+                                var c = this.text.charAt(ii);
+                                
+                                if (c == "'" && this.text.charAt(ii - 1) != "\\"){
+                                    break;
+                                }
+                            }
+                            
+                            keyword = ii - i;
+                            
+                            textColor = gray;
+                        }else{
+                            for (var ii = 0; ii < keywords.length; ii++){
+                                var k = keywords[ii];
+                                
+                                if (this.text.length >= k.length){
+                                    var found = true;
+                                    
+                                    for (var iii = 0; iii < k.length; iii++){
+                                        if (k.charCodeAt(iii) !== this.text.charCodeAt(i + iii)){
+                                            found = false;
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if (found){
+                                        textColor = green;
+                                        keyword = k.length - 1;
+                                        
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            for (var ii = 0; ii < specialChar.length; ii++){
+                                var k = specialChar.charCodeAt(ii);
+                                
+                                if (k === c){
+                                    keyword = 0;
+                                    textColor = yellow;
+                                }
+                            }
+                            
+                            for (var ii = 0; ii < numerics.length; ii++){
+                                var k = numerics.charCodeAt(ii);
+                                
+                                if (k === c){
+                                    main:for (keyword = 0; keyword < this.text.length - i; keyword++){
+                                        for(var iii = 0; iii < specialChar.length; iii++){
+                                            if (this.text.charCodeAt(keyword + i) === specialChar.charCodeAt(iii)){
+                                                keyword--;
+                                                break main;
+                                            }
+                                        }
+                                    }
+                                    
+                                    textColor = purple;
+                                }
+                            }
+                        }
+                    }
+                    
+                    position.push([
+                        pos, 0,
+                        pos, 1,
+                        pos + cwidth, 1,
+                        pos + cwidth, 0,
+                    ]);
+                    
+                    texPosition.push([
+                        x / width, y / height,
+                        x / width, (y - 1) / height,
+                        (x + cwidth) / width, (y - 1) / height,
+                        (x + cwidth) / width, y / height,
+                    ]);
+                    
+                    indices.push([
+                        i * 4, 1 + i * 4, 2 + i * 4,
+                        i * 4, 2 + i * 4, 3 + i * 4
+                    ]);
+                    
+                    color.push(textColor);
+                }
+                
+                pos += cwidth;
+            }
+            
+            this.object.setAttribute("position", Tessellator.VEC2, position, Float32Array);
+            this.object.setAttribute("texPosition", Tessellator.VEC2, texPosition, Float32Array);
+            this.object.setAttribute("color", Tessellator.VEC3, color, Uint8Array, true);
+            this.object.getIndices().push(indices);
+            this.object.upload();
+        }
+        
+        TextBox.Line.prototype.render = function (matrix){
+            if (!this.object){
+                this.createObject();
+            }
+            
+            this.object.render(matrix);
+        }
+        
+        TextBox.prototype.onkeydown = function (e){
+            if (e.which === 13){
+                if (this.selection.hasSelection()){
+                    this.text.delete(this.selection);
+                }
+                
+                var line = this.text.getLine(this.selection.xy);
+                
+                var add = "";
+                var addAmount = 0;
+                
+                for (var i = 0; i < line.length; i++){
+                    if (line.charAt(i) == " "){
+                        add += " ";
+                        addAmount++;
+                    }else{
+                        break;
+                    }
+                }
+                
+                if ((line.charAt(this.selection.xx - 1) == "{" && line.charAt(this.selection.xx) == "}") || 
+                    line.charAt(this.selection.xx - 1) == "(" && line.charAt(this.selection.xx) == ")" || 
+                    line.charAt(this.selection.xx - 1) == "[" && line.charAt(this.selection.xx) == "]"){
+                    addAmount += 4;
+                    add = "    " + add + "\r\n" + add;
+                }
+                
+                this.text.insert(this.selection, new TextBox.Text("\r\n" + add));
+                this.selection.xx = addAmount;
+                this.selection.xy++;
+                this.selection.join();
+                
+                this.updateSelection();
+                e.preventDefault();
+            }else if (e.which === 8){
+                if (this.selection.hasSelection()){
+                    this.text.delete(this.selection);
+                }else{
+                    this.selection.back(this.text);
+                    this.text.delete(this.selection);
+                }
+                
+                this.updateSelection();
+                e.preventDefault();
+            }else if (e.which === 46){
+                if (this.selection.hasSelection()){
+                    this.text.delete(this.selection);
+                }else{
+                    this.selection.forward(this.text);
+                    this.text.delete(this.selection);
+                }
+                
+                this.updateSelection();
+                e.preventDefault();
+            }else if (e.which === 37){
+                if (!e.shiftKey && this.selection.hasSelection()){
+                    this.selection.joinStart();
+                }else{
+                    this.selection.back(this.text);
+                    
+                    if (!e.shiftKey){
+                        this.selection.join();
+                    }
+                }
+                
+                this.updateSelection();
+                e.preventDefault();
+            }else if (e.which === 39){
+                if (!e.shiftKey && this.selection.hasSelection()){
+                    this.selection.joinEnd();
+                }else{
+                    this.selection.forward(this.text);
+                    
+                    if (!e.shiftKey){
+                        this.selection.join();
+                    }
+                }
+                
+                this.updateSelection();
+                e.preventDefault();
+            }else if (e.which === 38){
+                this.selection.up(this.text);
+                
+                if (!e.shiftKey){
+                    this.selection.join();
+                }
+                
+                this.updateSelection();
+                e.preventDefault();
+            }else if (e.which === 40){
+                this.selection.down(this.text);
+                
+                if (!e.shiftKey){
+                    this.selection.join();
+                }
+                
+                this.updateSelection();
+                e.preventDefault();
+            }else if (e.which === 65 && e.ctrlKey){
+                this.selection.all(this.text);
+                
+                this.updateSelection();
+                e.preventDefault();
+            }else if (e.which === 36){
+                this.selection.home(this.text);
+                
+                if (!e.shiftKey){
+                    this.selection.join();
+                }
+                
+                this.updateSelection();
+                e.preventDefault();
+            }else if (e.which === 35){
+                this.selection.end(this.text);
+                
+                if (!e.shiftKey){
+                    this.selection.join();
+                }
+                
+                this.updateSelection();
+                e.preventDefault();
+            }else if (e.which === 9){
+                if (this.selection.hasMultilineSelection()){
+                    if (!this.selection.isNormal()){
+                        this.selection.invert();
+                    }
+                
+                    this.selection.home();
+                    this.selection.lastEnd(this.text);
+                    
+                    for (var i = this.selection.startY(); i <= this.selection.endY(); i++){
+                        if (e.shiftKey){
+                            var del = 0;
+                            
+                            for (var ii = 0; ii < Math.min(4, this.text.getLine(i).length); ii++){
+                                if (this.text.getLine(i).charAt(ii) !== " "){
+                                    break;
+                                }else{
+                                    del++;
+                                }
+                            }
+                        
+                            this.text.delete(new TextBox.Selection(0, i, del, i));
+                        }else{
+                            this.text.insert(new TextBox.Selection(0, i), new TextBox.Text("    "));
+                        }
+                    }
+                    
+                    this.selection.yx += 4;
+                }else{
+                    if (this.selection.hasSelection()){
+                        this.text.delete(this.selection);
+                    }
+                    
+                    var r = 4 - (this.selection.startX() % 4);
+                    
+                    if (r !== 0){
+                        var s = " ";
+                        
+                        for (var i = 1; i < r; i++){
+                            s += " ";
+                        }
+                        
+                        this.text.insert(this.selection, new TextBox.Text(s));
+                        this.selection.propogate(r);
+                    }else{
+                        this.text.insert(this.selection, new TextBox.Text("    "));
+                        this.selection.propogate(4);
+                    }
+                }
+                
+                this.updateSelection();
+                e.preventDefault();
+            }else if (e.which === 67 && e.ctrlKey){
+                var clip = document.getElementById("clip");
+                
+                clip.value = this.text.subText(this.selection).toString();
+                clip.selectionStart = 0;
+                clip.selectionEnd = clip.value.length;
+                
+                clip.focus();
+                
+                setTimeout(function (){
+                    tessellator.canvas.focus();
+                }, 0);
+            }else if (e.which === 86 && e.ctrlKey){
+                var clip = document.getElementById("clip");
+                
+                clip.selectionStart = 0;
+                clip.selectionEnd = clip.value.length;
+                
+                clip.focus();
+                
+                var self = this;
+                
+                setTimeout(function (){
+                    tessellator.canvas.focus();
+                    
+                    var newText = new TextBox.Text(clip.value);
+                    self.text.insert(self.selection, newText);
+                    self.selection.xy += newText.length() - 1;
+                    self.selection.xx += newText.getLine(newText.length() - 1).length;
+                    self.selection.join();
+                    
+                    self.updateSelection();
+                }, 0);
+            }else if (e.which === 88 && e.ctrlKey){
+                var clip = document.getElementById("clip");
+                
+                clip.value = this.text.subText(this.selection).toString();
+                clip.selectionStart = 0;
+                clip.selectionEnd = clip.value.length;
+                
+                this.text.delete(this.selection);
+                this.updateSelection();
+                
+                clip.focus();
+                
+                setTimeout(function (){
+                    tessellator.canvas.focus();
+                }, 0);
+            }
+        }
+        
+        TextBox.prototype.onkeypress = function (e){
+            var c = String.fromCharCode(e.which);
+            
+            if (c == "{"){
+                c += "}";
+            }else if (c == "["){
+                c += "]";
+            }else if (c == "("){
+                c += ")";
+            }else if (c == "\"" || c == "'"){
+                c += c;
+            }
+            
+            this.text.insert(this.selection, new TextBox.Text(c));
+            this.selection.join();
+            this.selection.propogate(1);
+            
+            this.updateSelection();
+        }
+        
+        TextBox.prototype.onkeyup = function (e){
+            
+        }
+        
+        TextBox.prototype.onmousedown = function (e){
+            this.mouseDown = true;
+            this.selection.set(this.getSelection(e.clientX + this.xOff * this.scale, e.clientY + this.scroll * this.scale));
+            
+            this.updateSelection();
+        }
+        
+        TextBox.prototype.onmousemove = function (e){
+            if (this.mouseDown){
+                this.selection.setFirst(this.getSelection(e.clientX + this.xOff * this.scale, e.clientY + this.scroll * this.scale));
+                
+                this.updateSelection();
+            }
+        }
+        
+        TextBox.prototype.updateParantChar = function (){
+            if (!this.selection.hasSelection()){
+                this.uiParentChar.setColor(0.5, 0, 0);
+                this.uiParentChar.translate(this.xOff * this.scale, this.scroll * this.scale, 0);
+                
+                var sxx = this.selection.xx;
+                var syy = this.selection.xy;
+                var tchar;
+                var nchar;
+                var dir = -1;
+                
+                var line = this.text.getLine(syy);
+                
+                if (line.charAt(sxx - 1) == "}"){
+                    sxx--;
+                    nchar = "{";
+                    tchar = "}";
+                }else if (line.charAt(sxx) == "}"){
+                    nchar = "{";
+                    tchar = "}";
+                }else if (line.charAt(sxx - 1) == "{"){
+                    sxx--;
+                    nchar = "}";
+                    tchar = "{";
+                    dir = 1;
+                }else if (line.charAt(sxx) == "{"){
+                    nchar = "}";
+                    tchar = "{";
+                    dir = 1;
+                }else if (line.charAt(sxx - 1) == "]"){
+                    sxx--;
+                    nchar = "[";
+                    tchar = "]";
+                }else if (line.charAt(sxx) == "]"){
+                    nchar = "[";
+                    tchar = "]";
+                }else if (line.charAt(sxx - 1) == "["){
+                    sxx--;
+                    nchar = "]";
+                    tchar = "[";
+                    dir = 1;
+                }else if (line.charAt(sxx) == "["){
+                    nchar = "]";
+                    tchar = "[";
+                    dir = 1;
+                }else if (line.charAt(sxx - 1) == ")"){
+                    sxx--;
+                    nchar = "(";
+                    tchar = ")";
+                }else if (line.charAt(sxx) == ")"){
+                    nchar = "(";
+                    tchar = ")";
+                }else if (line.charAt(sxx - 1) == "("){
+                    sxx--;
+                    nchar = ")";
+                    tchar = "(";
+                    dir = 1;
+                }else if (line.charAt(sxx) == "("){
+                    nchar = ")";
+                    tchar = "(";
+                    dir = 1;
+                }else{
+                    dir = 0;
+                
+                    main:for (var y = syy; y >= 0; y--){
+                        var x;
+                        
+                        if (y === this.selection.xy){
+                            x = sxx - 1;
+                        }else{
+                            x = this.text.getLine(y).length - 1;
+                        }
+                        
+                        for (; x >= 0; x--){
+                            if (this.text.getLine(y).charAt(x) == "}"){
+                                break main;
+                            }else if (this.text.getLine(y).charAt(x) == "{"){
+                                nchar = "}";
+                                tchar = "{";
+                                
+                                dir = 1;
+                                syy = y;
+                                sxx = x;
+                                
+                                found = true;
+                                break main;
+                            }
+                        }
+                    }
+                    
+                    if (dir === 0) main:for (var y = syy; y < this.text.length(); y++){
+                            var x;
+                            
+                            if (y === syy){
+                                x = sxx + 1;
+                            }else{
+                                x = 0;
+                            }
+                            
+                            for (; x < this.text.getLine(y).length; x++){
+                                if (this.text.getLine(y).charAt(x) == "{"){
+                                    break main;
+                                }else if (this.text.getLine(y).charAt(x) == "}"){
+                                    nchar = "{";
+                                    tchar = "}";
+                                    
+                                    dir = -1;
+                                    syy = y;
+                                    sxx = x;
+                                    
+                                    found = true;
+                                    break main;
+                                }
+                            }
+                        }
+                    
+                    if (dir === 0){
+                        sxx = null;
+                    }
+                }
+                
+                if (sxx !== null){
+                    this.uiParentChar.fillRect(this.text.textWidth(new TextBox.Selection(0, syy, sxx, syy)) * this.scale, -(syy + 1) * this.scale, this.text.textWidth(new TextBox.Selection(sxx, syy, sxx + 1, syy)) * this.scale, this.scale);
+                    
+                    var i = 0;
+                    
+                    if (dir < 0){
+                        main:for (var y = syy; y >= 0; y--){
+                            var x;
+                            
+                            if (y === syy){
+                                x = sxx - 1;
+                            }else{
+                                x = this.text.getLine(y).length - 1;
+                            }
+                            
+                            for (; x >= 0; x--){
+                                if (this.text.getLine(y).charAt(x) == tchar){
+                                    i++;
+                                }else if (this.text.getLine(y).charAt(x) == nchar){
+                                    if (i === 0){
+                                        this.uiParentChar.fillRect(this.text.textWidth(new TextBox.Selection(0, y, x, y)) * this.scale, -(y + 1) * this.scale, this.text.textWidth(new TextBox.Selection(x, y, x + 1, y)) * this.scale, this.scale);
+                                        
+                                        break main;
+                                    }else{
+                                        i--;
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        main:for (var y = syy; y < this.text.length(); y++){
+                            var x;
+                            
+                            if (y === syy){
+                                x = sxx + 1;
+                            }else{
+                                x = 0;
+                            }
+                            
+                            for (; x < this.text.getLine(y).length; x++){
+                                if (this.text.getLine(y).charAt(x) == tchar){
+                                    i++;
+                                }else if (this.text.getLine(y).charAt(x) == nchar){
+                                    if (i === 0){
+                                        this.uiParentChar.fillRect(this.text.textWidth(new TextBox.Selection(0, y, x, y)) * this.scale, -(y + 1) * this.scale, this.text.textWidth(new TextBox.Selection(x, y, x + 1, y)) * this.scale, this.scale);
+                                        
+                                        break main;
+                                    }else{
+                                        i--;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+                
+                
+                this.uiParentChar.finish();
+            }else{
+                this.uiParentChar.dispose();
+            }
+        }
+        
+        TextBox.prototype.onmouseup = function (e){
+            this.mouseDown = false;
+        }
+        
+        TextBox.prototype.updateSelection = function (){
+            if (this.scroll < 0){
+                this.scroll = 0;
+            }
+            
+            if (this.scroll > Math.max(0, this.text.length() - (tessellator.height - 30) / this.scale)){
+                this.scroll = Math.max(0, this.text.length() - (tessellator.height - 30) / this.scale);
+            }
+        
+            this.uiSelectionPos.x = this.text.textWidth(new TextBox.Selection(0, this.selection.xy, this.selection.xx, this.selection.xy)) * this.scale;
+            this.uiSelectionPos.y = -(this.selection.xy - this.scroll) * this.scale;
+            
+            if (this.selection.hasSelection()){
+                this.uiSelected.setColor(0, 0, 1, 0.7);
+                this.uiSelected.translate(this.xOff * this.scale, this.scroll * this.scale, 0);
+                
+                if (this.selection.hasMultilineSelection()){
+                    var end = this.text.textWidth(new TextBox.Selection(0, this.selection.endY(), this.selection.endX(), this.selection.endY()));
+                    var start = this.text.textWidth(new TextBox.Selection(0, this.selection.startY(), this.selection.startX(), this.selection.startY()));
+                    
+                    for (var i = this.selection.startY(); i <= this.selection.endY(); i++){
+                        if (i === this.selection.startY()){
+                            var line = this.text.textWidth(new TextBox.Selection(0, i, this.text.getLine(i).length, i));
+                            
+                            this.uiSelected.fillRect(start * this.scale, -this.scale * (i + 1), (line - start) * this.scale, this.scale);
+                        }else if (i === this.selection.endY()){
+                            this.uiSelected.fillRect(0, -this.scale * (i + 1), end * this.scale, this.scale);
+                        }else{
+                            var line = this.text.textWidth(new TextBox.Selection(0, i, this.text.getLine(i).length, i));
+                            
+                            if (line < 0.25){
+                                line = 0.25;
+                            }
+                            
+                            this.uiSelected.fillRect(0, -this.scale * (i + 1), line * this.scale, this.scale);
+                        }
+                    }
+                }else{
+                    var end = this.text.textWidth(new TextBox.Selection(0, this.selection.xy, this.selection.endX(), this.selection.xy));
+                    var start = this.text.textWidth(new TextBox.Selection(0, this.selection.xy, this.selection.startX(), this.selection.xy));
+                    
+                    this.uiSelected.fillRect(start * this.scale, -this.scale * (1 + this.selection.xy), (end - start) * this.scale, this.scale);
+                }
+                
+                
+                this.uiSelected.finish();
+            }else{
+                this.uiSelected.dispose();
+            }
+            
+            this.updateParantChar();
+            
+            if (this.keyTimeout){
+                clearTimeout(this.keyTimeout);
+            }
+            
+            this.uiSelection.render = true;
+            var self = this;
+            
+            this.keyTimeout = setInterval(function (){
+                self.uiSelection.render = !self.uiSelection.render;
+            }, 500);
+            
+            if (updateOverlay){
+                updateOverlay();
+            }
+        }
+        
+        TextBox.prototype.changeScale = function (a){
+            this.scale += a * this.scale;
+            
+            this.uiSelection.translate(this.uiSelectionPos);
+                
+            this.uiSelection.setColor("red");
+            this.uiSelection.fillRect(0, -this.scale, 1, this.scale);
+            this.uiSelection.finish();
+            
+            this.updateSelection();
+        }
+        
+        TextBox.prototype.changeScroll = function (x, y){
+            this.scroll += y / this.scale;
+            
+            this.updateSelection();
+        }
+        
+        var text = new TextBox();
+        document.body.appendChild(tessellator.canvas);
+        
+        window.addEventListener("keydown", function (e){
+            text.onkeydown(e);
+        });
+        
+        window.addEventListener("keypress", function (e){
+            text.onkeypress(e);
+        });
+        
+        window.addEventListener("keyup", function (e){
+            text.onkeyup(e);
+        });
+        
+        window.addEventListener("mousedown", function (e){
+            text.onmousedown(e);
+        });
+        
+        window.addEventListener("mouseup", function (e){
+            text.onmouseup(e);
+        });
+        
+        window.addEventListener("mousemove", function (e){
+            text.onmousemove(e);
+        });
+        
+        window.addEventListener("mousewheel", function (e){
+            if (e.ctrlKey){
+                text.changeScale(e.deltaY / 2000);
+            }else{
+                text.changeScroll(e.deltaX, e.deltaY);
+            }
+            
+            updateOverlay();
+            e.preventDefault();
+        });
+        
+        var ui = tessellator.createModel();
+        ui.clear("black");
+        ui.setView(new Tessellator.StaticView())
+        
+        ui.add(text.ui);
+        
+        ui.finish();
+        
+        var shader = Tessellator.MODEL_VERTEX_LIGHTING_SHADER
+        
+        var modelRenderer = new Tessellator.ModelRenderer(shader.create(tessellator));
+        
+        var overlay = tessellator.createModel();
+        
+        var updateOverlay = function (){
+            overlay.setView(new Tessellator.StaticView(Tessellator.LEFT, Tessellator.BOTTOM));
+            tessellator.canvasResize();
+            
+            overlay.setColor("white");
+            overlay.fillRect(0, 0, tessellator.width, 30);
+            
+            overlay.push();
+            overlay.setView(new Tessellator.StaticView(Tessellator.RIGHT, Tessellator.BOTTOM));
+            overlay.scale(28);
+            overlay.setColor("black");
+            var date = new Date();
+            date = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+            overlay.drawText(date, -overlay.widthText(date), -1)
+            overlay.pop();
+            
+            overlay.setView(new Tessellator.StaticView(Tessellator.RIGHT, Tessellator.TOP));
+            overlay.fillRect(-20, -tessellator.height + 30, 20, tessellator.height - 30);
+            
+            var height = Math.min(1, ((tessellator.height - 30) / text.scale) / text.text.length());
+            var pos = text.scroll / text.text.length();
+            
+            overlay.setColor("black");
+            overlay.fillRect(-18, (-tessellator.height + 32) * height - pos * (tessellator.height - 34), 16, (tessellator.height - 34) * height);
+            
+            overlay.finish();
+        }
+        
+        window.addEventListener("resize", updateOverlay);
+        updateOverlay();
+        
+        setInterval(updateOverlay, 1000);
+        
+        new Tessellator.RenderLoop(new Tessellator.QueuedRenderer(modelRenderer, TextBox.renderer, modelRenderer), [ui, text, overlay]);
+    </script>
+</html>

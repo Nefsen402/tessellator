@@ -58,18 +58,14 @@ Tessellator.DirectionalLight.prototype.set = function (lighting, index, matrix){
         lighting[13 + index] = this.shadowRenderer.x;
         lighting[14 + index] = this.shadowRenderer.y;
         lighting[15 + index] = this.shadowRenderer.z;
-        
-        var pos = Tessellator.vec3().multiply(matrix);
-        
-        lighting.set(pos, 8 + index);
     }else{
         lighting[12 + index] = 0;
     };
 };
 
-Tessellator.DirectionalLight.prototype.applyLighting = function (matrix, index, renderer){
+Tessellator.DirectionalLight.prototype.applyLighting = function (mat, matrix, index, renderer){
     if (this.render){
-        this.set(renderer.lightingTexture.data, index[0] * 4 * 4, matrix);
+        this.set(renderer.lightingTexture.data, index[0] * 4 * 4, mat);
         
         if (index[0]++ * 4 * 4 >= renderer.lightingTexture.data.length){
             throw "too many lights!";
@@ -94,10 +90,11 @@ Tessellator.DirectionalLight.prototype.apply = function (matrix){
 
 Tessellator.DirectionalLight.prototype.createShadow = function (model, x, y, z, resolution){
     if (this.tessellator){
-        this.shadowRenderer = new Tessellator.DirectionalLightingShadowMapRenderer(Tessellator.DEPTH_MAP_SHADER.create(tessellator), x, y, z, this);
+        this.shadowRenderer = new Tessellator.DirectionalLightingShadowMapRenderer(Tessellator.DEPTH_MAP_ORTHOGRAPHIC_SHADER.create(tessellator), x, y, z, this);
         
         this.shadowMap = new Tessellator.TextureModel(this.tessellator, resolution * x / y, resolution * y / x, [
-            new Tessellator.TextureModel.AttachmentDepthTexture(),
+            new Tessellator.TextureModel.AttachmentColor(),
+            new Tessellator.TextureModel.AttachmentDepth(),
             new Tessellator.TextureModel.AttachmentRenderer(this.shadowRenderer, model)
         ]);
     }else{

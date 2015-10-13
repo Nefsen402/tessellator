@@ -32,7 +32,13 @@ Tessellator.prototype.createTextureBuffered = function (){
 };
 
 Tessellator.TextureBuffered = function (){
-    this.tessellator = arguments[0];
+    if (arguments[0].constructor === Tessellator){
+        this.tessellator = arguments[0];
+    }else{
+        this.shader = arguments[0];
+        this.tessellator = this.shader.tessellator;
+    }
+    
     this.parentTexture = arguments[1];
     
     if (arguments.length === 4){
@@ -49,33 +55,69 @@ Tessellator.TextureBuffered = function (){
             this.init();
         };
     }else if (arguments.length === 3){
-        var scale = arguments[2];
-        
+        if (isNaN(arguments[2])){
+            this.filter = arguments[2];
+            
+            if (!this.parentTexture.isReady()){
+                var self = this;
+                
+                this.parentTexture.addListener(function (){
+                    self.width = self.parentTexture.width;
+                    self.height = self.parentTexture.height;
+                    
+                    self.init();
+                });
+            }else{
+                this.width = this.parentTexture.width;
+                this.height = this.parentTexture.height;
+                
+                this.init();
+            };
+        }else{
+            var scale = arguments[2];
+            
+            if (!this.parentTexture.isReady()){
+                var self = this;
+                
+                this.parentTexture.addListener(function (){
+                    self.width = self.parentTexture.width * scale;
+                    self.height = self.parentTexture.height * scale;
+                    
+                    self.init();
+                });
+            }else{
+                this.width = this.parentTexture.width * scale;
+                this.height = this.parentTexture.height * scale;
+                
+                this.init();
+            };
+        }
+    }else if (arguments.length === 2){
         if (!this.parentTexture.isReady()){
             var self = this;
             
             this.parentTexture.addListener(function (){
-                self.width = self.parentTexture.width * scale;
-                self.height = self.parentTexture.height * scale;
+                self.width = self.parentTexture.width;
+                self.height = self.parentTexture.height;
                 
                 self.init();
             });
         }else{
-            this.width = this.parentTexture.width * scale;
-            this.height = this.parentTexture.height * scale;
+            this.width = this.parentTexture.width;
+            this.height = this.parentTexture.height;
             
             this.init();
         };
     }else{
-        throw "invalid arguments in Tessellator.CompressedTexture";
+        throw "invalid arguments in Tessellator.TextureBuffered";
     };
 };
 
 Tessellator.extend(Tessellator.TextureBuffered, Tessellator.TextureModel);
 
 Tessellator.TextureBuffered.prototype.init = function (){
-    this.renderer = new Tessellator.FullScreenTextureRenderer(this.tessellator.createPixelShader(Tessellator.PIXEL_SHADER_PASS));
-    
+    this.renderer = new Tessellator.FullScreenTextureRenderer(this.shader || this.tessellator.createPixelShader(Tessellator.PIXEL_SHADER_PASS));
+    console.log(this.filter)
     this.super(this.tessellator, this.width, this.height, [
         new Tessellator.TextureModel.AttachmentColor(this.filter),
         new Tessellator.TextureModel.AttachmentRenderer(this.renderer, this.parentTexture),

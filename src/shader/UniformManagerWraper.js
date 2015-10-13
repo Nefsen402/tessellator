@@ -27,19 +27,44 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.Model.prototype.setSpecularReflection = function (reflection){
-    this.add(new Tessellator.SpecularLight(reflection));
+Tessellator.UniformManagerWraper = function (wrap){
+    this.manager = wrap;
 };
 
-Tessellator.SpecularLight = function (intensity){
-    this.intensity = isNaN(intensity) ? intensity : Tessellator.float(intensity);
+Tessellator.UniformManagerWraper.prototype.setManager = function (wrap){
+    this.manager = wrap;
+}
+
+Tessellator.UniformManagerWraper.prototype.hasUniform = function (key){
+    return this.manager.hasUniform(key);
 };
 
-Tessellator.SpecularLight.prototype.init = function (interpreter){
-    interpreter.flush();
+Tessellator.UniformManagerWraper.prototype.getUniform = function (key){
+    return this.manager.getUniform(key);
 };
 
-Tessellator.SpecularLight.prototype.apply = function (render){
-    render.addDefinition("USE_SPECULAR_REFLECTION");
-    render.set("specular", this.intensity.x);
+Tessellator.UniformManagerWraper.prototype.uniform = function (key, value, matrix){
+    this.manager.uniform(key, value, matrix);
+};
+
+Tessellator.UniformManagerWraper.prototype.preUnify = function (shader, matrix){
+    this.manager.preUnify(shader, matrix);
+};
+
+Tessellator.UniformManagerWraper.prototype.unify = function (matrix){
+    this.manager.unify(matrix);
+};
+
+Tessellator.UniformManagerWraper.prototype.setInheriter = function (key, value){
+    this.manager.setInheriter(key, value);
+    
+    return this;
+};
+
+Tessellator.UniformManagerWraper.prototype.createManager = function (uniform){
+    this.manager.createManager(uniform);
+};
+
+Tessellator.UniformManagerWraper.prototype.clone = function (){
+    return new UniformManagerWraper(this.manager);
 };

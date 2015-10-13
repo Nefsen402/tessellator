@@ -99,8 +99,7 @@ Tessellator.OrthographicView.prototype.apply = function (render){
         };
     };
     
-    render.set("nearView", this.nearView);
-    render.set("farView", this.farView);
+    render.set("viewBounds", Tessellator.vec2(this.nearView, this.farView));
     
     var dx = 1 / (left - right),
         dy = 1 / (up - down),

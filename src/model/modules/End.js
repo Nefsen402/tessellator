@@ -41,7 +41,7 @@ Tessellator.End.prototype.init = function (interpreter){
     var extra = interpreter.get("extraGeometry");
     
     if (geometry === extra){
-        return;
+        return null;
     };
     
     if (this.indices){

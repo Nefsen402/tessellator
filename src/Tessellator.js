@@ -206,9 +206,13 @@ Tessellator.contexts = 0;
 Tessellator.createHandle = [];
 
 Tessellator.prototype.dispose = function (){
-   while (this.resources.length){
-       this.resources[this.resources.length - 1].dispose();
-   };
+    while (this.resources.length){
+        this.resources[this.resources.length - 1].dispose();
+    };
+    
+    if (this.onDispose){
+        this.onDispose(this);
+    }
 };
 
 Tessellator.prototype.setResolutionScale = function (scale){

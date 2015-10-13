@@ -46,7 +46,6 @@ Tessellator.Geometry.prototype.createObject = function (tessellator, drawMode, s
     
     this.convert();
     this.object = new Tessellator.Object(tessellator, this.type);
-    this.object.drawMode = drawMode;
     
     this.object.getIndices().push(this.indices);
     this.object.setAttribute("position", Tessellator.VEC3, this.positions, Float32Array, false, save);
@@ -93,6 +92,10 @@ Tessellator.Geometry.prototype.dispose = function (){
 
 //for models
 Tessellator.Geometry.prototype.apply = function (matrix){
+    if (this.type !== Tessellator.TRIANGLE){
+        matrix.removeDefinition("USE_LIGHTING");
+    };
+    
     if (this.object){
         this.object.render(matrix);
     };

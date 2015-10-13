@@ -1,0 +1,148 @@
+<html>
+    <meta charset="ASCII"></meta>
+    <script src="../build/Tessellator.js"></script>
+    
+    <style>
+        * {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #mainText {
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        canvas {
+            background: white;
+        }
+        
+        body {
+            margin: 0px;
+        }
+    </style>
+    
+    <body>
+        <canvas id="maincanvas"></canvas>
+        <textarea id="mainText">
+var rotation = Tessellator.float();
+var rotationTween = rotation.createTween();
+rotationTween.dir(Math.PI / 1000);
+
+var axis = Tessellator.vec3(0, 1, 0);
+var axisTween = axis.createTween();
+axisTween.dir(Tessellator.vec3(0.6, 0.4, 1));
+
+var model = tessellator.createModel();
+model.clear("black");
+model.setView(new Tessellator.PerspectiveView());
+model.translate(0, 0, -6);
+
+model.rotate(rotation, axis);
+
+model.setColor("white");
+model.drawCube(0, 0, 0, 1);
+model.finish();
+
+var renderer = new Tessellator.ModelRenderer(model);
+var renderLoop = new Tessellator.RenderLoop(renderer);
+
+tessellator.onDispose = function (){
+    renderLoop.stop();
+}</textarea>
+    </body>
+    
+    <script>
+        (function (){
+            var text = document.getElementById("mainText");
+            var keyLogger = {};
+            
+            var updateTimeout;
+            var tessellator = new Tessellator("maincanvas");
+            var opacity;
+            
+            var update = function (){
+                if (tessellator){
+                    tessellator.dispose();
+                }
+                
+                window.tessellator = tessellator;
+                eval(text.value);
+            }
+            
+            text.addEventListener("keydown", function (e){
+                opacity = 20;
+                keyLogger[e.which] = true;
+                
+                if (e.which === 9){
+                    text.value = text.value.substring(0, text.selectionStart) + "    " + text.value.substring(text.selectionStart);
+                    e.preventDefault();
+                }else if (e.which === 13){
+                    var indent = 0;
+                    var start = text.selectionStart;
+                    
+                    for (var i = text.selectionStart - 1; i >= 0; i--){
+                        var c = text.value.charAt(i);
+                        
+                        if (c == " "){
+                            indent++;
+                        }else if (c == "\n" || c == "\r"){
+                            break;
+                        }else{
+                            indent = 0;
+                        }
+                    }
+                    
+                    var newText = [];
+                    newText.push(text.value.substring(0, text.selectionStart), "\r\n");
+                    
+                    for (var i = 0; i < indent; i++){
+                        newText.push(" ");
+                    }
+                    
+                    newText.push(text.value.substring(text.selectionStart));
+                    
+                    text.value = newText.join("");
+                    
+                    text.selectionStart = text.selectionEnd = start + indent + 1;
+                    
+                    e.preventDefault();
+                }
+            });
+            
+            text.addEventListener("keyup", function (e){
+                keyLogger[e.which] = false;
+                
+                if (updateTimeout !== undefined){
+                    window.clearTimeout(updateTimeout);
+                }
+                
+                updateTimeout = window.setTimeout(update, 1000);
+            });
+            
+            text.addEventListener("mouseleave", function (){
+                opacity = 3;
+            });
+            
+            text.addEventListener("mousemove", function (){
+                text.style.background = "rgba(255,255,255,0.7)";
+                opacity = 20;
+            });
+            
+            window.setInterval(function (){
+                if (opacity > 0 && opacity < 0.7){
+                    opacity = Math.max(0, opacity - 0.03);
+                    
+                    text.style.background = "rgba(255,255,255," + opacity + ")";
+                }else{
+                    opacity = Math.max(0, opacity - 0.03);
+                }
+                
+            }, 10);
+            
+            update();
+        })();
+    </script>
+</html>

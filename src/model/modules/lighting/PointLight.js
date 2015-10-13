@@ -58,12 +58,14 @@ Tessellator.PointLight = function (){
     this.subtype = Tessellator.LIGHTING;
 };
 
-Tessellator.PointLight.prototype.set = function (lighting, index, matrix){
+Tessellator.PointLight.prototype.set = function (renderer, index, mat, matrix, vec){
     if (this.color.tween) this.color.tween.update();
+    
+    var lighting = renderer.lightingTexture.data;
     
     lighting.set(this.color.xyz.multiply(this.color.w), 1 + index);
     
-    var pos = this.pos.clone().multiply(matrix);
+    var pos = this.pos.clone().multiply(mat);
     lighting.set(pos, 4 + index);
     
     if (this.range){
@@ -75,52 +77,60 @@ Tessellator.PointLight.prototype.set = function (lighting, index, matrix){
     };
     
     if (this.shadowMap){
-        lighting[12 + index] = this.cubeIndex;
+        lighting[12 + index] = ++vec[1];
         
         lighting.set(this.shadowMap.renderer.applyViewMatrix, 13 + index);
         
         this.shadowMap.setPos(pos.negate());
+        
+        matrix.addDefinition("TEXTURE_CUBE_" + vec[1]);
+        matrix.set("cube" + vec[1], this.shadowMap);
     }else{
         lighting[12 + index] = 0;
     };
 };
 
 Tessellator.PointLight.prototype.createShadow = function (model, far, near, res){
+    var model = arguments[0];
+    
+    if (arguments.length === 4){
+        var far = arguments[1]
+        var near = arguments[2]
+        var res = arguments[3];
+    }else if (arguments.length === 3){
+        var far = arguments[1]
+        var near = arguments[2]
+        var res = 1024;
+    }else if (arguments.length === 2){
+        var far = (this.range && this.range.x) || Tessellator.DEFAULT_FAR_VIEW;
+        var near = Tessellator.DEFAULT_NEAR_VIEW;
+        var res = arguments[1];
+    }else if (arguments.length === 1){
+        var far = (this.range && this.range.x) || Tessellator.DEFAULT_FAR_VIEW;
+        var near = Tessellator.DEFAULT_NEAR_VIEW;
+        var res = 1024;
+    };
+    
     if (this.tessellator){
-        this.shadowMap = new Tessellator.TextureModelCubeMap(Tessellator.DEPTH_MAP_SHADER.create(tessellator), res, model, this.pos);
+        this.shadowMap = new Tessellator.TextureModelCubeMap(Tessellator.DEPTH_MAP_PERSPECTIVE_SHADER.create(tessellator), res, model, this.pos);
         this.shadowMap.renderer.applyViewMatrix = Tessellator.vec2(near, far);
-        
-        if (this.cubeIndex === 1){
-            model.addl(new Tessellator.Model.UniformSetter("cube1", this.shadowMap));
-            model.addl(new Tessellator.Model.UniformSetter("cube2", this.shadowMap));
-            model.addl(new Tessellator.Model.UniformSetter("cube3", this.shadowMap));
-            model.addl(new Tessellator.Model.UniformSetter("cube4", this.shadowMap));
-        }else{
-            model.addl(new Tessellator.Model.UniformSetter("cube" + this.cubeIndex, this.shadowMap));
-        }
     }else{
         this.shadowMap = arguments;
     };
 };
 
-Tessellator.PointLight.prototype.applyLighting = function (matrix, index, renderer){
-    this.set(renderer.lightingTexture.data, index[0] * 4 * 4, matrix);
+Tessellator.PointLight.prototype.applyLighting = function (mat, matrix, index, renderer){
+    this.set(renderer, index[0] * 4 * 4, mat, matrix, index);
     
     if (index[0]++ * 4 * 4 >= renderer.lightingTexture.data.length){
         throw "too many lights!";
     };
 };
 
-Tessellator.Initializer.setDefault("cubeIndex", function (){
-    return 0;
-});
-
 Tessellator.PointLight.prototype.init = function (interpreter){
     this.color = interpreter.get("color");
     
     this.tessellator = interpreter.tessellator;
-    this.cubeIndex = interpreter.get("cubeIndex") + 1;
-    interpreter.set("cubeIndex", this.cubeIndex);
     
     if (this.shadowMap){
         this.createShadow.apply(this, arguments);

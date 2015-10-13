@@ -50,6 +50,8 @@ Tessellator.DirectionalLightingShadowMapRenderer.prototype.renderRaw = function 
         0, 0, (this.z * 2 + this.z / 10) * dz, 1
     ));
     
+    matrix.set("viewBounds", Tessellator.vec2(this.z / 10, this.z * 2));
+    
     var mvmat = matrix.get("mvMatrix");
     mvmat.translate(Tessellator.vec3(0, 0, (this.z * 2 + this.z / 10) / -2));
     mvmat.rotateVec(this.light.vec, Tessellator.vec3(0, 1, 0));

@@ -46,7 +46,7 @@ Tessellator.AmbientLight.prototype.set = function (lighting, index, matrix){
     lighting[3 + index] = this.color[2] * this.color[3];
 };
 
-Tessellator.AmbientLight.prototype.applyLighting = function (matrix, index, renderer){
+Tessellator.AmbientLight.prototype.applyLighting = function (mat, matrix, index, renderer){
     this.set(renderer.lightingTexture.data, index[0] * 4 * 4, matrix);
     
     if (index[0]++ * 4 * 4 >= renderer.lightingTexture.data.length){

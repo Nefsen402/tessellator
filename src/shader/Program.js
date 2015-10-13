@@ -28,22 +28,32 @@
  */
 
 Tessellator.Program = function (tessellator){
-    this.tessellator = tessellator;
+    if (tessellator){
+        if (tessellator.constructor === Tessellator.UniformManager){
+            this.uniformManager = tessellator;
+        }else{
+            this.uniformManager = new Tessellator.UniformManager(tessellator);
+        }
+        
+        this.tessellator = this.uniformManager.tessellator;
+        this.shader = this.tessellator.GL.createProgram();
+    }
     
     this.linked = [];
-    this.shader = this.tessellator.GL.createProgram();
     this.ready = false;
-    this.active = false;
     
     this.attribs = {};
     this.uniforms = {};
-    this.uedits = 0;
     
     this.disposable = false;
 };
 
 Tessellator.Program.prototype.link = function (shader){
-    if (shader.constructor === Tessellator.ShaderPreset){
+    if (!this.tessellator && !shader.tessellator){
+        throw "cannot attach this shader because it does not contain a tessellator object to inherit from";
+    }else if (!this.tessellator){
+        this.tessellator = shader.tessellator;
+    }else if (shader.constructor === Tessellator.ShaderPreset){
         shader = shader.create(this.tessellator);
     };
     
@@ -72,6 +82,16 @@ Tessellator.Program.prototype.link = function (shader){
     };
     
     return this;
+};
+
+Tessellator.Program.prototype.getLinked = function (type){
+    for (var i = 0; i < this.linked.length; i++){
+        if (this.linked[i].type === type){
+            return this.linked[i];
+        }
+    };
+    
+    return null;
 };
 
 Tessellator.Program.prototype.load = function (){
@@ -134,36 +154,10 @@ Tessellator.Program.prototype.load = function (){
                     this.uniformSpace += uniform.size;
                 };
                 
-                var name;
+                var name = this.uniformManager.createManager(uniform);
                 
-                if (uniform.size > 1){
-                    name = uniform.name.substring(0, uniform.name.length - 3);
-                }else{
-                    name = uniform.name;
-                };
-                
-                var inherit = Tessellator.Program.DEFAULT_UNIFORM_INHERITER[uniform.type];
-                
-                this.uniforms[name] = {
-                    tessellator: this.tessellator,
-                    name: name,
-                    value: null,
-                    initialValue: true,
-                    inherit: inherit,
-                    configure: inherit.configure,
-                    map: inherit.map,
-                    startMap: inherit.startMap,
-                    location: gl.getUniformLocation(this.shader, name),
-                    shader: this,
-                    size: uniform.size,
-                    type: uniform.type,
-                    edits: 0,
-                };
-                
-            };
-            
-            if (this.uniformSpace > this.tessellator.maxUniformSpace){
-                console.error("The amount of uniforms exceeded the maximum! There may be problems!");
+                this.uniforms[name] = gl.getUniformLocation(this.shader, uniform.name);
+                this.uniforms[name].edits = 0;
             };
         };
         
@@ -181,74 +175,8 @@ Tessellator.Program.prototype.isReady = function (){
     return this.ready;
 };
 
-Tessellator.Program.prototype.hasUniform = function (key){
-    return key in this.uniforms;
-};
-
-Tessellator.Program.prototype.uniform = function (key, value, matrix, reason){
-    var u = this.uniforms[key];
-    
-    if (u){
-        u.configure(value, matrix, reason);
-        u.initialValue = false;
-        u.edits++;
-    };
-};
-
-Tessellator.Program.prototype.preUnify = function (matrix){
-    for (var o in this.uniforms){
-        var u = this.uniforms[o];
-        
-        if (u.startMap){
-            u.startMap(matrix, matrix.gets(o));
-        };
-    };
-};
-
-Tessellator.Program.prototype.unify = function (matrix){
-    for (var o in this.uniforms){
-        var u = this.uniforms[o];
-        
-        if (u.map){
-            u.map(matrix);
-        };
-        
-        if (!u.initialValue && u.inherit && u.edits !== u.lastUnify){
-            u.inherit(matrix);
-            
-            u.lastUnify = u.edits;
-            this.uedits++;
-        };
-    };
-};
-
-Tessellator.Program.prototype.setInheriter = function (key, value){
-    if (!value.configure){
-        value.configure = Tessellator.Program.DEFAULT_CONFIG;
-    };
-    
-    var u = this.uniforms[key];
-    
-    if (u){
-        u.inherit = value;
-        u.configure = u.inherit.configure;
-        u.map = u.inherit.map;
-        u.startMap = u.inherit.startMap;
-        
-        if (u.edits === undefined){
-            u.edits = 0;
-        };
-    }else{
-        u = {
-            configure: value.configure,
-            tessellator: this.tessellator,
-            shader: this
-        };
-        
-        this.uniforms[key] = u;
-    };
-    
-    return this;
+Tessellator.Program.prototype.getAttributes = function (){
+    return this.attribs;
 };
 
 Tessellator.Program.prototype.dispose = function (){
@@ -279,4 +207,14 @@ Tessellator.Program.prototype.set = function (){
     return this.isReady();
 };
 
-Tessellator.Program.prototype.postSet = function (){};
+Tessellator.Program.prototype.getUniforms = function (){
+    return this.uniformManager;
+};
+
+Tessellator.Program.prototype.setUniforms = function (){
+    return this.uniformManager;
+};
+
+Tessellator.Program.prototype.getUniform = function (key){
+    return this.uniforms[key];
+}
