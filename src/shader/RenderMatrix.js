@@ -37,8 +37,10 @@ Tessellator.RenderMatrix = function (renderer, parent){
     if (parent){
         this.copyMatrix(parent);
     }else{
-        if (renderer.shader){
-            this.uniformManager = new Tessellator.UniformManager(this.tessellator, this.renderer.shader.getUniforms());
+        this.uniformManager = new Tessellator.UniformManager(this.tessellator);
+        
+        if (this.renderer.shader){
+            this.uniformManager.fallback = this.renderer.shader.getUniforms();
         };
         
         this.changes = {};
@@ -65,6 +67,10 @@ Tessellator.RenderMatrix.prototype.MAX_INDEX = 1000000000;
 
 Tessellator.RenderMatrix.prototype.copyMatrix = function (parent){
     this.uniformManager = parent.uniformManager;
+    
+    if (this.renderer.shader){
+        this.uniformManager.fallback = this.renderer.shader.getUniforms();
+    };
     
     for (var o in parent.uniforms){
         this.uniforms[o] = parent.uniforms[o];
