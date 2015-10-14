@@ -52,8 +52,8 @@ Tessellator.ShaderSetDrawDependant = function (drawMode, shaders){
     this.uniformManager.setInheriter = function (key, value){
         for (var i = 0; i < shaders.length; i++){
             shaders[i].getUniforms().setInheriter(key, value);
-        }
-    }
+        };
+    };
 };
 
 Tessellator.ShaderSetDrawDependant.prototype.init = function (){
@@ -93,7 +93,7 @@ Tessellator.ShaderSetDrawDependant.prototype.dispose = function (key, value){
 
 Tessellator.ShaderSetDrawDependant.prototype.getUniforms = function (){
     return this.uniformManager;
-}
+};
 
 Tessellator.ShaderSetDrawDependant.prototype.getUniform = function (key){
     return this.shader.getUniform(key);
@@ -128,7 +128,7 @@ Tessellator.ShaderSetDrawDependant.prototype.getDefinitions = function (){
     
     for (var i = 0; i < this.shaders.length; i++){
         def[i] = this.shaders[i].getDefinitions();
-    }
+    };
     
     return def;
 };

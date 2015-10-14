@@ -156,10 +156,10 @@ Tessellator.UniformManager.prototype.createManager = function (uniform){
         u.value = null;
         
         u.custom = undefined;
-    }
+    };
     
     return name;
-}
+};
 
 Tessellator.UniformManager.prototype.clone = function (){
     var u = new Tessellator.UniformManager(this.tessellator);
@@ -170,7 +170,7 @@ Tessellator.UniformManager.prototype.clone = function (){
         
         for (var oo in old){
             n[o] = old[o];
-        }
+        };
         
         n.manager = u;
         

@@ -48,7 +48,7 @@ Tessellator.DEFAULT_FONT_SHEET = {
             widthTable[i] = measure.width / (canvas.width / 16);
             
             d.fillText(c, (i % 16) * canvas.width / 16, Math.floor(i / 16) * canvas.height / 16);
-        }
+        };
         
         return tessellator.loadTexture(canvas, Tessellator.TEXTURE_FILTER_LINEAR);
     },
@@ -57,7 +57,7 @@ Tessellator.DEFAULT_FONT_SHEET = {
     
     //If this was not block text, this table would be used.
     //every value is from 1 to 0.
-    widthTable: null,
+    widthTable: null
 };
 
 Tessellator.createHandle.push(function () {
@@ -86,12 +86,12 @@ Tessellator.Model.prototype.widthText = function (text){
         
         for (var i = 0; i < text.length; i++){
             w += fontSheet.widthTable[text.charCodeAt(i)];
-        }
+        };
         
         return w;
     }else{
         return text.length;
-    }
+    };
 };
 
 Tessellator.Text = function (matrix, text, x, y){

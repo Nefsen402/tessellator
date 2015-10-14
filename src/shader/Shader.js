@@ -57,7 +57,6 @@ Tessellator.Shader.prototype.loadDOM = function (dom){
         dom = document.getElementById(dom);
     };
     
-    
     if (!this.shader){
         var type;
         
@@ -93,7 +92,7 @@ Tessellator.Shader.prototype.loadRemote = function (src){
 
 Tessellator.Shader.prototype.getSource = function (){
     return this.source;
-}
+};
 
 Tessellator.Shader.prototype.load = function (source){
     if (!source){

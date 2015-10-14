@@ -33,7 +33,7 @@ Tessellator.UniformManagerWraper = function (wrap){
 
 Tessellator.UniformManagerWraper.prototype.setManager = function (wrap){
     this.manager = wrap;
-}
+};
 
 Tessellator.UniformManagerWraper.prototype.hasUniform = function (key){
     return this.manager.hasUniform(key);

@@ -3,7 +3,7 @@
         <textarea style="opacity:0;position:absolute;" id="clip"></textarea>
     </body>
     
-    <script src="/Tessellator.multifile"></script>
+    <script src="../../build/Tessellator.js"></script>
     
     <script type="glsl/vert" id="vert">
         attribute vec2 position;
@@ -438,7 +438,6 @@
         
         TextBox.Selection.prototype.propogate = function (pos){
             this.xx += pos;
-            this.yx += pos;
         }
         
         TextBox.Selection.prototype.hasSelection = function (){
@@ -899,9 +898,11 @@
                         
                         this.text.insert(this.selection, new TextBox.Text(s));
                         this.selection.propogate(r);
+                        this.selection.join();
                     }else{
                         this.text.insert(this.selection, new TextBox.Text("    "));
                         this.selection.propogate(4);
+                        this.selection.join();
                     }
                 }
                 
@@ -955,6 +956,63 @@
                 setTimeout(function (){
                     tessellator.canvas.focus();
                 }, 0);
+            }else if (e.which === 32 && e.ctrlKey){
+                if (!this.selection.hasSelection()){
+                    var line = this.text.getLine(this.selection.xy);
+                    
+                    var add = "";
+                    var addAmount = 0;
+                    
+                    for (var i = 0; i < line.length; i++){
+                        if (line.charAt(i) == " "){
+                            add += " ";
+                            addAmount++;
+                        }else{
+                            break;
+                        }
+                    }
+                    
+                    if (this.selection.xx >= 5 && line.substring(this.selection.xx - 5, this.selection.xx) == "pfunc"){
+                        this.selection.propogate(-5);
+                        this.text.insert(this.selection, new TextBox.Text("prototype.<name> = function (){\r\n" + add + "    \r\n" + add + "}"));
+                        this.selection.propogate(10);
+                        this.selection.join();
+                        this.selection.propogate(6);
+                    }else if (this.selection.xx >= 4 && line.substring(this.selection.xx - 4, this.selection.xx) == "func"){
+                        this.text.insert(this.selection, new TextBox.Text("tion <name> (){\r\n" + add + "    \r\n" + add + "}"));
+                        this.selection.propogate(5);
+                        this.selection.join();
+                        this.selection.propogate(6);
+                    }else if (this.selection.xx >= 4 && line.substring(this.selection.xx - 4, this.selection.xx) == "cout"){
+                        this.selection.propogate(-4);
+                        this.text.insert(this.selection, new TextBox.Text("console.log();"));
+                        this.selection.propogate(12);
+                        this.selection.join();
+                    }else if (this.selection.xx >= 4 && line.substring(this.selection.xx - 4, this.selection.xx) == "cerr"){
+                        this.selection.propogate(-4);
+                        this.text.insert(this.selection, new TextBox.Text("console.error();"));
+                        this.selection.propogate(14);
+                        this.selection.join();
+                    }else if (this.selection.xx >= 5 && line.substring(this.selection.xx - 5, this.selection.xx) == "cwarn"){
+                        this.selection.propogate(-5);
+                        this.text.insert(this.selection, new TextBox.Text("console.warn();"));
+                        this.selection.propogate(13);
+                        this.selection.join();
+                    }else if (this.selection.xx >= 4 && line.substring(this.selection.xx - 4, this.selection.xx) == "tess"){
+                        this.selection.propogate(-4);
+                        this.text.insert(this.selection, new TextBox.Text("Tessellator"));
+                        this.selection.propogate(11);
+                        this.selection.join();
+                    }else if (this.selection.xx >= 7 && line.substring(this.selection.xx - 7, this.selection.xx) == "getelem"){
+                        this.selection.propogate(-7);
+                        this.text.insert(this.selection, new TextBox.Text("getElementById(\"\")"));
+                        this.selection.propogate(16);
+                        this.selection.join();
+                    }
+                    
+                    this.updateSelection();
+                    e.preventDefault();
+                }
             }
         }
         
@@ -972,8 +1030,8 @@
             }
             
             this.text.insert(this.selection, new TextBox.Text(c));
-            this.selection.join();
             this.selection.propogate(1);
+            this.selection.join();
             
             this.updateSelection();
         }

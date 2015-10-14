@@ -33,11 +33,11 @@ Tessellator.Program = function (tessellator){
             this.uniformManager = tessellator;
         }else{
             this.uniformManager = new Tessellator.UniformManager(tessellator);
-        }
+        };
         
         this.tessellator = this.uniformManager.tessellator;
         this.shader = this.tessellator.GL.createProgram();
-    }
+    };
     
     this.linked = [];
     this.ready = false;
@@ -88,7 +88,7 @@ Tessellator.Program.prototype.getLinked = function (type){
     for (var i = 0; i < this.linked.length; i++){
         if (this.linked[i].type === type){
             return this.linked[i];
-        }
+        };
     };
     
     return null;
@@ -217,4 +217,4 @@ Tessellator.Program.prototype.setUniforms = function (){
 
 Tessellator.Program.prototype.getUniform = function (key){
     return this.uniforms[key];
-}
+};

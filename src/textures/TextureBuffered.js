@@ -37,7 +37,7 @@ Tessellator.TextureBuffered = function (){
     }else{
         this.shader = arguments[0];
         this.tessellator = this.shader.tessellator;
-    }
+    };
     
     this.parentTexture = arguments[1];
     
@@ -117,7 +117,7 @@ Tessellator.extend(Tessellator.TextureBuffered, Tessellator.TextureModel);
 
 Tessellator.TextureBuffered.prototype.init = function (){
     this.renderer = new Tessellator.FullScreenTextureRenderer(this.shader || this.tessellator.createPixelShader(Tessellator.PIXEL_SHADER_PASS));
-    console.log(this.filter)
+    
     this.super(this.tessellator, this.width, this.height, [
         new Tessellator.TextureModel.AttachmentColor(this.filter),
         new Tessellator.TextureModel.AttachmentRenderer(this.renderer, this.parentTexture),

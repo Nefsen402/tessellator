@@ -66,4 +66,4 @@ Tessellator.ColorSet.prototype.init = function (interpreter){
 
 Tessellator.ColorSet.prototype.apply = function (matrix){
     matrix.removeDefinition("USE_TEXTURE");
-}
+};

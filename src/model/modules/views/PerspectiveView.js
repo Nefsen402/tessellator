@@ -59,7 +59,7 @@ Tessellator.PerspectiveView = function (){
     
     if (!isNaN(this.FOV)){
         this.FOV = Tessellator.float(this.FOV);
-    }
+    };
     
     if (this.farView < this.nearView){
         console.error("The perspective far view is shorter then the near view. This is probably not intentional. " + this.farView + ":" + this.nearView);

@@ -63,8 +63,8 @@ Tessellator.ShaderPreset.prototype.configureActiveProgram = function (vert, frag
         for (var i = 0; i < cache.length; i++){
             if (cache[i][0] === tessellator){
                 return cache[i][1];
-            }
-        }
+            };
+        };
         
         var prog = new Tessellator.ActiveProgram(tessellator.createShaderProgram(vert, frag));
         

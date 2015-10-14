@@ -94,12 +94,12 @@ Tessellator.PointLight.prototype.createShadow = function (model, far, near, res)
     var model = arguments[0];
     
     if (arguments.length === 4){
-        var far = arguments[1]
-        var near = arguments[2]
+        var far = arguments[1];
+        var near = arguments[2];
         var res = arguments[3];
     }else if (arguments.length === 3){
-        var far = arguments[1]
-        var near = arguments[2]
+        var far = arguments[1];
+        var near = arguments[2];
         var res = 1024;
     }else if (arguments.length === 2){
         var far = (this.range && this.range.x) || Tessellator.DEFAULT_FAR_VIEW;

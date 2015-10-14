@@ -52,13 +52,13 @@ Tessellator.RenderMatrix = function (renderer, parent){
         
         this.enable(Tessellator.CULL_FACE);
         this.enable(Tessellator.DEPTH_TEST);
-        this.enable(Tessellator.BLEND.gl);
+        this.enable(Tessellator.BLEND);
+        
+        if (this.renderer.shader && this.renderer.shader.getDefinitions){
+            this.definitions = this.renderer.shader.getDefinitions();
+        };
         
         renderer.configure(this);
-    };
-    
-    if (this.renderer.shader && this.renderer.shader.getDefinitions){
-        this.definitions = this.renderer.shader.getDefinitions();
     };
 };
 
@@ -91,6 +91,14 @@ Tessellator.RenderMatrix.prototype.copyMatrix = function (parent){
     this.glDepthMask = parent.glDepthMask;
     this.glDepthFunc = parent.glDepthFunc;
     this.glLineWidth = parent.glLineWidth;
+    
+    if (!parent.definitions){
+        if (this.renderer.shader && this.renderer.shader.getDefinitions){
+            this.definitions = this.renderer.shader.getDefinitions();
+        };
+    }else{
+        this.definitions = parent.definitions;
+    };
 };
 
 Tessellator.RenderMatrix.prototype.dirty = function (item){
@@ -129,6 +137,14 @@ Tessellator.RenderMatrix.prototype.get = function (key){
 //sneaky get. does not set the value dirty
 Tessellator.RenderMatrix.prototype.gets = function (key){
     return this.uniforms[key];
+};
+
+Tessellator.RenderMatrix.prototype.preUnify = function (shader, matrix){
+    if (this.definitions){
+        this.renderer.shader.setDefinitions(this.definitions);
+    };
+    
+    this.uniformManager.preUnify(shader, matrix);
 };
 
 Tessellator.RenderMatrix.prototype.unify = function (){
@@ -201,10 +217,6 @@ Tessellator.RenderMatrix.prototype.unifyGLAttributes = function (){
             this.changes[o] = this.index;
         };
     };
-    
-    if (this.definitions){
-        this.renderer.shader.setDefinitions(this.definitions);
-    }
 };
 
 Tessellator.RenderMatrix.prototype.has = function (key){
@@ -265,8 +277,8 @@ Tessellator.RenderMatrix.prototype.resetDefinitions = function (){
         
         s.resetDefinitions();
         this.definitions = s.getDefinitions();
-    }
-}
+    };
+};
 
 Tessellator.RenderMatrix.prototype.isEnabled = function (value){
     return this.enabled[value];

@@ -48,11 +48,11 @@ Tessellator.Model.NormalMap.prototype.init = function (interpreter){
     if (this.texture){
         if (interpreter.get("draw") !== Tessellator.TEXTURE){
             throw "unable to bind a normal map if there is no texture bound first";
-        }
+        };
         
         if (this.texture.constructor === String){
             this.texture = interpreter.tessellator.getTexture(this.texture);
-        }
+        };
     };
     
     interpreter.flush();

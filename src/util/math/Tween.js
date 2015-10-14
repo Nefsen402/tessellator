@@ -245,9 +245,7 @@ Tessellator.Tween.prototype.rad = function (start, cycles, rsin, rcos, time){
     if (time <= 0){
         this.add(function (tween, t){
             for (var i = 0; i < tween.vec.length; i++){
-                tween.vec[i] = tween.ovec[i] + 
-                    Math.sin(t / 1000 * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rsin[i] +
-                    Math.cos(t / 1000 * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rcos[i];
+                tween.vec[i] = tween.ovec[i] + Math.sin(t / 1000 * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rsin[i] + Math.cos(t / 1000 * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rcos[i];
             };
             
             return -1;
@@ -255,9 +253,7 @@ Tessellator.Tween.prototype.rad = function (start, cycles, rsin, rcos, time){
     }else{
         this.add(function (tween, t){
             for (var i = 0; i < tween.vec.length; i++){
-                tween.vec[i] = tween.ovec[i] + 
-                    Math.sin(Math.min(t / time, 1) * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rsin[i] +
-                    Math.cos(Math.min(t / time, 1) * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rcos[i];
+                tween.vec[i] = tween.ovec[i] + Math.sin(Math.min(t / time, 1) * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rsin[i] + Math.cos(Math.min(t / time, 1) * cycles[0] * Math.PI * 2 + start[0] * Math.PI * 2) * rcos[i];
             };
             
             return t - time;

@@ -63,8 +63,6 @@ Tessellator.Model.TextureBind.prototype.init = function (interpreter){
     interpreter.set("mask", false);
 };
 
-Tessellator.Model.TextureBind.prototype.postInit = Tessellator.EMPTY_FUNC;
-
 Tessellator.Model.TextureBind.prototype.apply = function (render, model){
     render.addDefinition("USE_TEXTURE");
     
