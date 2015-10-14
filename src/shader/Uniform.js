@@ -56,18 +56,26 @@ Tessellator.Program.UNIFY_WINDOW.configure = function (value){
 };
 
 Tessellator.Program.F1V_UNIFY_FUNC = function (){
+    if (this.value.tween) this.value.tween.update();
+    
     this.gl.uniform1fv(this.location, this.value);
 };
 
 Tessellator.Program.F2V_UNIFY_FUNC = function (){
+    if (this.value.tween) this.value.tween.update();
+    
     this.gl.uniform2fv(this.location, this.value);
 };
 
 Tessellator.Program.F3V_UNIFY_FUNC = function (){
+    if (this.value.tween) this.value.tween.update();
+    
     this.gl.uniform3fv(this.location, this.value);
 };
 
 Tessellator.Program.F4V_UNIFY_FUNC = function (){
+    if (this.value.tween) this.value.tween.update();
+    
     this.gl.uniform4fv(this.location, this.value);
 };
 

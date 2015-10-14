@@ -1,0 +1,48 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    <script>
+        var tessellator = new Tessellator("gl");
+        
+        var rotation = Tessellator.float();
+        var rotationTween = rotation.createTween();
+        rotationTween.dir(Math.PI / 1000);
+        
+        
+        var model = tessellator.createModel(); //creates a model
+        model.clear("sky"); //clears the rendering target (the screen) to the color black
+        model.setColor("sky");
+        
+        //arguments: far / near
+        //far: the distance from the camera at which objects will fade completely into fog.
+        //near (optional (defaults true)): the distance from the camera at which objects will not be effected by the fog at all.
+        model.setFog(10, 3);
+        
+        model.setView(new Tessellator.PerspectiveView());
+        model.translate(-2, 0, -3);
+        
+        model.rotate(rotation, Tessellator.vec3(0, 0, 1));
+        
+        model.setColor("white");
+        model.fillCube(0, 0, -0, 1);
+        model.fillCube(0, 0, -1, 1);
+        model.fillCube(0, 0, -2, 1);
+        model.fillCube(0, 0, -3, 1);
+        model.fillCube(0, 0, -4, 1);
+        model.fillCube(0, 0, -5, 1);
+        model.fillCube(0, 0, -6, 1);
+        model.fillCube(0, 0, -7, 1);
+        model.fillCube(0, 0, -8, 1);
+        model.fillCube(0, 0, -9, 1);
+        model.fillCube(0, 0, -10, 1);
+        model.finish();
+        
+        var renderer = new Tessellator.ModelRenderer(model); //creates a renderer that will render our model
+        
+        var renderLoop = new Tessellator.RenderLoop(renderer); //creates a render loop. By defaut, this will render as fast as possible
+    </script>
+</html>

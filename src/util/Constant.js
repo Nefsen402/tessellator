@@ -733,6 +733,7 @@
     Tessellator.COLOR_CORAL = Tessellator.vec4(1, 0.5, 0.3125, 1);
     Tessellator.COLOR_INDIAN_RED = Tessellator.vec4(0.8008, 0.3594, 0.3594, 1);
     Tessellator.COLOR_AMBER = Tessellator.vec4(1, 0.4921, 0, 1);
+    Tessellator.COLOR_SKY = Tessellator.vec4(0.529, 0.8, 0.98, 1);
     Tessellator.COLOR_CLEAR = Tessellator.vec4(0, 0, 0, 0);
     
     Tessellator.DEFAULT_COLOR = Tessellator.COLOR_WHITE;
@@ -773,5 +774,6 @@
         "VIOLET": Tessellator.COLOR_VIOLET,
         "AMBER": Tessellator.COLOR_AMBER,
         "CLEAR": Tessellator.COLOR_CLEAR,
+        "SKY": Tessellator.COLOR_SKY,
     };
 };

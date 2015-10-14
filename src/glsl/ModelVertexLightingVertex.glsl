@@ -3,7 +3,7 @@ attribute vec3 position;
 uniform mat4 mvMatrix;
 uniform mat4 pMatrix;
 
-vec4 mvPosition;
+varying vec4 mvPosition;
 
 #ifdef USE_TEXTURE
     attribute vec2 color;

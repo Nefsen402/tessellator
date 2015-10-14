@@ -606,7 +606,7 @@ Tessellator.vec3.prototype.toString = function (){
     return "vec3(" + this[0] + ", " + this[1] + ", " + this[2] + ")";
 };
 
-if (Object.defineProperty) (function (){
+(function (){
     var getSwizzle = function (vec, s){
         if (vec.tween) vec.tween.update();
         
@@ -665,7 +665,7 @@ if (Object.defineProperty) (function (){
             };
             
             if (!c[s]){
-                Object.defineProperty(Tessellator.vec3.prototype, s, {
+                c[s] = {
                     get: function (){
                         return getSwizzle(this, s);
                     },
@@ -673,9 +673,7 @@ if (Object.defineProperty) (function (){
                     set: function (v){
                         setSwizzle(this, s, v);
                     }
-                });
-                
-                c[s] = true;
+                };
             };
         })();
         
@@ -695,4 +693,6 @@ if (Object.defineProperty) (function (){
             };
         };
     };
+    
+    Object.defineProperties(Tessellator.vec3.prototype, c);
 })();

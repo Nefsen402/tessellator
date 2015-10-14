@@ -18,6 +18,11 @@ uniform sampler2D normalTexture;
     varying vec4 colorInfo;
 #endif
 
+#ifdef USE_FOG
+    uniform vec2 fog;
+    uniform vec3 fogColor;
+#endif
+
 varying vec4 mvPosition;
 
 #define LIGHTING_EPSILON 0.0005
@@ -235,6 +240,12 @@ void main(void){
             #endif
         
             mainColor.xyz *= getLightMask(normal);
+        #endif
+        
+        #ifdef USE_FOG
+            float fogLerp = clamp((length(mvPosition.xyz) - fog.x) / (fog.y - fog.x), 0., 1.);
+            
+            mainColor.xyz = mainColor.xyz * (1. - fogLerp) + fogColor * fogLerp;
         #endif
         
         gl_FragColor = mainColor;

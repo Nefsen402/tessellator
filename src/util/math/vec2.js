@@ -494,7 +494,7 @@ Tessellator.vec2.prototype.toString = function (){
     return "vec2(" + this[0] + ", " + this[1] + ")";
 };
 
-if (Object.defineProperty) (function (){
+(function (){
     var getSwizzle = function (vec, s){
         if (vec.tween) vec.tween.update();
         
@@ -552,7 +552,7 @@ if (Object.defineProperty) (function (){
             };
             
             if (!c[s]){
-                Object.defineProperty(Tessellator.vec2.prototype, s, {
+                c[s] = {
                     get: function (){
                         return getSwizzle(this, s);
                     },
@@ -560,9 +560,7 @@ if (Object.defineProperty) (function (){
                     set: function (v){
                         setSwizzle(this, s, v);
                     }
-                });
-                
-                c[s] = true;
+                };
             };
         })();
         
@@ -582,4 +580,6 @@ if (Object.defineProperty) (function (){
             };
         };
     };
+    
+    Object.defineProperties(Tessellator.vec2.prototype, c);
 })();

@@ -1,5 +1,7 @@
 precision mediump float;
 
+varying vec4 mvPosition;
+
 uniform vec4 clip;
 uniform vec2 window;
 uniform vec4 mask;
@@ -14,6 +16,11 @@ uniform vec4 mask;
 
 #ifdef USE_LIGHTING
     varying vec3 lightMask;
+#endif
+
+#ifdef USE_FOG
+    uniform vec2 fog;
+    uniform vec3 fogColor;
 #endif
 
 void main(void){
@@ -42,6 +49,12 @@ void main(void){
     if(mainColor.w == 0.0){
         discard;
     }else{
+        #ifdef USE_FOG
+            float fogLerp = clamp((length(mvPosition.xyz) - fog.x) / (fog.y - fog.x), 0., 1.);
+            
+            mainColor.xyz = mainColor.xyz * (1. - fogLerp) + fogColor * fogLerp;
+        #endif
+        
         gl_FragColor = mainColor;
     }
 }
