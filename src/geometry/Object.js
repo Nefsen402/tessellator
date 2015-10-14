@@ -275,7 +275,7 @@ Tessellator.Object.prototype.render = function (shader){
             return;
         };
         
-        matrix.preUnify(shader, matrix);
+        matrix.preUnify();
         
         if (!shader.set(matrix.renderer, matrix, this)){
             return;

@@ -59,8 +59,6 @@ Tessellator.PointLight = function (){
 };
 
 Tessellator.PointLight.prototype.set = function (renderer, index, mat, matrix, vec){
-    if (this.color.tween) this.color.tween.update();
-    
     var lighting = renderer.lightingTexture.data;
     
     lighting.set(this.color.xyz.multiply(this.color.w), 1 + index);

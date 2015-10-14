@@ -34,13 +34,13 @@ Tessellator.RenderMatrix = function (renderer, parent){
     this.renderer = renderer;
     this.tessellator = renderer.tessellator;
     
-    if (renderer.shader){
-        this.uniformManager = renderer.shader.getUniforms();
-    };
-    
     if (parent){
         this.copyMatrix(parent);
     }else{
+        if (renderer.shader){
+            this.uniformManager = new Tessellator.UniformManager(this.tessellator, this.renderer.shader.getUniforms());
+        };
+        
         this.changes = {};
         
         this.index = 1;
@@ -52,7 +52,6 @@ Tessellator.RenderMatrix = function (renderer, parent){
         
         this.enable(Tessellator.CULL_FACE);
         this.enable(Tessellator.DEPTH_TEST);
-        this.enable(Tessellator.BLEND);
         
         if (this.renderer.shader && this.renderer.shader.getDefinitions){
             this.definitions = this.renderer.shader.getDefinitions();
@@ -65,16 +64,14 @@ Tessellator.RenderMatrix = function (renderer, parent){
 Tessellator.RenderMatrix.prototype.MAX_INDEX = 1000000000;
 
 Tessellator.RenderMatrix.prototype.copyMatrix = function (parent){
+    this.uniformManager = parent.uniformManager;
+    
     for (var o in parent.uniforms){
         this.uniforms[o] = parent.uniforms[o];
     };
     
     for (var o in parent.enabled){
         this.enabled[o] = parent.enabled[o];
-    };
-    
-    for (var o in this.changes){
-        parent.changes[o] = this.changes[o];
     };
     
     this.changes = parent.changes;
@@ -139,12 +136,12 @@ Tessellator.RenderMatrix.prototype.gets = function (key){
     return this.uniforms[key];
 };
 
-Tessellator.RenderMatrix.prototype.preUnify = function (shader, matrix){
+Tessellator.RenderMatrix.prototype.preUnify = function (){
     if (this.definitions){
         this.renderer.shader.setDefinitions(this.definitions);
     };
     
-    this.uniformManager.preUnify(shader, matrix);
+    this.uniformManager.preUnify(this);
 };
 
 Tessellator.RenderMatrix.prototype.unify = function (){

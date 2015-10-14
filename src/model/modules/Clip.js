@@ -28,28 +28,18 @@
  */
 
 Tessellator.Model.prototype.setClip = function (x, y, width, height){
-    return this.add(new Tessellator.Clip(x, y, width, height));
+    return this.add(new Tessellator.Model.Clip(x, y, width, height));
 };
 
-Tessellator.Clip = function (x, y, w, h){
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-    
-    this.clip = new Float32Array(4);
-    this.clip[0] = x;
-    this.clip[1] = y;
-    this.clip[2] = w;
-    this.clip[3] = h;
+Tessellator.Model.Clip = function (x, y, w, h){
+    this.clip = Tessellator.vec4(x, y, w, h);
 };
 
-Tessellator.Clip.prototype.init = function (interpreter){
+Tessellator.Model.Clip.prototype.init = function (interpreter){
     interpreter.flush();
 };
 
-Tessellator.Clip.prototype.postInit = Tessellator.EMPTY_FUNC;
-
-Tessellator.Clip.prototype.apply = function (render){
-    render.set("clip", this.clip);
+Tessellator.Model.Clip.prototype.apply = function (render){
+    render.addDefinition("USE_SCISSOR");
+    render.set("scissor", this.clip);
 };

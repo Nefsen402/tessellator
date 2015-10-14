@@ -39,7 +39,7 @@ Tessellator.Disable = function (arg){
 
 Tessellator.Disable.prototype.apply = function (render){
     if (this.arg === Tessellator.LIGHTING){
-        render.set("lights", render.renderer.noLightingTexture);
+        render.removeDefinition("USE_LIGHTING")
     }else{
         render.disable(this.arg)
     };

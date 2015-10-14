@@ -15,23 +15,52 @@ varying vec4 mvPosition;
     varying vec4 colorInfo;
 #endif
 
-#ifdef USE_SPECULAR_REFLECTION
-    uniform float specular;
-#endif
-
-uniform sampler2D normalTexture;
-
-#define LIGHTING_EPSILON 0.0005
-#define LIGHTING_MAX_ANGLE_INFUANCE 0.5
-
 #ifdef USE_LIGHTING
+    #define LIGHTING_EPSILON 0.0005
+    #define LIGHTING_MAX_ANGLE_INFUANCE 0.5
+    
     attribute vec3 normal;
+    
+    varying vec3 lightMask;
+    
+    #ifdef USE_SPECULAR_REFLECTION
+        uniform float specular;
+    #endif
     
     uniform mat3 nMatrix;
     uniform sampler2D lights, shadowMap;
-    uniform samplerCube cube1, cube2, cube3, cube4;
     
-    varying vec3 lightMask;
+    #ifdef TEXTURE_CUBE_1
+        uniform samplerCube cube1;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_2
+        uniform samplerCube cube2;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_3
+        uniform samplerCube cube3;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_4
+        uniform samplerCube cube4;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_5
+        uniform samplerCube cube5;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_6
+        uniform samplerCube cube6;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_7
+        uniform samplerCube cube7;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_8
+        uniform samplerCube cube8;
+    #endif
     
     float unpackFloat(vec4 value){
         return dot(value, vec4(1.0/(256.0*256.0*256.0), 1.0/(256.0*256.0), 1.0/256.0, 1.0));
@@ -54,10 +83,30 @@ uniform sampler2D normalTexture;
             if (cube == 4) return textureCube(cube4, pos);
         #endif
         
+        #ifdef TEXTURE_CUBE_5
+            if (cube == 1) return textureCube(cube5, pos);
+        #endif
+        
+        #ifdef TEXTURE_CUBE_6
+            if (cube == 2) return textureCube(cube6, pos);
+        #endif
+        
+        #ifdef TEXTURE_CUBE_7
+            if (cube == 3) return textureCube(cube7, pos);
+        #endif
+        
+        #ifdef TEXTURE_CUBE_8
+            if (cube == 4) return textureCube(cube8, pos);
+        #endif
+        
         return vec4(0);
     }
 
-    vec3 getLightMask(vec3 normal){
+    #ifdef USE_SPECULAR_REFLECTION
+        vec3 getLightMask(vec3 normal, float specular){
+    #else
+        vec3 getLightMask(vec3 normal){
+    #endif
         vec3 lightMask = vec3(0);
         
         for (float i = 0.0; i < 256.; i++){
@@ -215,13 +264,10 @@ void main(void){
     #ifdef USE_LIGHTING
         vec3 norm = normalize(nMatrix * normal);
         
-        #ifdef USE_NORMAL_MAP
-            vec3 normalTex = texture2D(normalTexture, tex).xyz * 2. - 1.;
-            vec3 c = cross (norm, normalTex);
-            
-            norm = -normalTex * c + norm * abs(1. - c);
+        #ifdef USE_SPECULAR_REFLECTION
+            lightMask = getLightMask(norm, specular);
+        #else
+            lightMask = getLightMask(norm);
         #endif
-        
-        lightMask = getLightMask(norm);
     #endif
 }

@@ -1,14 +1,11 @@
 precision mediump float;
 
-uniform vec4 clip;
 uniform vec2 window;
 uniform vec4 mask;
 
-#ifdef USE_SPECULAR_REFLECTION
-    uniform float specular;
+#ifdef USE_SCISSOR
+    uniform vec4 scissor;
 #endif
-
-uniform sampler2D normalTexture;
 
 #ifdef USE_TEXTURE
     uniform sampler2D texture;
@@ -25,13 +22,55 @@ uniform sampler2D normalTexture;
 
 varying vec4 mvPosition;
 
-#define LIGHTING_EPSILON 0.0005
-#define LIGHTING_MAX_ANGLE_INFUANCE 0.5
-
 #ifdef USE_LIGHTING
+    #define LIGHTING_EPSILON 0.0005
+    #define LIGHTING_MAX_ANGLE_INFUANCE 0.5
+
+    #ifdef USE_SPECULAR_REFLECTION
+        uniform float specular;
+        
+        #ifdef USE_SPECULAR_MAP
+            uniform sampler2D specularMap;
+        #endif
+    #endif
+
+    #ifdef USE_NORMAL_MAP
+        uniform sampler2D normalTexture;
+    #endif
+
     uniform sampler2D lights, shadowMap;
     
-    uniform samplerCube cube1, cube2, cube3, cube4;
+    #ifdef TEXTURE_CUBE_1
+        uniform samplerCube cube1;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_2
+        uniform samplerCube cube2;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_3
+        uniform samplerCube cube3;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_4
+        uniform samplerCube cube4;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_5
+        uniform samplerCube cube5;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_6
+        uniform samplerCube cube6;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_7
+        uniform samplerCube cube7;
+    #endif
+    
+    #ifdef TEXTURE_CUBE_8
+        uniform samplerCube cube8;
+    #endif
     
     varying vec3 lightNormal;
     
@@ -56,10 +95,30 @@ varying vec4 mvPosition;
             if (cube == 4) return textureCube(cube4, pos);
         #endif
         
+        #ifdef TEXTURE_CUBE_5
+            if (cube == 1) return textureCube(cube5, pos);
+        #endif
+        
+        #ifdef TEXTURE_CUBE_6
+            if (cube == 2) return textureCube(cube6, pos);
+        #endif
+        
+        #ifdef TEXTURE_CUBE_7
+            if (cube == 3) return textureCube(cube7, pos);
+        #endif
+        
+        #ifdef TEXTURE_CUBE_8
+            if (cube == 4) return textureCube(cube8, pos);
+        #endif
+        
         return vec4(0);
     }
-
-    vec3 getLightMask(vec3 normal){
+    
+    #ifdef USE_SPECULAR_REFLECTION
+        vec3 getLightMask(vec3 normal, float specular){
+    #else
+        vec3 getLightMask(vec3 normal){
+    #endif
         vec3 lightMask = vec3(0);
         
         for (float i = 0.0; i < 256.; i++){
@@ -208,14 +267,13 @@ varying vec4 mvPosition;
 #endif
 
 void main(void){
-    {
-        float xarea=gl_FragCoord.x / window.x;
-        float yarea=gl_FragCoord.y / window.y;
+    #ifdef USE_SCISSOR
+        vec2 area = gl_FragCoord.xy / window;
         
-        if(xarea < clip.x || yarea < clip.y || clip.x + clip.z < xarea || clip.y + clip.w < yarea){
+        if(area.x < scissor.x || area.y < scissor.y || scissor.x + scissor.z < area.x || scissor.y + scissor.w < area.y){
             discard;
         }
-    }
+    #endif
     
     #ifdef USE_TEXTURE
         vec2 tex = mod(colorInfo, 1.);
@@ -233,13 +291,28 @@ void main(void){
             vec3 normal = lightNormal;
             
             #ifdef USE_NORMAL_MAP
-                vec3 normalTex = texture2D(normalTexture, tex).xyz * 2. - 1.;
-                vec3 c = cross (normal, normalTex);
+                vec3 z = normalize(texture2D(normalTexture, tex).xyz * 2. - 1.);
+                vec3 x = normalize(cross(z, vec3(0, 1, 0)));
+                vec3 y = normalize(cross(z, x));
                 
-                normal = -normalTex * c + normal * abs(1. - c);
+                normal *= mat3 (
+                    x.x, y.x, z.x,
+                    x.y, y.y, z.y,
+                    x.z, y.z, z.z
+                );
             #endif
-        
-            mainColor.xyz *= getLightMask(normal);
+            
+            #ifdef USE_SPECULAR_REFLECTION
+                float reflection = specular;
+                
+                #ifdef USE_SPECULAR_MAP
+                    reflection *= texture2D(specularMap, tex).x;
+                #endif
+                
+                mainColor.xyz *= getLightMask(normal, reflection);
+            #else
+                mainColor.xyz *= getLightMask(normal);
+            #endif
         #endif
         
         #ifdef USE_FOG

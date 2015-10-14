@@ -53,7 +53,7 @@ Tessellator.Vertex = function (vertices){
 
 Tessellator.Vertex.prototype.init = function (interpreter){
     if (this.vertices.length){
-        var geometry = interpreter.get("currentGeometry");
+        var geometry = interpreter.get("currentGeometry") || interpreter.get("extraGeometry");
         
         if (!geometry){
             throw "cannot add vertices to a non existing shape";

@@ -40,45 +40,43 @@ Tessellator.End.prototype.init = function (interpreter){
     var cached = interpreter.get("cachedGeometry");
     var extra = interpreter.get("extraGeometry");
     
-    if (geometry === extra){
-        return null;
-    };
-    
-    if (this.indices){
-        geometry.indices.push(this.indices);
-    };
-    
-    if (extra){
-        geometry.forceAdd(extra);
-        
-        interpreter.set("extraGeometry", null);
-    };
-    
-    geometry.convert();
-    geometry.generateNormals();
-    
-    {
-        var tex = interpreter.get("textureBounds");
-        
-        if (tex && tex.defaultBounds){
-            geometry.generateTextureCoordinates(tex.bounds[0], tex.bounds[1]);
-        };
-    };
-    
-    if (cached){
-        if (cached.disposed){
-            interpreter.set("cachedGeometry", geometry);
-        }else if (!cached.add(geometry)){
-            interpreter.set("cachedGeometry", geometry);
+    if (geometry){
+        if (extra){
+            geometry.forceAdd(extra);
             
-            if (cached){
-                cached.createObject(interpreter.tessellator, interpreter.get("draw"), Tessellator.STATIC);
-                
-                return cached;
+            interpreter.set("extraGeometry", null);
+        };
+        
+        if (this.indices){
+            geometry.indices.push(this.indices);
+        };
+        
+        geometry.convert();
+        geometry.generateNormals();
+        
+        {
+            var tex = interpreter.get("textureBounds");
+            
+            if (tex && tex.defaultBounds){
+                geometry.generateTextureCoordinates(tex.bounds[0], tex.bounds[1]);
             };
         };
-    }else{
-        interpreter.set("cachedGeometry", geometry)
+        
+        if (cached){
+            if (cached.disposed){
+                interpreter.set("cachedGeometry", geometry);
+            }else if (!cached.add(geometry)){
+                interpreter.set("cachedGeometry", geometry);
+                
+                if (cached){
+                    cached.createObject(interpreter.tessellator, interpreter.get("draw"), Tessellator.STATIC);
+                    
+                    return cached;
+                };
+            };
+        }else{
+            interpreter.set("cachedGeometry", geometry);
+        };
     };
     
     return null;

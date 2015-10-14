@@ -36,7 +36,7 @@ Tessellator.ActiveProgram = function (program){
     this.definitions.removed = {};
     this.cache = [this.definitions];
     
-    this.uniformManager = program.getUniforms();
+    this.uniformManager = new Tessellator.UniformManager(this.tessellator);
 };
 
 Tessellator.ActiveProgram.prototype.hasDefinition = function (name){
@@ -158,27 +158,31 @@ Tessellator.ActiveProgram.prototype.set = function (){
 };
 
 Tessellator.ActiveProgram.prototype.getShader = function (){
-    if (this.program.isReady() && !this.definitions.shader){
-        if (this.definitions.length === 0){
-            this.definitions.shader = this.program;
-        }else{
-            var str = [];
-            
-            for (var i = 0; i < this.definitions.length; i++){
-                str.push("#define ", this.definitions[i], "\r\n");
-            };
-            
-            str = str.join("");
-            
-            var vert = new Tessellator.Shader(this.tessellator, Tessellator.VERTEX_SHADER).load(str + this.program.getLinked(Tessellator.VERTEX_SHADER).getSource());
-            var frag = new Tessellator.Shader(this.tessellator, Tessellator.FRAGMENT_SHADER).load(str + this.program.getLinked(Tessellator.FRAGMENT_SHADER).getSource());
-            
-            this.definitions.shader = new Tessellator.Program(this.uniformManager).link(vert).link(frag).load();
-            
-            for (var o in this.inheriters){
-                this.definitions.shader.setInheriter(o, this.inheriters[o]);
+    if (this.program.isReady()){
+        if (!this.definitions.shader){
+            if (this.definitions.length === 0){
+                this.definitions.shader = this.program;
+            }else{
+                var str = [];
+                
+                for (var i = 0; i < this.definitions.length; i++){
+                    str.push("#define ", this.definitions[i], "\r\n");
+                };
+                
+                str = str.join("");
+                
+                var vert = new Tessellator.Shader(this.tessellator, Tessellator.VERTEX_SHADER).load(str + this.program.getLinked(Tessellator.VERTEX_SHADER).getSource());
+                var frag = new Tessellator.Shader(this.tessellator, Tessellator.FRAGMENT_SHADER).load(str + this.program.getLinked(Tessellator.FRAGMENT_SHADER).getSource());
+                
+                this.definitions.shader = new Tessellator.Program(this.tessellator).link(vert).link(frag).load();
+                
+                for (var o in this.inheriters){
+                    this.definitions.shader.setInheriter(o, this.inheriters[o]);
+                };
             };
         };
+        
+        this.uniformManager.fallback = this.definitions.shader.getUniforms();
     };
     
     return this.definitions.shader;

@@ -28,11 +28,7 @@
  */
 
 Tessellator.Model.prototype.translate = function(){
-    if (arguments.length === 1 && arguments[0].constructor === Tessellator.Translate){
-        return this.add(arguments[0]);
-    }else{
-        return this.add(Tessellator.new.apply(Tessellator.Translate, arguments));
-    };
+    return this.add(Tessellator.new.apply(Tessellator.Translate, arguments));
 };
 
 Tessellator.Translate = function (){

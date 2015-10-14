@@ -2,9 +2,12 @@ precision mediump float;
 
 varying vec4 mvPosition;
 
-uniform vec4 clip;
 uniform vec2 window;
 uniform vec4 mask;
+
+#ifdef USE_SCISSOR
+    uniform vec4 scissor;
+#endif
 
 #ifdef USE_TEXTURE
     uniform sampler2D texture;
@@ -24,14 +27,13 @@ uniform vec4 mask;
 #endif
 
 void main(void){
-    {
-        float xarea=gl_FragCoord.x / window.x;
-        float yarea=gl_FragCoord.y / window.y;
+    #ifdef USE_SCISSOR
+        vec2 area = gl_FragCoord.xy / window;
         
-        if(xarea < clip.x || yarea < clip.y || clip.x + clip.z < xarea || clip.y + clip.w < yarea){
+        if(area.x < scissor.x || area.y < scissor.y || scissor.x + scissor.z < area.x || scissor.y + scissor.w < area.y){
             discard;
         }
-    }
+    #endif
     
     #ifdef USE_TEXTURE
         vec2 tex = mod(colorInfo, 1.);

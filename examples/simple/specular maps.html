@@ -1,0 +1,47 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    <script>
+        var tessellator = new Tessellator("gl"); //creates the main tessellator object and we are linking our canvas to it.
+        
+        //we want to set up an animation and a very basic and effective solution to movement is vectors and floats.
+        var rotation = Tessellator.float(); //creates a float value
+        var rotationTween = rotation.createTween(); //creates a tween. This dynamically changes the float value and creates an animation
+        rotationTween.dir(Math.PI / 4 / 1000); //dir is short for direction. This simply makes adds the value passed add to the float every millisecond
+
+        //we set up the model now. This is what gets rendered on the screen
+        var model = tessellator.createModel(); //creates a model
+        model.clear("black"); //clears the rendering target (the screen) to the color black
+        model.setView(new Tessellator.PerspectiveView()); //creates a persepective view. You can also set this to a orthographic view.
+        
+        //we are going to apply a light because you cannot see the normal maps without lighting
+        model.enable(Tessellator.LIGHTING);
+        model.setPointLight(4, 0, 0);
+        
+        model.translate(0, 0, -4); //by defalt things are going to render right at the camera. This moves the objects back.
+        
+        model.setSpecularReflection(100);
+        
+        model.push();
+            //working with any kind of special maps, you have to bind a standard texture
+            model.bindTexture("../textures/earth.jpg");
+            
+            //similar to bindNormalMap except works with specular lighting. You can use both of these at the same time
+            model.bindSpecularMap("../textures/earth specular.jpg");
+            model.rotate(rotation, Tessellator.vec3(1, 1, 1));
+            model.fillSphere(0, 0, 0, 1, 20);
+        model.pop();
+        
+        model.finish(); //finish the model. Tell the renderer that this is ready to be rendered.
+        
+        var shader = new Tessellator.ActiveProgram(tessellator.createShaderProgram("../../src/glsl/ModelFragmentLightingVertex.glsl", "../../src/glsl/ModelFragmentLightingFragment.glsl"));
+        
+        var renderer = new Tessellator.ModelRenderer(shader, model); //creates a renderer that will render our model
+        
+        var renderLoop = new Tessellator.RenderLoop(renderer); //creates a render loop. By defaut, this will render as fast as possible
+    </script>
+</html>

@@ -27,46 +27,43 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.Initializer.setDefault("colorAttribEnabled", function (){
-    return true;
-});
-
-Tessellator.Model.prototype.start = function (type, drawType){
-    var start = new Tessellator.Start(this.tessellator, type, drawType);
-    
-    this.add(start);
-    
-    return start.geometry;
+Tessellator.Model.prototype.bindSpecularMap = function (texture){
+    return this.add(new Tessellator.Model.SpecularMap(texture));
 };
 
-Tessellator.Start = function (tessellator, shapeType, drawType) {
-    this.drawType = drawType;
-    this.shapeType = shapeType;
+Tessellator.Model.SpecularMap = function (texture){
+    this.texture = texture;
+    
+    this.disposable = true;
 };
 
-Tessellator.Start.prototype.init = function (interpreter){
-    
-    if (
-        this.shapeType === Tessellator.INDICES || 
-        this.shapeType === Tessellator.TEXTURE ||
-        this.shapeType === Tessellator.NORMAL
-    ){
-        var extra = interpreter.get("extraGeometry");
-        
-        if (extra){
-            extra.type = this.shapeType;
-        }else{
-            interpreter.set("extraGeometry", new Tessellator.Geometry(this.shapeType));
-        }
-    }else{
-        var geometry = new Tessellator.Geometry(this.shapeType);
-        
-        if (this.shapeType === Tessellator.LINE){
-            interpreter.set("draw", Tessellator.LINE);
+Tessellator.Model.SpecularMap.prototype.dispose = function (){
+    if (this.texture && this.texture.disposable){
+        this.texture.dispose();
+        this.texture = null;
+    };
+};
+
+Tessellator.Model.SpecularMap.prototype.init = function (interpreter){
+    if (this.texture){
+        if (interpreter.get("draw") !== Tessellator.TEXTURE){
+            throw "unable to bind a normal map if there is no texture bound first";
         };
         
-        interpreter.set("currentGeometry", geometry);
+        if (this.texture.constructor === String){
+            this.texture = interpreter.tessellator.getTexture(this.texture);
+        };
     };
     
-    return null;
+    interpreter.flush();
+};
+
+Tessellator.Model.SpecularMap.prototype.apply = function (render, model, renderer){
+    if (this.texture){
+        render.addDefinition("USE_SPECULAR_MAP");
+        
+        render.set("specularMap", this.texture);
+    }else{
+        render.removeDefinition("USE_SPECULAR_MAP");
+    };
 };

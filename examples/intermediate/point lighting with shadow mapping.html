@@ -1,5 +1,5 @@
 <html>
-    <script src="/Tessellator.multifile" type="text/javascript"></script>
+    <script src="../../build/Tessellator.js" type="text/javascript"></script>
     
     <body style="margin:0px;background:black;">
         <canvas style="width:100%;height:100%;" id="maincanvas"></canvas>
@@ -91,9 +91,7 @@
         
         rendererCube.setAspect(1);
         
-        var shader = new Tessellator.ShaderPreset().configureActiveProgram("../../src/glsl/ModelFragmentLightingVertex.glsl", "../../src/glsl/ModelFragmentLightingFragment.glsl");
-        
-        var rendererNormal = new Tessellator.ModelRenderer(shader.create(tessellator), model);
+        var rendererNormal = new Tessellator.ModelRenderer(model);
         
         var renderLoop = new Tessellator.RenderLoop(rendererNormal);
         

@@ -35,6 +35,8 @@
         //the texture is simply too large. Scaleing the texture by a half makes the effect easier to see
         model.scaleTexture(0.25);
         
+        model.setSpecularReflection(100);
+        
         model.push();
             model.bindNormalMap("../textures/brick2 normal.jpg"); //similar to bindTexture, this texture will infuance the normals of the lighing. this needs to be called after bindTexture
             
@@ -45,6 +47,15 @@
         
         //this cube has no normal map. This will show of the difference that the normal map can make
         model.push();
+            model.translate(0, 0, 0);
+            model.rotate(rotation, axis);
+            model.fillCube(0, 0, 0, 1);
+        model.pop();
+        
+        //no lighting
+        model.push();
+            model.disable(Tessellator.LIGHTING);
+            
             model.translate(-2, 0, 0);
             model.rotate(rotation, axis);
             model.fillCube(0, 0, 0, 1);

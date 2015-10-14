@@ -27,19 +27,20 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.UniformManager = function (tessellator){
+Tessellator.UniformManager = function (tessellator, fallback){
     this.uniforms = {};
     
     this.tessellator = tessellator;
+    this.fallback = fallback;
     this.uedits = 0;
 };
 
 Tessellator.UniformManager.prototype.hasUniform = function (key){
-    return key in this.uniforms;
+    return (key in this.uniforms) || (this.fallback && this.fallback.hasUniform(key));
 };
 
 Tessellator.UniformManager.prototype.getUniform = function (key){
-    return this.uniforms[key];
+    return this.uniforms[key] || (this.fallback && this.fallback.getUniform(key));
 };
 
 Tessellator.UniformManager.prototype.uniform = function (key, value, matrix){
@@ -49,25 +50,29 @@ Tessellator.UniformManager.prototype.uniform = function (key, value, matrix){
         u.configure(value, matrix);
         u.initialValue = false;
         u.edits++;
-    };
+    }else if (this.fallback){
+        this.fallback.uniform(key, value, matrix);
+    }
 };
 
-Tessellator.UniformManager.prototype.preUnify = function (shader, matrix){
+Tessellator.UniformManager.prototype.preUnify = function (matrix){
     for (var o in this.uniforms){
         var u = this.uniforms[o];
-        u.shader = shader;
-        u.location = shader.getUniform(o);
+        u.shader = matrix.renderer.shader;
+        u.location = u.shader.getUniform(o);
         
         if (u.startMap){
             u.startMap(matrix, matrix.gets(o));
         };
     };
+    
+    if (this.fallback) this.fallback.preUnify(matrix);
 };
 
 Tessellator.UniformManager.prototype.unify = function (matrix){
     for (var o in this.uniforms){
         var u = this.uniforms[o];
-        var ru = matrix.renderer.shader.getUniform(o);
+        var ru = u.shader.getUniform(o);
         
         if (ru){
             if (u.map){
@@ -82,6 +87,8 @@ Tessellator.UniformManager.prototype.unify = function (matrix){
             };
         };
     };
+    
+    if (this.fallback) this.fallback.unify(matrix);
 };
 
 Tessellator.UniformManager.prototype.setInheriter = function (key, value){
@@ -90,6 +97,18 @@ Tessellator.UniformManager.prototype.setInheriter = function (key, value){
     };
     
     var u = this.uniforms[key];
+    
+    if (!u && this.fallback){
+        var uu = this.fallback.getUniform(key);
+        
+        if (uu){
+            u = {};
+            
+            for (var o in uu){
+                u[o] = uu[o];
+            };
+        };
+    };
     
     if (u){
         u.inherit = value;
@@ -169,7 +188,7 @@ Tessellator.UniformManager.prototype.clone = function (){
         var old = this.uniforms[o];
         
         for (var oo in old){
-            n[o] = old[o];
+            n[oo] = old[oo];
         };
         
         n.manager = u;

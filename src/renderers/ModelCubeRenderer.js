@@ -49,6 +49,8 @@ Tessellator.ModelCubeRenderer.prototype.renderRaw = function (matrix, side){
         this.tessellator.GL.clearColor(0, 0, 0, 0);
         this.tessellator.GL.clear(Tessellator.COLOR_BUFFER_BIT | Tessellator.DEPTH_BUFFER_BIT);
         
+        matrix.disable(Tessellator.BLEND);
+        
         var nearView = this.applyViewMatrix[0],
             farView = this.applyViewMatrix[1],
             nf = nearView - farView;

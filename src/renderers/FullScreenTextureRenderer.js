@@ -33,7 +33,6 @@ Tessellator.FullScreenTextureRenderer = function (shader){
     };
     
     this.super(shader);
-    
     if (arguments.length > 1){
         this.textures = Array.prototype.slice.call(arguments, 1, arguments.length);
     };

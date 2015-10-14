@@ -29,13 +29,9 @@
 
 Tessellator.Program = function (tessellator){
     if (tessellator){
-        if (tessellator.constructor === Tessellator.UniformManager){
-            this.uniformManager = tessellator;
-        }else{
-            this.uniformManager = new Tessellator.UniformManager(tessellator);
-        };
+        this.uniformManager = new Tessellator.UniformManager(tessellator);
         
-        this.tessellator = this.uniformManager.tessellator;
+        this.tessellator = tessellator;
         this.shader = this.tessellator.GL.createProgram();
     };
     
@@ -208,10 +204,6 @@ Tessellator.Program.prototype.set = function (){
 };
 
 Tessellator.Program.prototype.getUniforms = function (){
-    return this.uniformManager;
-};
-
-Tessellator.Program.prototype.setUniforms = function (){
     return this.uniformManager;
 };
 

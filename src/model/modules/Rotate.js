@@ -28,30 +28,16 @@
  */
 
 Tessellator.Model.prototype.rotate = function (){
-    if (arguments.length === 1 && arguments[0].constructor === Tessellator.Rotate){
-        return this.add(arguments[0]);
-    }else{
-        return this.add(Tessellator.new.apply(Tessellator.Rotate, arguments));
-    };
+    return this.add(Tessellator.new.apply(Tessellator.Model.Rotate, arguments));
 };
 
 Tessellator.Model.prototype.rotateDeg = function (){
-    var rotate;
+    arguments[0] *= Math.PI / 180;
     
-    if (arguments.length === 1 && arguments[0].constructor === Tessellator.Rotate){
-        return this.add(arguments[0]);
-    }else{
-        arguments[0] *= Math.PI / 180;
-        
-        return this.add(Tessellator.new.apply(Tessellator.Rotate, arguments));
-    };
-    
-    return this.add(rotate);
+    return this.add(Tessellator.new.apply(Tessellator.Model.Rotate, arguments));
 };
 
-Tessellator.Rotate = function (){
-    this.type = Tessellator.ROTATE;
-    
+Tessellator.Model.Rotate = function (){
     if (arguments.length === 0){
         this.degree = arguments[0];
         
@@ -72,26 +58,25 @@ Tessellator.Rotate = function (){
         throw "invalid arguments in Tessellator.rotate()";
     };
     
-    if (!this.degree.length){
+    if (!isNaN(this.degree)){
         this.degree = Tessellator.float(this.degree);
     };
 };
 
-Tessellator.Rotate.prototype.apply = function (render){
+Tessellator.Model.Rotate.prototype.apply = function (render){
     var m = render.get("mvMatrix");
     
     this.set(m);
 };
 
-Tessellator.Rotate.prototype.applyLighting = function (matrix){
+Tessellator.Model.Rotate.prototype.applyLighting = function (matrix){
     this.set(matrix);
 };
 
-Tessellator.Rotate.prototype.set = function (m){
+Tessellator.Model.Rotate.prototype.set = function (m){
     m.rotate(this.degree, this.vec);
 };
 
-
-Tessellator.Rotate.prototype.init = function (interpreter){
+Tessellator.Model.Rotate.prototype.init = function (interpreter){
     interpreter.flush();
 };

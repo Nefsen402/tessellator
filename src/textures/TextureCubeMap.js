@@ -72,6 +72,13 @@ Tessellator.TextureCubeMap.prototype.configure = function (target, track){
             if (!tex || !tex.texture.isReady()){
                 ready = false;
             }else{
+                if (this.width === -1 || this.height === -1){
+                    this.width = tex.texture.width;
+                    this.height = tex.texture.height;
+                }else if (this.width !== tex.texture.width || this.height !== tex.texture.height){
+                    throw "all the textures for all 6 sides of the cube map need to be the same size";
+                };
+                
                 tex.glTexture = this.texture;
                 
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);

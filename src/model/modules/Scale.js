@@ -28,18 +28,10 @@
  */
 
 Tessellator.Model.prototype.scale = function (){
-    if (arguments.length === 1 && arguments[0].constructor === Tessellator.Scale){
-        return this.add(arguments[0]);
-    }else{
-        return this.add(Tessellator.new.apply(Tessellator.Scale, arguments));
-    };
+    return this.add(Tessellator.new.apply(Tessellator.Model.Scale, arguments));
 };
 
-Tessellator.Scale = function (){
-    this.type = Tessellator.SCALE;
-    
-    var scale;
-    
+Tessellator.Model.Scale = function (){
     if (arguments.length === 0){
         this.coords = Tessellator.vec3(0, 0, 0);
     }else if (arguments.length === 1){
@@ -53,20 +45,20 @@ Tessellator.Scale = function (){
     };
 };
 
-Tessellator.Scale.prototype.apply = function (render){
+Tessellator.Model.Scale.prototype.apply = function (render){
     var m = render.get("mvMatrix");
     
     this.set(m);
 };
 
-Tessellator.Scale.prototype.applyLighting = function (matrix){
+Tessellator.Model.Scale.prototype.applyLighting = function (matrix){
     this.set(matrix);
 };
 
-Tessellator.Scale.prototype.set = function (m){
+Tessellator.Model.Scale.prototype.set = function (m){
     m.scale(this.coords);
 };
 
-Tessellator.Scale.prototype.init = function (interpreter){
+Tessellator.Model.Scale.prototype.init = function (interpreter){
     interpreter.flush();
 };

@@ -38,7 +38,7 @@ Tessellator.Enable = function (arg){
 
 Tessellator.Enable.prototype.apply = function (render){
     if (this.arg === Tessellator.LIGHTING){
-        render.set("lights", render.renderer.lightingTexture);
+        render.addDefinition("USE_LIGHTING")
     }else{
         render.enable(this.arg);
     };

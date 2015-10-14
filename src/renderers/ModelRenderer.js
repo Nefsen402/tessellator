@@ -50,22 +50,23 @@ Tessellator.ModelRenderer = function (){
         };
     }else if (arguments.length === 2){
         var arg = arguments[0];
+        this.model = arguments[1];
         
-        if (arg.constructor === Tessellator){
+        if (arg.constructor === Tessellator.ShaderPreset){
+            this.super(arg.create(this.model.tessellator));
+        }else if (arg.constructor === Tessellator){
             if (!Tessellator.ModelRenderer.defaultShader){
                 Tessellator.ModelRenderer.defaultShader = Tessellator.MODEL_VIEW_FRAGMENT_LIGHTING_SHADER.create(arg);
             };
+            
             this.super(Tessellator.ModelRenderer.defaultShader);
         }else{
             this.super(arg);
         };
-        
-        this.model = arguments[1];
     }else{
         this.super();
     };
     
-    this.noLightingTexture = new Tessellator.TextureData(this.tessellator, 1, 1, Tessellator.RGBA, Tessellator.UNSIGNED_BYTE, new Uint8Array([0, 255, 255, 255]));
     this.lightingTexture = new Tessellator.TextureData(this.tessellator, 4, 256, Tessellator.RGBA, Tessellator.FLOAT);
 };
 
@@ -98,9 +99,8 @@ Tessellator.ModelRenderer.prototype.configure = function (matrix){
     
     matrix.set("mvMatrix", Tessellator.mat4());
     matrix.set("mask", Tessellator.vec4(1, 1, 1, 1));
-    matrix.set("clip", Tessellator.NO_CLIP);
-    matrix.set("lights", this.noLightingTexture);
-    matrix.set("specular", 0);
+    
+    matrix.enable(Tessellator.BLEND);
     
     this.super.configure(matrix);
 };
@@ -113,9 +113,9 @@ Tessellator.ModelRenderer.prototype.init = function (matrix, model){
     };
     
     if (this.setLighting(model, matrix)){
-        matrix.addDefinition("USE_LIGHTING");
-        
         this.lightingTexture.update();
+        
+        matrix.set("lights", this.lightingTexture);
     };
     
     return true;
