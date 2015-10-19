@@ -79,7 +79,7 @@ Tessellator.Tween.prototype.loop = function (flag){
 
 Tessellator.Tween.prototype.update = function (){
     if (!this.updating && (!Tessellator.Tween.locked || Tessellator.Tween.locked !== this.lock) && this.time != this.updated && this.ovec){
-        this.lock = Tessellator.Tween.lock;
+        this.lock = Tessellator.Tween.locked;
         this.updating = true;
         
         var time = Tessellator.now();
