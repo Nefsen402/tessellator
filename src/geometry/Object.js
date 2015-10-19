@@ -27,10 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.prototype.createObject = function (){
-    return Tessellator.new.apply(Tessellator.Object, [this].concat(arguments));
-};
-
 Tessellator.Object = function (tessellator, type){
     tessellator.resources.push(this);
     
@@ -126,6 +122,10 @@ Tessellator.Object.prototype.setUniform = function (name, value){
     this.uniforms[name] = value;
 };
 
+Tessellator.Object.prototype.getBuffer = function (name){
+    return this.attribs[name].buffer;
+};
+
 Tessellator.Object.prototype.setAttributeData = function (name, value, off){
     off = off || 0;
     var attrib = this.attribs[name];
@@ -192,6 +192,8 @@ Tessellator.Object.prototype.bindAttributes = function (shader){
                 if (oo.divisor !== undefined && this.instancinginstance){
                     this.instancinginstance.vertexAttribDivisorANGLE(sa[o], oo.divisor);
                 };
+            }else{
+                console.warn("trying to render a object while not all attributes are uploaded!");
             };
         };
     };
@@ -244,7 +246,16 @@ Tessellator.Object.prototype.useInstancing = function (){
         var o = self.attribs[name];
         
         o.divisor = divisor;
-        self.instances = o.buffer.getLength() / o.dataSize * divisor;
+        
+        var instances = o.buffer.getLength() / o.dataSize * divisor;
+        
+        if (self.instances && self.instances !== instances){
+            console.warn("the attributes being instanced are not uniform length! Using the shorter one...");
+            
+            self.instances = Math.min(self.instances, instances);
+        }else{
+            self.instances = instances;
+        };
     };
     
     for (var i = 0; i < arguments.length; i++){
@@ -275,8 +286,8 @@ Tessellator.Object.prototype.render = function (shader){
             return;
         };
         
-        matrix.preUnify();
-        
+        matrix.preUnify(this);
+    
         if (!shader.set(matrix.renderer, matrix, this)){
             return;
         };
@@ -334,7 +345,9 @@ Tessellator.Object.prototype.apply = Tessellator.Object.prototype.render;
 Tessellator.Object.prototype.dispose = function (){
     if (!this.disposed){
         for (var o in this.attribs){
-            this.attribs[o].buffer.dispose(this.tessellator);
+            if (this.attribs[o].disposable){
+                this.attribs[o].buffer.dispose(this.tessellator);
+            };
         };
         
         if (this.indices){
@@ -357,6 +370,8 @@ Tessellator.Object.Buffer = function (value, dataType, type, readHint){
     this.readHint = readHint || Tessellator.STATIC;
     
     this.uploaded = false;
+    this.disposable = true;
+    this.disposed = false;
 };
 
 Tessellator.Object.Buffer.prototype.getLength = function (){
@@ -404,6 +419,7 @@ Tessellator.Object.Buffer.prototype.dispose = function (tessellator){
         tessellator.GL.deleteBuffer(this.value);
         
         this.value = null;
+        this.disposed = true;
     };
 };
 

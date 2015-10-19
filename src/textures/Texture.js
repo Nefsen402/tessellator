@@ -256,7 +256,7 @@ Tessellator.DEFAULT_TEXTURE_FILTER = Tessellator.TEXTURE_FILTER_NEAREST;
 Tessellator.DEFAULT_CLAMP_TEXTURE_FILTER = Tessellator.TEXTURE_FILTER_NEAREST_CLAMP;
 
 Tessellator.getAppropriateTextureFilter = function (width, height){
-    if (width && height && (width & (width - 1)) === 0 && (height & (height - 1)) === 0){
+    if (width && height && Tessellator.isPowerOf2(width) && Tessellator.isPowerOf2(height)){
         return Tessellator.DEFAULT_TEXTURE_FILTER;
     }else{
         return Tessellator.DEFAULT_CLAMP_TEXTURE_FILTER;

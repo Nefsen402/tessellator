@@ -35,7 +35,7 @@ Tessellator.mat4 = function (){
     for (var i = 0, k = arguments.length; i < k; i++){
         var arg = arguments[i];
         
-        if (typeof arg != "number"){
+        if (typeof arg !== "number"){
             array.set(arg, pos);
             pos += arg.length;
         }else{
@@ -95,7 +95,11 @@ Tessellator.mat4.prototype.random = function (scale){
 };
 
 Tessellator.mat4.prototype.clone = function (){
-    return Tessellator.mat4(this);
+    var a = new Float32Array(this);
+    
+    a.__proto__ = Tessellator.mat4.prototype;
+    
+    return a;
 };
 
 Tessellator.mat4.prototype.copy = function (copy){

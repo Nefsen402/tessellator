@@ -34,7 +34,7 @@ Tessellator.mat2 = function (){
     for (var i = 0, k = arguments.length; i < k; i++){
         var arg = arguments[i];
         
-        if (isNaN(arg)){
+        if (typeof arg !== "number"){
             array.set(arg, pos);
             pos += arg.length;
         }else{

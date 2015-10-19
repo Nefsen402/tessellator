@@ -27,22 +27,6 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.Program.I1_UNIFY_FUNC = function (){
-    this.shader.tessellator.GL.uniform1i(this.location, this.value);
-};
-
-Tessellator.Program.F1_UNIFY_FUNC = function (){
-    var value;
-    
-    if (this.value.length){
-        value = this.value[0];
-    }else{
-        value = this.value;
-    };
-    
-    this.gl.uniform1f(this.location, value);
-};
-
 Tessellator.Program.UNIFY_WINDOW = function (){
     if (this.location){
         this.gl.uniform2fv(this.location, this.value);
@@ -55,10 +39,24 @@ Tessellator.Program.UNIFY_WINDOW.configure = function (value){
     this.gl.viewport(0, 0, this.value[0], this.value[1]);
 };
 
-Tessellator.Program.F1V_UNIFY_FUNC = function (){
-    if (this.value.tween) this.value.tween.update();
-    
-    this.gl.uniform1fv(this.location, this.value);
+Tessellator.Program.F_UNIFY_FUNC = function (){
+    if (typeof this.value === "number"){
+        this.gl.uniform1f(this.location, this.value);
+    }else{
+        if (this.value.tween) this.value.tween.update();
+        
+        this.gl.uniform1fv(this.location, this.value);
+    }
+};
+
+Tessellator.Program.I_UNIFY_FUNC = function (){
+    if (typeof this.value === "number"){
+        this.gl.uniform1i(this.location, this.value | 0);
+    }else{
+        if (this.value.tween) this.value.tween.update();
+        
+        this.gl.uniform1i(this.location, this.value[0] | 0);
+    }
 };
 
 Tessellator.Program.F2V_UNIFY_FUNC = function (){
@@ -92,13 +90,13 @@ Tessellator.Program.MAT2_UNIFY_FUNC = function (){
 };
 
 Tessellator.Program.BIND_TEXTURE_2D = function (render){
-    this.gl.activeTexture(this.gl.TEXTURE0 + Tessellator.Program.textureUnit);
+    this.gl.activeTexture(Tessellator.TEXTURE0 + Tessellator.Program.textureUnit);
     this.gl.uniform1i(this.location, Tessellator.Program.textureUnit);
     
     if (this.value){
         this.value.bind();
     }else{
-        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+        this.gl.bindTexture(Tessellator.TEXTURE_2D, null);
     };
 };
 
@@ -107,8 +105,8 @@ Tessellator.Program.BIND_TEXTURE_2D.map = function (matrix){
 };
 
 Tessellator.Program.BIND_TEXTURE_2D.startMap = function (matrix, value){
-    if (value && this.inherit && value.lastFrameUpdate !== this.shader.tessellator.frame){
-        value.lastFrameUpdate = this.shader.tessellator.frame;
+    if (value && this.inherit && value.lastFrameUpdate !== this.tessellator.frame){
+        value.lastFrameUpdate = this.tessellator.frame;
         
         value.configure(Tessellator.TEXTURE_2D, matrix);
     };
@@ -117,13 +115,13 @@ Tessellator.Program.BIND_TEXTURE_2D.startMap = function (matrix, value){
 };
 
 Tessellator.Program.BIND_TEXTURE_CUBE = function (render){
-    this.gl.activeTexture(this.gl.TEXTURE0 + Tessellator.Program.textureUnit);
+    this.gl.activeTexture(Tessellator.TEXTURE0 + Tessellator.Program.textureUnit);
     this.gl.uniform1i(this.location, Tessellator.Program.textureUnit);
     
     if (this.value){
         this.value.bind();
     }else{
-        this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, null);
+        this.gl.bindTexture(Tessellator.TEXTURE_CUBE_MAP, null);
     };
 };
 
@@ -132,8 +130,8 @@ Tessellator.Program.BIND_TEXTURE_CUBE.map = function (matrix){
 };
 
 Tessellator.Program.BIND_TEXTURE_CUBE.startMap = function (matrix, value){
-    if (value && this.inherit && value.lastFrameUpdate !== this.shader.tessellator.frame){
-        value.lastFrameUpdate = this.shader.tessellator.frame;
+    if (value && this.inherit && value.lastFrameUpdate !== this.tessellator.frame){
+        value.lastFrameUpdate = this.tessellator.frame;
         
         value.configure(Tessellator.TEXTURE_CUBE_MAP, matrix);
     };
@@ -174,8 +172,8 @@ Tessellator.Program.DEFAULT_UNIFORM_INHERITER = {};
     this[Tessellator.INT_VEC2] = Tessellator.Program.F2V_UNIFY_FUNC;
     this[Tessellator.BOOL_VEC2] = Tessellator.Program.F2V_UNIFY_FUNC;
     
-    this[Tessellator.FLOAT] = Tessellator.Program.F1_UNIFY_FUNC;
-    this[Tessellator.INT] = Tessellator.Program.I1_UNIFY_FUNC;
+    this[Tessellator.FLOAT] = Tessellator.Program.F_UNIFY_FUNC;
+    this[Tessellator.INT] = Tessellator.Program.I_UNIFY_FUNC;
     
     this[Tessellator.SAMPLER_2D] = Tessellator.Program.BIND_TEXTURE_2D;
     this[Tessellator.SAMPLER_CUBE] = Tessellator.Program.BIND_TEXTURE_CUBE;

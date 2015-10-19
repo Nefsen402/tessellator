@@ -690,10 +690,11 @@
     Tessellator.POINT = Tessellator.POINTS;
     Tessellator.QUAD =                                             0x00FF2000;
     Tessellator.QUAD_STRIP =                                       0x00FF2001;
-    Tessellator.POLYGON =                                          0x00FF2002;
-    Tessellator.INDICES =                                          0x00FF2003;
-    Tessellator.TEXTURE =                                          0x00FF2004;
-    Tessellator.NORMAL =                                           0x00FF2005;
+    Tessellator.QUAD_LOOP =                                        0x00FF2002;
+    Tessellator.POLYGON =                                          0x00FF2003;
+    Tessellator.INDICES =                                          0x00FF2004;
+    Tessellator.TEXTURE =                                          0x00FF2005;
+    Tessellator.NORMAL =                                           0x00FF2006;
     
     Tessellator.CENTER =                                           0;
     Tessellator.RIGHT =                                            1;
@@ -729,12 +730,16 @@
     Tessellator.COLOR_BROWN = Tessellator.vec4(0.6445, 0.164, 0.164, 1);
     Tessellator.COLOR_FIRE_BRICK = Tessellator.vec4(0.6953, 0.1328, 0.1328, 1);
     Tessellator.COLOR_CRIMSON = Tessellator.vec4(0.8594, 0.0755, 0.2344, 1);
-    Tessellator.COLOR_TOMATO = Tessellator.vec4(1, 0.164, 0.164, 1);
-    Tessellator.COLOR_CORAL = Tessellator.vec4(1, 0.5, 0.3125, 1);
     Tessellator.COLOR_INDIAN_RED = Tessellator.vec4(0.8008, 0.3594, 0.3594, 1);
     Tessellator.COLOR_AMBER = Tessellator.vec4(1, 0.4921, 0, 1);
     Tessellator.COLOR_SKY = Tessellator.vec4(0.529, 0.8, 0.98, 1);
     Tessellator.COLOR_CLEAR = Tessellator.vec4(0, 0, 0, 0);
+    Tessellator.COLOR_CORAL = Tessellator.vec4(1, 0.5, 0.31372, 1);
+    Tessellator.COLOR_TOMATO = Tessellator.vec4(1, 0.3882, 0.27843, 1);
+    Tessellator.COLOR_ORANGE_RED = Tessellator.vec4(1, 0.27, 0, 1);
+    Tessellator.COLOR_GOLD = Tessellator.vec4(1, 0.84313, 0, 1);
+    Tessellator.COLOR_ORANGE = Tessellator.vec4(1, 0.647, 0, 1);
+    Tessellator.COLOR_DARK_ORANGE = Tessellator.vec4(1, 0.549, 0, 1);
     
     Tessellator.DEFAULT_COLOR = Tessellator.COLOR_WHITE;
     Tessellator.NO_CLIP = Tessellator.vec4(0, 0, 1, 1);
@@ -764,8 +769,6 @@
         "MAROON": Tessellator.COLOR_MAROON,
         "FIRE BRICK": Tessellator.COLOR_FIRE_BRICK,
         "CRIMSON": Tessellator.COLOR_CRIMSON,
-        "TOMATO": Tessellator.COLOR_TOMATO,
-        "CORAL": Tessellator.COLOR_CORAL,
         "INDIAN RED": Tessellator.COLOR_INDIAN_RED,
         "PINK": Tessellator.COLOR_PINK,
         "LIGHT PINK": Tessellator.LIGHT_PINK,
@@ -775,5 +778,11 @@
         "AMBER": Tessellator.COLOR_AMBER,
         "CLEAR": Tessellator.COLOR_CLEAR,
         "SKY": Tessellator.COLOR_SKY,
+        "TOMATO": Tessellator.COLOR_TOMATO,
+        "CORAL": Tessellator.COLOR_CORAL,
+        "ORANGE RED": Tessellator.COLOR_ORANGE_RED,
+        "GOLD": Tessellator.COLOR_GOLD,
+        "ORANGE": Tessellator.COLOR_ORANGE,
+        "DARK ORANGE": Tessellator.COLOR_DARK_ORANGE,
     };
 };

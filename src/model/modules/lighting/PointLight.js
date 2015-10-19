@@ -110,7 +110,7 @@ Tessellator.PointLight.prototype.createShadow = function (model, far, near, res)
     };
     
     if (this.tessellator){
-        this.shadowMap = new Tessellator.TextureModelCubeMap(Tessellator.DEPTH_MAP_PERSPECTIVE_SHADER.create(tessellator), res, model, this.pos);
+        this.shadowMap = new Tessellator.TextureModelCubeMap(Tessellator.DEPTH_MAP_PERSPECTIVE_SHADER.create(this.tessellator), res, model, this.pos);
         this.shadowMap.renderer.applyViewMatrix = Tessellator.vec2(near, far);
     }else{
         this.shadowMap = arguments;

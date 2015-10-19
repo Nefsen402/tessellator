@@ -32,20 +32,19 @@ Tessellator.Initializer.setDefault("colorAttribEnabled", function (){
 });
 
 Tessellator.Model.prototype.start = function (type, drawType){
-    var start = new Tessellator.Start(this.tessellator, type, drawType);
+    var start = new Tessellator.Model.Start(type, drawType);
     
     this.add(start);
     
     return start.geometry;
 };
 
-Tessellator.Start = function (tessellator, shapeType, drawType) {
+Tessellator.Model.Start = function (shapeType, drawType) {
     this.drawType = drawType;
     this.shapeType = shapeType;
 };
 
-Tessellator.Start.prototype.init = function (interpreter){
-    
+Tessellator.Model.Start.prototype.init = function (interpreter){
     if (
         this.shapeType === Tessellator.INDICES || 
         this.shapeType === Tessellator.TEXTURE ||
@@ -55,18 +54,28 @@ Tessellator.Start.prototype.init = function (interpreter){
         
         if (extra){
             extra.type = this.shapeType;
+            
+            this.geometry = extra;
         }else{
-            interpreter.set("extraGeometry", new Tessellator.Geometry(this.shapeType));
-        }
+            this.geometry = new Tessellator.Geometry(this.shapeType);
+            
+            interpreter.set("extraGeometry", this.geometry);
+        };
     }else{
-        var geometry = new Tessellator.Geometry(this.shapeType);
+        this.geometry = new Tessellator.Geometry(this.shapeType);
+        
+        if (interpreter.get("colorAttribEnabled") && interpreter.get("draw") !== Tessellator.TEXTURE){
+            this.geometry.setColor(interpreter.get("color255"));
+        };
         
         if (this.shapeType === Tessellator.LINE){
             interpreter.set("draw", Tessellator.LINE);
         };
         
-        interpreter.set("currentGeometry", geometry);
+        interpreter.set("currentGeometry", this.geometry);
     };
+    
+    interpreter.set("geometryType", this.shapeType);
     
     return null;
 };

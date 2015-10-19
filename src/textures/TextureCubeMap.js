@@ -51,6 +51,36 @@ Tessellator.TextureCubeMap.prototype.set = function (side, texture){
     };
 };
 
+Tessellator.TextureCubeMap.prototype.unwrap = function (texture, map){
+    if (!texture.isReady()){
+        var self = this;
+        
+        texture.addListener(function (){
+            self.unwrap(texture, map);
+        });
+    }else{
+        if (!map){
+            map = Tessellator.TextureCubeMap.MAP_STANDARD;
+        };
+        
+        var width = texture.width / map[0][0];
+        var height = texture.height / map[0][1];
+        
+        var shader = tessellator.createPixelShaderUV(Tessellator.PIXEL_SHADER_PASS);
+        
+        for (var i = 0; i < 6; i++){
+            var tex = new Tessellator.TextureModel(this.tessellator, width, height, [
+                new Tessellator.TextureModel.AttachmentColor(),
+                new Tessellator.TextureModel.AttachmentRenderer(new Tessellator.FullScreenTextureRenderer(shader, map[i + 1], texture))
+            ]);
+            
+            tex.autoUpdate = false;
+            
+            this.set(Tessellator.TextureCubeMap.INDEX_LOOKUP[i], tex);
+        };
+    };
+};
+
 Tessellator.TextureCubeMap.prototype.get = function (side){
     return this.textures[Tessellator.TextureCubeMap.INDEX_LOOKUP.indexOf(side)].texture;
 };
@@ -60,7 +90,7 @@ Tessellator.TextureCubeMap.prototype.configure = function (target, track){
     
     if (track.constructor === Tessellator.RenderMatrix){
         if (!this.texture){
-            gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture = gl.createTexture());
+            gl.bindTexture(target, this.texture = gl.createTexture());
             this.fliter(this.tessellator, this);
         };
         
@@ -81,7 +111,7 @@ Tessellator.TextureCubeMap.prototype.configure = function (target, track){
                 
                 tex.glTexture = this.texture;
                 
-                gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
+                gl.bindTexture(target, this.texture);
                 tex.texture.configure(tex.target, tex);
             };
         };
@@ -107,4 +137,84 @@ Tessellator.TextureCubeMap.INDEX_LOOKUP = [
     Tessellator.TEXTURE_CUBE_MAP_NEGATIVE_Y,
     Tessellator.TEXTURE_CUBE_MAP_POSITIVE_Z,
     Tessellator.TEXTURE_CUBE_MAP_NEGATIVE_Z
+];
+
+Tessellator.TextureCubeMap.MAP_STANDARD = [
+    [4, 3],
+    [
+        1 / 4 * 1, 1 / 3 * 2,
+        1 / 4 * 2, 1 / 3 * 2,
+        1 / 4 * 2, 1 / 3 * 1,
+        1 / 4 * 1, 1 / 3 * 1
+    ],
+    [
+        1 / 4 * 3, 1 / 3 * 2,
+        1 / 4 * 4, 1 / 3 * 2,
+        1 / 4 * 4, 1 / 3 * 1,
+        1 / 4 * 3, 1 / 3 * 1
+    ],
+    [
+        1 / 4 * 2, 1 / 3 * 3,
+        1 / 4 * 2, 1 / 3 * 2,
+        1 / 4 * 1, 1 / 3 * 2,
+        1 / 4 * 1, 1 / 3 * 3
+    ],
+    [
+        1 / 4 * 1, 1 / 3 * 0,
+        1 / 4 * 1, 1 / 3 * 1,
+        1 / 4 * 2, 1 / 3 * 1,
+        1 / 4 * 2, 1 / 3 * 0
+    ],
+    [
+        1 / 4 * 0, 1 / 3 * 2,
+        1 / 4 * 1, 1 / 3 * 2,
+        1 / 4 * 1, 1 / 3 * 1,
+        1 / 4 * 0, 1 / 3 * 1
+    ],
+    [
+        1 / 4 * 2, 1 / 3 * 2,
+        1 / 4 * 3, 1 / 3 * 2,
+        1 / 4 * 3, 1 / 3 * 1,
+        1 / 4 * 2, 1 / 3 * 1
+    ]
+];
+
+Tessellator.TextureCubeMap.MAP_Y_FIRST = [
+    [4, 3],
+    [
+        1 / 4 * 1, 1 / 3 * 2,
+        1 / 4 * 2, 1 / 3 * 2,
+        1 / 4 * 2, 1 / 3 * 1,
+        1 / 4 * 1, 1 / 3 * 1
+    ],
+    [
+        1 / 4 * 3, 1 / 3 * 2,
+        1 / 4 * 4, 1 / 3 * 2,
+        1 / 4 * 4, 1 / 3 * 1,
+        1 / 4 * 3, 1 / 3 * 1
+    ],
+    [
+        1 / 4 * 0, 1 / 3 * 3,
+        1 / 4 * 1, 1 / 3 * 3,
+        1 / 4 * 1, 1 / 3 * 2,
+        1 / 4 * 0, 1 / 3 * 2
+    ],
+    [
+        1 / 4 * 0, 1 / 3 * 1,
+        1 / 4 * 1, 1 / 3 * 1,
+        1 / 4 * 1, 1 / 3 * 0,
+        1 / 4 * 0, 1 / 3 * 0
+    ],
+    [
+        1 / 4 * 0, 1 / 3 * 2,
+        1 / 4 * 1, 1 / 3 * 2,
+        1 / 4 * 1, 1 / 3 * 1,
+        1 / 4 * 0, 1 / 3 * 1
+    ],
+    [
+        1 / 4 * 2, 1 / 3 * 2,
+        1 / 4 * 3, 1 / 3 * 2,
+        1 / 4 * 3, 1 / 3 * 1,
+        1 / 4 * 2, 1 / 3 * 1
+    ]
 ];

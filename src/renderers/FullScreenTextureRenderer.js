@@ -27,18 +27,48 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.FullScreenTextureRenderer = function (shader){
-    if (shader.constructor === Tessellator){
-        shader = tessellator.createPixelShader(Tessellator.PIXEL_SHADER_PASS);
-    };
-    
-    this.super(shader);
-    if (arguments.length > 1){
+Tessellator.FullScreenTextureRenderer = function (shader, uv){
+    if (uv && uv.constructor === Array){
+        if (arguments.length > 2){
+            this.textures = Array.prototype.slice.call(arguments, 2, arguments.length);
+            
+            if (shader.constructor === Tessellator.ShaderPreset){
+                shader = shader.create(this.textures[0].tessellator);
+            };
+        };
+        
+        if (shader.constructor === Tessellator){
+            shader = tessellator.createPixelShader(Tessellator.PIXEL_SHADER_PASS);
+        };
+        
+        this.super(shader);
+        
+        this.setUV(uv);
+    }else if (arguments.length > 1){
         this.textures = Array.prototype.slice.call(arguments, 1, arguments.length);
-    };
+        
+        if (shader.constructor === Tessellator.ShaderPreset){
+            shader = tessellator.createPixelShader(shader.create(this.textures[0].tessellator));
+        }else if (shader.constructor === Tessellator){
+            shader = tessellator.createPixelShader(Tessellator.PIXEL_SHADER_PASS);
+        };
+        
+        this.super(shader);
+    }else{
+        if (shader.constructor === Tessellator){
+            shader = tessellator.createPixelShader(Tessellator.PIXEL_SHADER_PASS);
+        };
+        
+        this.super(shader);
+    }
 };
 
 Tessellator.copyProto(Tessellator.FullScreenTextureRenderer, Tessellator.FullScreenRenderer);
+
+Tessellator.FullScreenTextureRenderer.prototype.setUV = function (uv){
+    this.object.setAttribute("uv", Tessellator.VEC2, new Tessellator.Array(uv));
+    this.object.upload();
+};
 
 Tessellator.FullScreenTextureRenderer.prototype.setTextures = function (textures){
     this.textures = textures;

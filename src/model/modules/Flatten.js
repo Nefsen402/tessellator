@@ -27,30 +27,16 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.Model.prototype.scaleTexture = function (){
-    if (arguments.length == 1){
-        return this.add(new Tessellator.Model.TextureScale(arguments[0], arguments[0]));
-    }else{
-        return this.add(new Tessellator.Model.TextureScale(arguments[0], arguments[1]));
-    };
+Tessellator.Model.prototype.flatten = function (){
+    return this.add(new Tessellator.Model.Flatten());
 };
 
-Tessellator.Model.TextureScale = function (scaleX, scaleY) {
-    this.scaleX = scaleX;
-    this.scaleY = scaleY;
+Tessellator.Model.Flatten = function () {};
+
+Tessellator.Model.Flatten.prototype.apply = function (matrix){
+    matrix.addDefinition("FLATTEN_MATRIX");
 };
 
-Tessellator.Model.TextureScale.prototype.init = function (interpreter){
+Tessellator.Model.Flatten.prototype.init = function (interpreter){
     interpreter.flush();
-    
-    var tb = interpreter.get("textureBounds");
-    
-    if (tb && tb.bounds){
-        for (var i = 0, k = tb.bounds.length / 2; i < k; i++){
-            tb.bounds[i * 2] *= this.scaleX;
-            tb.bounds[i * 2 + 1] *= this.scaleY;
-        };
-    };
-    
-    return null;
 };

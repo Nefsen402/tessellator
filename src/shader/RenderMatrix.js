@@ -28,8 +28,8 @@
  */
 
 Tessellator.RenderMatrix = function (renderer, parent){
-    this.uniforms = {};
-    this.enabled = {};
+    this.uniforms = [];
+    this.enabled = [];
     
     this.renderer = renderer;
     this.tessellator = renderer.tessellator;
@@ -43,7 +43,8 @@ Tessellator.RenderMatrix = function (renderer, parent){
             this.uniformManager.fallback = this.renderer.shader.getUniforms();
         };
         
-        this.changes = {};
+        this.changes = [];
+        this.eChanges = [];
         
         this.index = 1;
         
@@ -63,8 +64,6 @@ Tessellator.RenderMatrix = function (renderer, parent){
     };
 };
 
-Tessellator.RenderMatrix.prototype.MAX_INDEX = 1000000000;
-
 Tessellator.RenderMatrix.prototype.copyMatrix = function (parent){
     this.uniformManager = parent.uniformManager;
     
@@ -72,19 +71,21 @@ Tessellator.RenderMatrix.prototype.copyMatrix = function (parent){
         this.uniformManager.fallback = this.renderer.shader.getUniforms();
     };
     
-    for (var o in parent.uniforms){
-        this.uniforms[o] = parent.uniforms[o];
-    };
-    
-    for (var o in parent.enabled){
-        this.enabled[o] = parent.enabled[o];
-    };
+    this.uniforms = parent.uniforms.slice(0);
+    this.enabled = parent.enabled.slice(0);
     
     this.changes = parent.changes;
+    this.eChanges = parent.eChanges;
     
-    for (var o in this.changes){
-        if (this.changes[o] > parent.index){
-            this.changes[o] = this.MAX_INDEX;
+    for (var i = 0; i < this.changes.length; i += 2){
+        if (this.changes[i + 1] > parent.index){
+            this.changes[i + 1] = -parent.index;
+        };
+    };
+    
+    for (var i = 0; i < this.eChanges.length; i += 2){
+        if (this.eChanges[i + 1] > parent.index){
+            this.eChanges[i + 1] = -parent.index;
         };
     };
     
@@ -104,11 +105,17 @@ Tessellator.RenderMatrix.prototype.copyMatrix = function (parent){
     };
 };
 
-Tessellator.RenderMatrix.prototype.dirty = function (item){
-    if (item){
-        this.changes[item] = this.MAX_INDEX;
-    }else for (var o in this.changes){
-        this.changes[o] = this.MAX_INDEX;
+Tessellator.RenderMatrix.prototype.dirty = function (key){
+    if (key){
+        for (var i = 0; i < this.changes.length; i += 2){
+            if (this.changes[i] === key){
+                this.changes[i + 1] = -this.index;
+                
+                return;
+            };
+        };
+    }else for (var i = 0; i < this.changes.length; i += 2){
+        this.changes[i + 1] = -this.index;
     };
 };
 
@@ -116,18 +123,10 @@ Tessellator.RenderMatrix.prototype.exists = function (key){
     return this.uniformManager.hasUniform(key);
 };
 
-Tessellator.RenderMatrix.prototype.set = function (key, value){
-    this.dirty(key);
-    
-    this.uniforms[key] = value;
-};
-
 //new set. will not set if there is already a value
 Tessellator.RenderMatrix.prototype.setn = function (key, value){
-    if (!this.uniforms[key]){
-        this.dirty(key);
-        
-        this.uniforms[key] = value;
+    if (!this.gets(key)){
+        this.set(key, value)
     };
 };
 
@@ -137,27 +136,60 @@ Tessellator.RenderMatrix.prototype.get = function (key){
     return this.gets(key);
 };
 
-//sneaky get. does not set the value dirty
-Tessellator.RenderMatrix.prototype.gets = function (key){
-    return this.uniforms[key];
-};
-
 Tessellator.RenderMatrix.prototype.preUnify = function (){
+    this.uniformManager.preUnify(this);
+    
     if (this.definitions){
         this.renderer.shader.setDefinitions(this.definitions);
     };
+};
+
+Tessellator.RenderMatrix.prototype.has = function (key){
+    return this.gets(key) !== undefined;
+};
+
+Tessellator.RenderMatrix.prototype.gets = function (key){
+    for (var i = 0; i < this.changes.length; i += 2){
+        if (this.changes[i] === key) return this.uniforms[i / 2];
+    };
     
-    this.uniformManager.preUnify(this);
+    return null;
+};
+
+Tessellator.RenderMatrix.prototype.set = function (key, value){
+    this.changes[this.sets(key, value) + 1] = -this.index; 
+};
+
+Tessellator.RenderMatrix.prototype.sets = function (key, value){
+    for (var i = 0; i < this.changes.length; i += 2){
+        if (this.changes[i] === key){
+            this.uniforms[i / 2] = value;
+            
+            return i;
+        };
+    };
+    
+    this.changes[i + 0] = key;
+    this.uniforms[i / 2] = value;
+    
+    return i;
 };
 
 Tessellator.RenderMatrix.prototype.unify = function (){
     var c = false;
     
-    for (var o in this.uniforms){
-        if (this.changes[o] > this.index){
-            this.uniformManager.uniform(o, this.uniforms[o], this);
+    for (var i = 0; i < this.changes.length; i += 2){
+        var index = this.changes[i + 1];
+        
+        if (index < 0){
+            this.uniformManager.uniform(this.changes[i], this.uniforms[i / 2], this);
+            this.changes[i + 1] = -index;
             
-            this.changes[o] = this.index;
+            c = true;
+         }else if (index > this.index){
+            this.uniformManager.uniform(this.changes[i], this.uniforms[i / 2], this);
+            
+            this.changes[i + 1] = this.index;
             
             c = true;
         };
@@ -171,10 +203,10 @@ Tessellator.RenderMatrix.prototype.unify = function (){
 };
 
 Tessellator.RenderMatrix.prototype.unifyAll = function (){
-    for (var o in this.uniforms){
-        this.uniformManager.uniform(o, this.uniforms[o], this);
+    for (var i = 0; i < this.changes.length; i += 2){
+        this.uniformManager.uniform(this.changes[i], this.uniforms[i / 2], this);
         
-        this.changes[o] = this.index;
+        this.changes[i + 1] = this.index;
     };
     
     this.uniformManager.unify(this);
@@ -209,49 +241,55 @@ Tessellator.RenderMatrix.prototype.unifyGLAttributes = function (){
         this.changes.GL_LINE_WIDTH = this.index;
     };
     
-    for (var o in this.enabled){
-        if (this.changes[o] > this.index){
-            if (this.enabled[o]){
-                t.GL.enable(o);
+    for (var i = 0; i < this.eChanges.length; i += 2){
+        var index = this.eChanges[i + 1];
+        
+        if (index < 0){
+            var a = this.eChanges[i];
+            
+            if (this.enabled[i / 2]){
+                t.GL.enable(a);
             }else{
-                t.GL.disable(o);
+                t.GL.disable(a);
             };
             
-            this.changes[o] = this.index;
+            this.eChanges[i + 1] = -index;
+        }else if (index > this.index){
+            var a = this.eChanges[i];
+            
+            if (this.enabled[i / 2]){
+                t.GL.enable(a);
+            }else{
+                t.GL.disable(a);
+            };
+            
+            this.eChanges[i + 1] = this.index;
         };
-    };
-};
-
-Tessellator.RenderMatrix.prototype.has = function (key){
-    if (this.uniforms[key] !== undefined){
-        return true;
-    }else{
-        return false;
     };
 };
 
 Tessellator.RenderMatrix.prototype.blendFunc = function (value){
     this.glBlendFunc = value;
     
-    this.dirty("GL_BLEND_FUNC");
+    this.changes.GL_BLEND_FUNC = -this.index;
 };
 
 Tessellator.RenderMatrix.prototype.depthMask = function (value){
     this.glDepthMask = value;
     
-    this.dirty("GL_DEPTH_MASK");
+    this.changes.GL_DEPTH_MASK = -this.index;
 };
 
 Tessellator.RenderMatrix.prototype.depthFunc = function (value){
     this.glDepthFunc = value;
     
-    this.dirty("GL_DEPTH_FUNC");
+    this.changes.GL_DEPTH_FUNC = -this.index;
 };
 
 Tessellator.RenderMatrix.prototype.lineWidth = function (value){
     this.glLineWidth = value;
     
-    this.dirty("GL_LINE_WIDTH");
+    this.changes.GL_LINE_WIDTH = -this.index;
 };
 
 Tessellator.RenderMatrix.prototype.addDefinition = function (def){
@@ -284,23 +322,61 @@ Tessellator.RenderMatrix.prototype.resetDefinitions = function (){
 };
 
 Tessellator.RenderMatrix.prototype.isEnabled = function (value){
-    return this.enabled[value];
+    for (var i = 0; i < this.eChanges.length; i += 2){
+        if (this.eChanges[i] === value){
+            return this.enabled[i / 2];
+        };
+    };
+    
+    return false;
+};
+
+Tessellator.RenderMatrix.prototype.isEnableDefined = function (value){
+    for (var i = 0; i < this.eChanges.length; i += 2){
+        if (this.eChanges[i] === value){
+            return true;
+        };
+    };
+    
+    return false;
 };
 
 Tessellator.RenderMatrix.prototype.enable = function (value){
-    this.enabled[value] = true;
-    this.dirty(value);
+    for (var i = 0; i < this.eChanges.length; i += 2){
+        if (this.eChanges[i] === value){
+            this.eChanges[i + 1] = -this.index;
+            
+            this.enabled[i / 2] = true;
+            
+            return;
+        };
+    };
+    
+    this.eChanges[i + 0] = value;
+    this.eChanges[i + 1] = -this.index;
+    this.enabled[i / 2] = true;
 };
 
 Tessellator.RenderMatrix.prototype.disable = function (value){
-    this.enabled[value] = false;
-    this.dirty(value);
+    for (var i = 0; i < this.eChanges.length; i += 2){
+        if (this.eChanges[i] === value){
+            this.eChanges[i + 1] = -this.index;
+            
+            this.enabled[i / 2] = false;
+            
+            return;
+        };
+    };
+    
+    this.eChanges[i + 0] = value;
+    this.eChanges[i + 1] = -this.index;
+    this.enabled[i / 2] = false;
 };
 
 Tessellator.RenderMatrix.prototype.copy = function (renderer) {
     if (renderer){
-        var copy = new Tessellator.RenderMatrix(renderer);
-        copy.copyMatrix(this);
+        var copy = new Tessellator.RenderMatrix(renderer, this);
+        renderer.configure(copy);
         
         return copy;
     }else{

@@ -35,6 +35,17 @@ Tessellator.Tween = function (vec){
     this.loopDirectives = false;
     
     this.updated = false;
+    this.lock = null;
+};
+
+Tessellator.Tween.locked = null;
+
+Tessellator.Tween.lock = function (id){
+    this.locked = id;
+};
+
+Tessellator.Tween.unlock = function (){
+    this.locked = null;
 };
 
 Tessellator.Tween.prototype.getVec = function (){
@@ -55,7 +66,7 @@ Tessellator.Tween.prototype.add = function (e){
     this.directives.push(e);
     
     if (this.directives.length === 1){
-        this.directiveStartTime = Date.now();
+        this.directiveStartTime = Tessellator.now();
         this.ovec = this.vec.clone();
     };
 };
@@ -67,10 +78,11 @@ Tessellator.Tween.prototype.loop = function (flag){
 };
 
 Tessellator.Tween.prototype.update = function (){
-    if (!this.updating && this.time != this.updated && this.ovec){
+    if (!this.updating && (!Tessellator.Tween.locked || Tessellator.Tween.locked !== this.lock) && this.time != this.updated && this.ovec){
+        this.lock = Tessellator.Tween.lock;
         this.updating = true;
         
-        var time = Date.now();
+        var time = Tessellator.now();
         
         while (this.directives.length){
             this.updated = time;

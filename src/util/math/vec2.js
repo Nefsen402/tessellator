@@ -34,7 +34,7 @@ Tessellator.vec2 = function (){
     for (var i = 0, k = arguments.length; i < k; i++){
         var arg = arguments[i];
         
-        if (isNaN(arg)){
+        if (typeof arg !== "number"){
             if (arg.tween) arg.tween.update();
             
             array.set(arg, pos);
@@ -474,24 +474,21 @@ Tessellator.vec2.prototype.aspect = function (){
     return this[0] / this[1];
 };
 
-Tessellator.vec2.prototype.x = function (){
-    if (this.tween) this.tween.update();
-    
-    return this[0];
-};
-
-Tessellator.vec2.prototype.y = function (){
-    if (this.tween) this.tween.update();
-    
-    return this[1];
-};
-
 Tessellator.vec2.prototype.createTween = function (){
     return this.tween = new Tessellator.Tween(this);
 };
 
 Tessellator.vec2.prototype.toString = function (){
     return "vec2(" + this[0] + ", " + this[1] + ")";
+};
+
+Tessellator.vec3.prototype.reflect = function (normal){
+    var d = this.dot(normal).x * 2;
+    
+    this[0] -= d * normal[0];
+    this[1] -= d * normal[1];
+    
+    return this;
 };
 
 (function (){

@@ -158,6 +158,8 @@ Tessellator.FragmentedArray.prototype.write = function (array, pos){
 Tessellator.FragmentedArray.prototype.compress = function (){
     this.buffer = [ this.combine() ];
     this.elements = 1;
+    
+    return this.buffer[0];
 };
 
 Tessellator.FragmentedArray.prototype.combine = function (func){

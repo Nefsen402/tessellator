@@ -9,6 +9,13 @@ uniform vec4 mask;
     uniform vec4 scissor;
 #endif
 
+#ifdef USE_REFLECTION_CUBE
+    uniform float reflectionIntensity;
+    uniform samplerCube reflectionCube;
+    
+    varying vec3 lightNormal;
+#endif
+
 #ifdef USE_TEXTURE
     uniform sampler2D texture;
     
@@ -46,6 +53,10 @@ void main(void){
     
     #ifdef USE_LIGHTING
         mainColor.xyz *= lightMask;
+    #endif
+    
+    #ifdef USE_REFLECTION_CUBE
+        mainColor = mainColor * (1. - reflectionIntensity) + textureCube(reflectionCube, reflect(normalize(mvPosition.xyz), lightNormal * vec3(-1, 1, 1))) * reflectionIntensity;
     #endif
     
     if(mainColor.w == 0.0){

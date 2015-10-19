@@ -513,6 +513,17 @@ Tessellator.vec4.prototype.random = function (scale){
     return this;
 };
 
+Tessellator.vec4.prototype.reflect = function (normal){
+    var d = this.dot(normal).x * 2;
+    
+    this[0] -= d * normal[0];
+    this[1] -= d * normal[1];
+    this[2] -= d * normal[2];
+    this[3] -= d * normal[3];
+    
+    return this;
+};
+
 Tessellator.vec4.prototype.asin = function (){
     if (this.tween) this.tween.cancel();
     

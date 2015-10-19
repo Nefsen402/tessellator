@@ -54,10 +54,12 @@ Tessellator.Geometry.prototype.createObject = function (tessellator, drawMode, s
         this.object.setAttribute("normal", Tessellator.VEC3, this.normals, Float32Array, false, save);
     };
     
-    if (drawMode === Tessellator.TEXTURE){
-        this.object.setAttribute("color", Tessellator.VEC2, this.colors, Float32Array, false, save);
-    }else{
-        this.object.setAttribute("color", Tessellator.VEC4, this.colors, Uint8Array, true, save);
+    if (!this.colors.isEmpty()){
+        if (drawMode === Tessellator.TEXTURE){
+            this.object.setAttribute("color", Tessellator.VEC2, this.colors, Float32Array, false, save);
+        }else{
+            this.object.setAttribute("color", Tessellator.VEC4, this.colors, Uint8Array, true, save);
+        };
     };
     
     this.object.upload();
@@ -109,6 +111,30 @@ Tessellator.Geometry.prototype.addPositions = function (pos){
     };
 };
 
+Tessellator.Geometry.prototype.setColor = function (){
+    this.color = Tessellator.getColor(arguments);
+};
+
+Tessellator.Geometry.prototype.setVertex = function (){
+    if (arguments.length === 1){
+        this.addPositions(arguments[0]);
+        
+        if (this.color){
+            for (var i = 0, k = arguments[0].length; i < k; i += 3){
+                this.colors.push(this.color);
+            };
+        };
+    }else{
+        this.addPositions(arguments);
+        
+        if (this.color){
+            for (var i = 0, k = arguments.length; i < k; i += 3){
+                this.colors.push(this.color);
+            };
+        };
+    };
+};
+
 Tessellator.Geometry.prototype.generateTextureCoordinates = function (x, y){
     this.convert();
     
@@ -147,10 +173,35 @@ Tessellator.Geometry.prototype.generateTextureCoordinates = function (x, y){
     };
 };
 
+Tessellator.Geometry.prototype.createWireFrame = function (){
+    this.convert();
+    
+    if (this.type === Tessellator.TRIANGLE){
+        var newIndices = new Tessellator.Array();
+        var indices = this.indices.combine();
+        
+        for (var i = 0; i < indices.length; i += 3){
+            var a = indices[i + 0],
+                b = indices[i + 1],
+                c = indices[i + 2];
+            
+            newIndices.push([
+                a, b,
+                b, c,
+                c, a
+            ]);
+        };
+        
+        this.indices = newIndices;
+        this.type = Tessellator.LINES;
+    };
+};
+
 Tessellator.Geometry.prototype.generateNormals = function (){
     this.convert();
     
     if (this.normals.isEmpty() && this.type === Tessellator.TRIANGLE){
+        var positions = this.positions.compress();
         var normals = new Float32Array(this.positions.length);
         
         var indices = this.indices.combine();
@@ -160,17 +211,17 @@ Tessellator.Geometry.prototype.generateNormals = function (){
                 ib = indices[i + 1],
                 ic = indices[i + 2];
             
-            var x1 = this.positions.get(ia * 3 + 0),
-                y1 = this.positions.get(ia * 3 + 1),
-                z1 = this.positions.get(ia * 3 + 2),
+            var x1 = positions[ia * 3 + 0],
+                y1 = positions[ia * 3 + 1],
+                z1 = positions[ia * 3 + 2],
                 
-                x2 = this.positions.get(ib * 3 + 0),
-                y2 = this.positions.get(ib * 3 + 1),
-                z2 = this.positions.get(ib * 3 + 2),
+                x2 = positions[ib * 3 + 0],
+                y2 = positions[ib * 3 + 1],
+                z2 = positions[ib * 3 + 2],
                 
-                x3 = this.positions.get(ic * 3 + 0),
-                y3 = this.positions.get(ic * 3 + 1),
-                z3 = this.positions.get(ic * 3 + 2);
+                x3 = positions[ic * 3 + 0],
+                y3 = positions[ic * 3 + 1],
+                z3 = positions[ic * 3 + 2];
             
             //deltas
             var Ux = x2 - x1,
@@ -287,7 +338,7 @@ Tessellator.Geometry.prototype.convert = function (){
 };
 
 Tessellator.Geometry.prototype.add = function (newGeometry, arg){
-    if (this.type === newGeometry.type){
+    if (this.type === newGeometry.type && newGeometry.indices.length + this.indices.length <= Tessellator.VERTEX_LIMIT){
         newGeometry.indices.compress();
         newGeometry.indices.offset(this.positions.length / 3);
         

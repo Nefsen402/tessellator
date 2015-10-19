@@ -80,7 +80,7 @@ Tessellator.Model.prototype.remove = function (obj){
 
 Tessellator.Model.prototype.apply = function (matrix, mod, renderer){
     if (this.render){
-        var copy = matrix.copy(renderer || this.renderer);
+        var copy = matrix.copy(this.renderer);
         copy.set("mvMatrix", matrix.gets("mvMatrix").clone());
         
         if (this.renderer){

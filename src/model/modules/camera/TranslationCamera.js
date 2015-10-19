@@ -28,9 +28,6 @@
  */
 
 Tessellator.TranslationCamera = function (view, x, y, z){
-    this.type = Tessellator.VIEW;
-    this.subtype = Tessellator.CAMERA;
-    
     this.view = view;
     
     if (arguments.length === 2){
@@ -57,9 +54,9 @@ Tessellator.TranslationCamera.prototype.set = function (m){
 };
 
 Tessellator.TranslationCamera.prototype.init = function (interpreter){
-    this.view.init(interpreter);
+    if (this.view.init) this.view.init(interpreter);
 };
 
 Tessellator.TranslationCamera.prototype.postInit = function (interpreter){
-    this.view.postInit(interpreter);
+    if (this.view.postInit) this.view.postInit(interpreter);
 };

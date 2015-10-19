@@ -100,7 +100,9 @@ Tessellator.ModelRenderer.prototype.configure = function (matrix){
     matrix.set("mvMatrix", Tessellator.mat4());
     matrix.set("mask", Tessellator.vec4(1, 1, 1, 1));
     
-    matrix.enable(Tessellator.BLEND);
+    if (!matrix.isEnableDefined()){
+        matrix.enable(Tessellator.BLEND);
+    };
     
     this.super.configure(matrix);
 };

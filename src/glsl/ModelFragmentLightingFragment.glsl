@@ -15,12 +15,21 @@ uniform vec4 mask;
     varying vec4 colorInfo;
 #endif
 
+#ifdef USE_REFLECTION_CUBE
+    uniform float reflectionIntensity;
+    uniform samplerCube reflectionCube;
+#endif
+
 #ifdef USE_FOG
     uniform vec2 fog;
     uniform vec3 fogColor;
 #endif
 
 varying vec4 mvPosition;
+
+#if defined(USE_LIGHTING) || defined(USE_REFLECTION_CUBE)
+    varying vec3 lightNormal;
+#endif
 
 #ifdef USE_LIGHTING
     #define LIGHTING_EPSILON 0.0005
@@ -72,8 +81,6 @@ varying vec4 mvPosition;
         uniform samplerCube cube8;
     #endif
     
-    varying vec3 lightNormal;
-    
     float unpackFloat(vec4 value){
         return dot(value, vec4(1.0/(256.0*256.0*256.0), 1.0/(256.0*256.0), 1.0/256.0, 1.0));
     }
@@ -96,19 +103,19 @@ varying vec4 mvPosition;
         #endif
         
         #ifdef TEXTURE_CUBE_5
-            if (cube == 1) return textureCube(cube5, pos);
+            if (cube == 5) return textureCube(cube5, pos);
         #endif
         
         #ifdef TEXTURE_CUBE_6
-            if (cube == 2) return textureCube(cube6, pos);
+            if (cube == 6) return textureCube(cube6, pos);
         #endif
         
         #ifdef TEXTURE_CUBE_7
-            if (cube == 3) return textureCube(cube7, pos);
+            if (cube == 7) return textureCube(cube7, pos);
         #endif
         
         #ifdef TEXTURE_CUBE_8
-            if (cube == 4) return textureCube(cube8, pos);
+            if (cube == 8) return textureCube(cube8, pos);
         #endif
         
         return vec4(0);
@@ -313,6 +320,12 @@ void main(void){
             #else
                 mainColor.xyz *= getLightMask(normal);
             #endif
+            
+            #ifdef USE_REFLECTION_CUBE
+                mainColor = mainColor * (1. - reflectionIntensity) + textureCube(reflectionCube, reflect(-normalize(mvPosition.xyz), normal)) * reflectionIntensity;
+            #endif
+        #elif defined(USE_REFLECTION_CUBE)
+            mainColor = mainColor * (1. - reflectionIntensity) + textureCube(reflectionCube, reflect(normalize(mvPosition.xyz), lightNormal * vec3(-1, 1, 1))) * reflectionIntensity;
         #endif
         
         #ifdef USE_FOG

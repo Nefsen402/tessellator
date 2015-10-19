@@ -40,8 +40,10 @@ Tessellator.prototype.createShaderProgram = function (vertexShader, fragmentShad
         if (vertexShader.constructor === String){
             if (vertexShader.indexOf(".glsl", vertexShader.length - 5) !== -1){
                 shader.loadRemote(vertexShader);
-            }else{
+            }else if (vertexShader.indexOf(" main") >= 0){
                 shader.load(vertexShader);
+            }else{
+                shader.loadDOM(document.getElementById(vertexShader));
             };
         }else{
             shader.loadDOM(vertexShader);
@@ -62,8 +64,10 @@ Tessellator.prototype.createShaderProgram = function (vertexShader, fragmentShad
         if (fragmentShader.constructor === String){
             if (fragmentShader.indexOf(".glsl", fragmentShader.length - 5) !== -1){
                 shader.loadRemote(fragmentShader);
-            }else{
+            }else if (fragmentShader.indexOf(" main") >= 0){
                 shader.load(fragmentShader);
+            }else{
+                shader.loadDOM(document.getElementById(fragmentShader));
             };
         }else{
             shader.loadDOM(fragmentShader);
@@ -83,10 +87,13 @@ Tessellator.prototype.createPixelShader = function (shader){
     return this.createShaderProgram(Tessellator.PIXEL_SHADER_VERTEX_SHADER, shader);
 };
 
+Tessellator.prototype.createPixelShaderUV = function (shader){
+    return this.createShaderProgram(Tessellator.PIXEL_SHADER_VERTEX_UV_SHADER, shader);
+};
+
 Tessellator.prototype.getShaderFromDOM = function (dom){
     return new Tessellator.Shader(this).loadDOM(dom);
 };
-
 
 Tessellator.prototype.getShader = function (shaderSource, type){
     if (shaderSource.constructor === Tessellator.ShaderPreset){

@@ -28,19 +28,21 @@
  */
 
 Tessellator.Model.prototype.end = function (indices){
-    return this.add(new Tessellator.End(indices));
+    return this.add(new Tessellator.Model.End(indices));
 };
 
-Tessellator.End = function (indices){
+Tessellator.Model.End = function (indices){
     this.indices = indices;
 };
 
-Tessellator.End.prototype.init = function (interpreter){
-    var geometry = interpreter.getr("currentGeometry");
-    var cached = interpreter.get("cachedGeometry");
-    var extra = interpreter.get("extraGeometry");
+Tessellator.Model.End.prototype.init = function (interpreter){
+    var geomType = interpreter.getr("geometryType");
     
-    if (geometry){
+    if (geomType !== Tessellator.INDICES && geomType !== Tessellator.TEXTURE && geomType !== Tessellator.NORMAL){
+        var geometry = interpreter.getr("currentGeometry");
+        var cached = interpreter.get("cachedGeometry");
+        var extra = interpreter.get("extraGeometry");
+        
         if (extra){
             geometry.forceAdd(extra);
             

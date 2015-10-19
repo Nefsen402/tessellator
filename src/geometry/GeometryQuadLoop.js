@@ -27,54 +27,40 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.RadialCamera = function (view, rad, lock){
-    this.view = view;
-    
-    this.rad = rad || Tessellator.vec2(0, 0);
-    
-    this.lock = lock;
-};
-
-Tessellator.RadialCamera.prototype.x = function (){
-    return this.radX.x;
-};
-
-Tessellator.RadialCamera.prototype.y = function (){
-    return this.radY.x;
-};
-
-Tessellator.RadialCamera.prototype.apply = function (render){
-    this.view.apply(render);
-    
-    this.set(render.exists("mvMatrix") ? render.get("mvMatrix") : render.get("pMatrix"));
-};
-
-Tessellator.RadialCamera.prototype.applyLighting = function (matrix){
-    if (this.view.applyLighting) this.view.applyLighting(matrix);
-    
-    this.set(matrix);
-};
-
-Tessellator.RadialCamera.prototype.set = function (m){
-    if (this.lock){
-        if (this.radY.x < -Math.PI / 2 + 0.001){
-            this.radY[0] = -Math.PI / 2 + 0.001;
-        }else if (this.radY[0] > Math.PI / 2 - 0.001){
-            this.radY[0] = Math.PI / 2 - 0.001;
+Tessellator.Geometry.registerCustomGeometry(Tessellator.QUAD_LOOP, Tessellator.TRIANGLE, function (g){
+    if (g.indices.length){
+        var newIndices = new Tessellator.Array();
+        var k = g.indices.combine(Uint16Array);
+        
+        for (var i = 0; i < k.length - 2; i += 2){
+            var i0 = k[i + 0],
+                i1 = k[i + 1],
+                i2 = k[(i + 2) % (k + 2)],
+                i3 = k[(i + 3) % (k + 2)];
+            
+            g.indices.push([
+                i1,
+                i0,
+                i2,
+                
+                i1,
+                i2,
+                i3
+            ]);
+        };
+        
+        g.indices = newIndices;
+    }else{
+        for (var i = 0, k = g.positions.length / 3 - 2; i <= k; i += 2){
+            g.indices.push([
+                1 + i,
+                0 + i,
+                (2 + i) % (k + 2),
+                
+                1 + i,
+                (2 + i) % (k + 2),
+                (3 + i) % (k + 2)
+            ]);
         };
     };
-    
-    m.rotateVec(Tessellator.vec3().yawpitch(this.rad), Tessellator.vec3(0, 1, 0));
-};
-
-Tessellator.RadialCamera.prototype.init = function (interpreter){
-    if (this.view.init){
-        this.view.init(interpreter);
-    };
-};
-
-Tessellator.RadialCamera.prototype.postInit = function (interpreter){
-    if (this.view.postInit){
-        this.view.postInit(interpreter);
-    };
-};
+});

@@ -2,7 +2,7 @@
 
 Tessellator is a rendering engine for WebGL. It's goal is to make WebGL less verbose and easier to use. Similar to THREE.js, this is supposed to simplfy the process of making a webgl program/game/animation while still having options for vary advanced users.
 
-Here is a basic spinning cube, the most basic of the basic. This one happenes to be animated without setting up a loop. How did I do it? Tessellator adds many class and tries to borrow from GLSL and object oriented pragramming languages so the programmer feels right at home. One thing I added were Vectors like you have in glsl. Calling
+Tessellator adds many class and tries to borrow from GLSL and object oriented pragramming languages so the programmer feels right at home. One thing I added were Vectors like you have in glsl. Calling
 
 ```javascript
     Tessellator.vec4(Tessellator.vec2(1), Tessellator.float(5), -7)

@@ -27,54 +27,35 @@
  * Github: https://github.com/Need4Speed402/tessellator
  */
 
-Tessellator.RadialCamera = function (view, rad, lock){
-    this.view = view;
+Tessellator.Model.prototype.bindReflectionCube = function (cube, intensity){
+    return this.add(new Tessellator.Model.ReflectionCube(cube, intensity));
+};
+
+Tessellator.Model.ReflectionCube = function (cube, intensity){
+    this.cube = cube;
+    this.intensity = intensity || 1;
     
-    this.rad = rad || Tessellator.vec2(0, 0);
-    
-    this.lock = lock;
+    this.disposable = true;
 };
 
-Tessellator.RadialCamera.prototype.x = function (){
-    return this.radX.x;
-};
-
-Tessellator.RadialCamera.prototype.y = function (){
-    return this.radY.x;
-};
-
-Tessellator.RadialCamera.prototype.apply = function (render){
-    this.view.apply(render);
-    
-    this.set(render.exists("mvMatrix") ? render.get("mvMatrix") : render.get("pMatrix"));
-};
-
-Tessellator.RadialCamera.prototype.applyLighting = function (matrix){
-    if (this.view.applyLighting) this.view.applyLighting(matrix);
-    
-    this.set(matrix);
-};
-
-Tessellator.RadialCamera.prototype.set = function (m){
-    if (this.lock){
-        if (this.radY.x < -Math.PI / 2 + 0.001){
-            this.radY[0] = -Math.PI / 2 + 0.001;
-        }else if (this.radY[0] > Math.PI / 2 - 0.001){
-            this.radY[0] = Math.PI / 2 - 0.001;
-        };
-    };
-    
-    m.rotateVec(Tessellator.vec3().yawpitch(this.rad), Tessellator.vec3(0, 1, 0));
-};
-
-Tessellator.RadialCamera.prototype.init = function (interpreter){
-    if (this.view.init){
-        this.view.init(interpreter);
+Tessellator.Model.ReflectionCube.prototype.dispose = function (){
+    if (this.cube && this.cube.disposable){
+        this.cube.dispose();
+        this.cube = null;
     };
 };
 
-Tessellator.RadialCamera.prototype.postInit = function (interpreter){
-    if (this.view.postInit){
-        this.view.postInit(interpreter);
+Tessellator.Model.ReflectionCube.prototype.init = function (interpreter){
+    interpreter.flush();
+};
+
+Tessellator.Model.ReflectionCube.prototype.apply = function (render, model, renderer){
+    if (this.cube){
+        render.addDefinition("USE_REFLECTION_CUBE");
+        
+        render.set("reflectionCube", this.cube);
+        render.set("reflectionIntensity", this.intensity);
+    }else{
+        render.removeDefinition("USE_REFLECTION_CUBE");
     };
 };

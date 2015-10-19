@@ -96,7 +96,7 @@ Tessellator.RenderLoop.prototype.stop = function (){
 };
 
 Tessellator.RenderLoop.prototype.start = function (){
-    this.item.lastFrame = this.item.now();
+    this.item.lastFrame = Tessellator.now();
     this.item.expectedWait = 0;
     
     if (this.animationFrame === undefined){
@@ -128,6 +128,10 @@ Tessellator.RenderLoop.prototype.setRenderer = function (renderer){
     this.item.renderer = renderer;
 };
 
+Tessellator.RenderLoop.prototype.getRenderer = function (){
+    return this.item.renderer;
+};
+
 Tessellator.RenderLoop.prototype.renderArg = function (arg){
     this.item.setRenderArg(arg);
 };
@@ -146,14 +150,6 @@ Tessellator.RenderLoop.Item = function (renderer, renderArg){
     this.renderArg = arguments[1];
 };
 
-Tessellator.RenderLoop.Item.prototype.now = function (){
-    if (window.performance && window.performance.now){
-        return window.performance.now();
-    }else{
-        return Date.now();
-    };
-};
-
 Tessellator.RenderLoop.Item.prototype.setFPS = function (fps){
     this.savedTime = 0;
     this.maxFPS = fps && !isNaN(fps) ? Tessellator.float(fps) : fps;
@@ -164,7 +160,7 @@ Tessellator.RenderLoop.Item.prototype.setRenderArg = function (arg){
 };
 
 Tessellator.RenderLoop.Item.prototype.render = function (){
-    var time = this.now();
+    var time = Tessellator.now();
     var ta = time - this.lastFrame;
     this.lastFrame = time;
     

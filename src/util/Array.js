@@ -74,7 +74,7 @@ Tessellator.Array.prototype.push = function (){
     for (var i = 0, k = arguments.length; i < k; i++){
         var arg = arguments[i];
         
-        if (arg.length){
+        if (typeof arg !== "number"){
             size += arg.length;
         }else{
             size++;
@@ -94,7 +94,7 @@ Tessellator.Array.prototype.push = function (){
         for (var i = 0, k = arguments.length; i < k; i++){
             var arg = arguments[i];
             
-            if (arg.length){
+            if (typeof arg !== "number"){
                 if (arg.constructor === Tessellator.Array || arg.constructor === Tessellator.FragmentedArray){
                     arg.write(this.buffer, pos);
                 }else{

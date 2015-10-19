@@ -452,3 +452,19 @@ Tessellator.prototype.exitFullscreen = function (){
         this.fullscreen.event();
     };
 };
+
+Tessellator.now = function (){
+    if (window.performance && window.performance.now){
+        return window.performance.now();
+    }else{
+        return Date.now();
+    };
+};
+
+Tessellator.isPowerOf2 = function (x){
+    return (x & (x - 1)) === 0;
+};
+
+Tessellator.sign = function (x){
+    return (x === 0) ? 0 : (x < 0) ? -1 : 1;
+};

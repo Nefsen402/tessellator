@@ -34,7 +34,7 @@ Tessellator.vec3 = function (){
     for (var i = 0, k = arguments.length; i < k; i++){
         var arg = arguments[i];
         
-        if (isNaN(arg)){
+        if (typeof arg !== "number"){
             if (arg.tween) arg.tween.update();
             
             array.set(arg, pos);
@@ -527,13 +527,51 @@ Tessellator.vec3.prototype.cross = function (vec3){
 Tessellator.vec3.prototype.pitchyaw = function (pitch, yaw){
     if (this.tween) this.tween.cancel();
     
-    pitch = Tessellator.float.forValue(pitch);
-    yaw = Tessellator.float.forValue(yaw);
+    if (!yaw){
+        if (pitch.tween) pitch.tween.update();
+        
+        yaw = pitch[1];
+        pitch = pitch[0];
+    }else{
+        pitch = Tessellator.float.forValue(pitch);
+        yaw = Tessellator.float.forValue(yaw);
+    };
     
     var c = Math.cos(pitch);
     this[0] = c * Math.cos(yaw);
     this[1] = Math.sin(pitch);
     this[2] = c * Math.sin(-yaw);
+    
+    return this;
+};
+
+Tessellator.vec3.prototype.yawpitch = function (yaw, pitch){
+    if (this.tween) this.tween.cancel();
+    
+    if (!pitch){
+        if (yaw.tween) yaw.tween.update();
+        
+        pitch = yaw[1];
+        yaw = yaw[0];
+    }else{
+        pitch = Tessellator.float.forValue(pitch);
+        yaw = Tessellator.float.forValue(yaw);
+    };
+    
+    var c = Math.cos(pitch);
+    this[0] = c * Math.cos(yaw);
+    this[1] = Math.sin(pitch);
+    this[2] = c * Math.sin(-yaw);
+    
+    return this;
+};
+
+Tessellator.vec3.prototype.reflect = function (normal){
+    var d = this.dot(normal).x * 2;
+    
+    this[0] -= d * normal[0];
+    this[1] -= d * normal[1];
+    this[2] -= d * normal[2];
     
     return this;
 };

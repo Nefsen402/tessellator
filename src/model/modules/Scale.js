@@ -35,7 +35,17 @@ Tessellator.Model.Scale = function (){
     if (arguments.length === 0){
         this.coords = Tessellator.vec3(0, 0, 0);
     }else if (arguments.length === 1){
-        this.coords = Tessellator.vec3(arguments[0], arguments[0], arguments[0]);
+        if (!isNaN(arguments[0])){
+            this.coords = Tessellator.vec3(arguments[0], arguments[0], arguments[0]);
+        }else if (arguments[0].length === 1){
+            if (arguments[0].constructor === Tessellator.float){
+                this.coords = arguments[0];
+            }else{
+                this.coords = Tessellator.float(arguments[0]);
+            };
+        }else{
+            this.coords = arguments[0];
+        };
     }else if (arguments.length === 2){
         this.coords = Tessellator.vec3(arguments[0], arguments[1], 0);
     }else if (arguments.length === 3){
@@ -56,7 +66,15 @@ Tessellator.Model.Scale.prototype.applyLighting = function (matrix){
 };
 
 Tessellator.Model.Scale.prototype.set = function (m){
-    m.scale(this.coords);
+    var c;
+    
+    if (this.coords.constructor === Tessellator.float){
+        c = Tessellator.vec3(this.coords);
+    }else{
+        c = this.coords;
+    };
+    
+    m.scale(c);
 };
 
 Tessellator.Model.Scale.prototype.init = function (interpreter){

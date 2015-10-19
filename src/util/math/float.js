@@ -35,7 +35,7 @@ Tessellator.float = function (){
     }else if (arguments.length === 1){
         var arg = arguments[0];
         
-        if (arg.length){
+        if (typeof arg !== "number"){
             if (arg.length === 1){
                 if (arg.tween) arg.tween.update();
                 
@@ -119,7 +119,7 @@ Tessellator.float.prototype.subtract = function (float) {
 Tessellator.float.prototype.divide = function (float) {
     if (this.tween) this.tween.cancel();
     
-    this[0] /= Tessellator.float.forValue(float[0]);
+    this[0] /= Tessellator.float.forValue(float);
     
     return this;
 };

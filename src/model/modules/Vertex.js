@@ -36,9 +36,11 @@ Tessellator.Model.prototype.setVertex = function (){
         this.add(new Tessellator.Vertex(arguments[0]));
     }else{
         if (arguments.length === 2 && isNaN(arguments[1])){
-            this.start(arguments[0]);
+            var geom = this.start(arguments[0]);
             this.add(new Tessellator.Vertex(arguments[1]));
             this.end();
+            
+            return geom;
         }else{
             this.add(new Tessellator.Vertex(arguments));
         };
@@ -68,16 +70,7 @@ Tessellator.Vertex.prototype.init = function (interpreter){
         }else if (geometry.type === Tessellator.NORMAL){
             geometry.normals.push(this.vertices);
         }else{
-            if (interpreter.get("colorAttribEnabled") && interpreter.get("draw") !== Tessellator.TEXTURE){
-                var k = this.vertices.length / 3;
-                var c = interpreter.get("color255");
-                
-                for (var i = 0; i < k; i++){
-                    geometry.colors.push(c);
-                };
-            };
-            
-            geometry.addPositions(this.vertices);
+            geometry.setVertex(this.vertices);
         };
     };
     

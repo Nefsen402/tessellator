@@ -38,12 +38,12 @@ Tessellator.Geometry.registerCustomGeometry(Tessellator.QUAD_STRIP, Tessellator.
                 i2 = k[i + 2],
                 i3 = k[i + 3];
             
-            newIndices.push([
-                i0,
+            g.indices.push([
                 i1,
+                i0,
                 i2,
                 
-                i0,
+                i1,
                 i2,
                 i3
             ]);
@@ -51,13 +51,13 @@ Tessellator.Geometry.registerCustomGeometry(Tessellator.QUAD_STRIP, Tessellator.
         
         g.indices = newIndices;
     }else{
-        for (var i = 0, k = g.vertices.length / 3 - 2; i < k; i += 2){
+        for (var i = 0, k = g.positions.length / 3 - 2; i < k; i += 2){
             g.indices.push([
-                0 + i,
                 1 + i,
+                0 + i,
                 2 + i,
                 
-                0 + i,
+                1 + i,
                 2 + i,
                 3 + i
             ]);

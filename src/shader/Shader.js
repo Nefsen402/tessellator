@@ -36,10 +36,14 @@ Tessellator.Shader = function (tessellator, type){
     
     this.ready = false;
     this.disposable = true;
+    this.disposed = false;
 };
 
 Tessellator.Shader.prototype.setReady = function (){
     this.ready = true;
+    this.disposed = false;
+    
+    this.tessellator.resources.push(this);
     
     if (this.listener){
         this.listener(this);
@@ -109,12 +113,12 @@ Tessellator.Shader.prototype.load = function (source){
         gl.shaderSource(this.shader, source);
         gl.compileShader(this.shader);
         
-        if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
+        if (!gl.getShaderParameter(this.shader, Tessellator.COMPILE_STATUS)) {
             var error;
             
-            if (this.type === gl.FRAGMENT_SHADER){
+            if (this.type === Tessellator.FRAGMENT_SHADER){
                 error = "fragment shader problem";
-            }else if (this.type === gl.VERTEX_SHADER){
+            }else if (this.type === Tessellator.VERTEX_SHADER){
                 error = "vertex shader problem";
             };
             
@@ -206,8 +210,15 @@ Tessellator.Shader.prototype.create = function (type){
 };
 
 Tessellator.Shader.prototype.dispose = function (){
+    this.tessellator.resources.remove(this);
+    
     if (this.shader){
         this.tessellator.GL.deleteShader(this.shader);
+        
+        this.ready = false;
+        this.shader = null;
+        this.source = null;
+        this.disposed = true;
     };
 };
 

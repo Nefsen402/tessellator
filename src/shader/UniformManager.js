@@ -52,18 +52,18 @@ Tessellator.UniformManager.prototype.uniform = function (key, value, matrix){
         u.edits++;
     }else if (this.fallback){
         this.fallback.uniform(key, value, matrix);
-    }
+    };
 };
 
 Tessellator.UniformManager.prototype.preUnify = function (matrix){
     for (var o in this.uniforms){
         var u = this.uniforms[o];
-        u.shader = matrix.renderer.shader;
-        u.location = u.shader.getUniform(o);
         
         if (u.startMap){
             u.startMap(matrix, matrix.gets(o));
         };
+        
+        u.shader = matrix.renderer.shader;
     };
     
     if (this.fallback) this.fallback.preUnify(matrix);
@@ -72,9 +72,11 @@ Tessellator.UniformManager.prototype.preUnify = function (matrix){
 Tessellator.UniformManager.prototype.unify = function (matrix){
     for (var o in this.uniforms){
         var u = this.uniforms[o];
-        var ru = u.shader.getUniform(o);
+        var ru = matrix.renderer.shader.getUniform(o);
         
         if (ru){
+            u.location = ru;
+            
             if (u.map){
                 u.map(matrix);
             };

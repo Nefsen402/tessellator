@@ -29,24 +29,26 @@
 
 Tessellator.Model.prototype.translateTexture = function (){
     if (arguments.length == 1){
-        return this.add(new Tessellator.TextureTranslate(arguments[0], arguments[0]));
+        return this.add(new Tessellator.Model.TextureTranslate(arguments[0], arguments[0]));
     }else{
-        return this.add(new Tessellator.TextureTranslate(arguments[0], arguments[1]));
+        return this.add(new Tessellator.Model.TextureTranslate(arguments[0], arguments[1]));
     };
 };
 
-Tessellator.TextureTranslate = function (x, y) {
-    this.type = Tessellator.TEXTURE_SCALE;
-    
+Tessellator.Model.TextureTranslate = function (x, y) {
     this.x = x;
     this.y = y;
 };
 
-Tessellator.TextureTranslate.prototype.init = function (interpreter){
-    if (interpreter.get("textureBounds") && interpreter.get("textureBounds").bounds){
-        for (var i = 0, k = interpreter.get("textureBounds").bounds.length / 2; i < k; i++){
-            interpreter.get("textureBounds").bounds[i * 2] += this.x;
-            interpreter.get("textureBounds").bounds[i * 2 + 1] += this.y;
+Tessellator.Model.TextureTranslate.prototype.init = function (interpreter){
+    interpreter.flush();
+    
+    var tb = interpreter.get("textureBounds");
+    
+    if (tb && tb.bounds){
+        for (var i = 0, k = tb.bounds.length / 2; i < k; i++){
+            tb.bounds[i * 2] += this.x;
+            tb.bounds[i * 2 + 1] += this.y;
         };
     };
     

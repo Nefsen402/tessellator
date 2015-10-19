@@ -86,6 +86,6 @@ Tessellator.QueuedRenderer.prototype.init = function (){
 
 Tessellator.QueuedRenderer.prototype.renderRaw = function (matrix, arg){
     for (var i = 0; i < this.queue.length; i++){
-        this.queue[i].render(matrix.copy(this.queue[i]), arg.constructor === Array ? arg[i] : arg);
+        this.queue[i].render(matrix.copy(this.queue[i]), arg && arg.constructor === Array ? arg[i] : arg);
     };
 };

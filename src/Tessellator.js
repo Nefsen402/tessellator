@@ -283,7 +283,7 @@ Tessellator.prototype.getDataURL = function (){
 };
 
 Tessellator.prototype.preRender = function (){
-    this.frame++;
+    Tessellator.Tween.lock(this.frame++);
     
     this.canvasResize();
     
@@ -293,6 +293,8 @@ Tessellator.prototype.preRender = function (){
 };
 
 Tessellator.prototype.postRender = function (){
+    Tessellator.Tween.unlock();
+    
     if (this.TD){
         this.TD.drawImage(this.renderCanvas, 0, 0, this.originWidth, this.originHeight, 0, 0, this.width, this.height);
     };

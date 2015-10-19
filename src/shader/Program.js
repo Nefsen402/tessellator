@@ -28,18 +28,9 @@
  */
 
 Tessellator.Program = function (tessellator){
-    if (tessellator){
-        this.uniformManager = new Tessellator.UniformManager(tessellator);
-        
-        this.tessellator = tessellator;
-        this.shader = this.tessellator.GL.createProgram();
-    };
+    this.tessellator = tessellator;
     
-    this.linked = [];
     this.ready = false;
-    
-    this.attribs = {};
-    this.uniforms = {};
     
     this.disposable = false;
 };
@@ -51,6 +42,16 @@ Tessellator.Program.prototype.link = function (shader){
         this.tessellator = shader.tessellator;
     }else if (shader.constructor === Tessellator.ShaderPreset){
         shader = shader.create(this.tessellator);
+    };
+    
+    if (!this.shader){
+        this.uniformManager = new Tessellator.UniformManager(this.tessellator);
+        this.shader = this.tessellator.GL.createProgram();
+        
+        this.attribs = {};
+        this.uniforms = {};
+        
+        this.linked = [];
     };
     
     this.linked.push(shader);
@@ -91,6 +92,10 @@ Tessellator.Program.prototype.getLinked = function (type){
 };
 
 Tessellator.Program.prototype.load = function (){
+    if (!this.linked.length){
+        throw "no linked shaders!";
+    };
+    
     var ready = true;
     
     for (var i = 0; i < this.linked.length; i++){
@@ -113,14 +118,14 @@ Tessellator.Program.prototype.load = function (){
         
         gl.linkProgram(this.shader);
         
-        if (!gl.getProgramParameter(this.shader, gl.LINK_STATUS)){
+        if (!gl.getProgramParameter(this.shader, Tessellator.LINK_STATUS)){
             var error = gl.getProgramInfoLog(this.shader);
             
             throw "unable to load shader program: " + error;
         };
         
         {
-            var attribs = gl.getProgramParameter(this.shader, gl.ACTIVE_ATTRIBUTES);
+            var attribs = gl.getProgramParameter(this.shader, Tessellator.ACTIVE_ATTRIBUTES);
             
             this.attributeCount = attribs;
             
@@ -132,7 +137,7 @@ Tessellator.Program.prototype.load = function (){
         };
         
         {
-            var uniforms = gl.getProgramParameter(this.shader, gl.ACTIVE_UNIFORMS);
+            var uniforms = gl.getProgramParameter(this.shader, Tessellator.ACTIVE_UNIFORMS);
             
             this.uniformCount = uniforms;
             this.uniformSpace = 0;
@@ -140,11 +145,11 @@ Tessellator.Program.prototype.load = function (){
             for (var i = 0; i < uniforms; i++){
                 var uniform = gl.getActiveUniform(this.shader, i);
                 
-                if (uniform.type === gl.FLOAT_MAT4){
+                if (uniform.type === Tessellator.FLOAT_MAT4){
                     this.uniformSpace += uniform.size * 4;
-                }else if (uniform.type === gl.FLOAT_MAT3){
+                }else if (uniform.type === Tessellator.FLOAT_MAT3){
                     this.uniformSpace += uniform.size * 3;
-                }else if (uniform.type === gl.FLOAT_MAT2){
+                }else if (uniform.type === Tessellator.FLOAT_MAT2){
                     this.uniformSpace += uniform.size * 2;
                 }else{
                     this.uniformSpace += uniform.size;
@@ -165,9 +170,12 @@ Tessellator.Program.prototype.load = function (){
 
 Tessellator.Program.prototype.setReady = function (){
     this.ready = true;
+    this.disposed = false;
 };
 
 Tessellator.Program.prototype.isReady = function (){
+    this.disposed = false;
+    
     return this.ready;
 };
 
@@ -176,15 +184,22 @@ Tessellator.Program.prototype.getAttributes = function (){
 };
 
 Tessellator.Program.prototype.dispose = function (){
-    for (var i = 0; i < this.linked.length; i++){
-        if (this.linked[i].disposable){
-            this.linked[i].dispose();
+    if (this.shader){
+        this.tessellator.resources.remove(this);
+        
+        for (var i = 0; i < this.linked.length; i++){
+            if (this.linked[i].disposable){
+                this.linked[i].dispose();
+            };
         };
-    };
-    
-    this.tessellator.GL.deleteProgram(this.shader);
-    
-    return this;
+        
+        this.tessellator.GL.deleteProgram(this.shader);
+        this.shader = null;
+        
+        this.disposed = true;
+        this.uniformManager = null;
+        this.ready = false;
+    }
 };
 
 Tessellator.Program.prototype.bind = function (){
