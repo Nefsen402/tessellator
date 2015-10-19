@@ -1,0 +1,177 @@
+<html>
+
+<body style="margin:0px;">
+
+<canvas id="gl" style="width:100%;height:100%;"></canvas>
+
+<script src="../../build/Tessellator.js"></script>
+
+<script>
+var tessellator = new Tessellator("gl");
+
+
+var model = tessellator.createModel();
+var viewmodel = tessellator.createModel();
+var mapModel = tessellator.createModel();
+
+viewmodel.clear("black");
+viewmodel.setView(new Tessellator.PerspectiveView(70 / 360 * Math.PI * 2, 30, 2));
+viewmodel.add(model);
+viewmodel.finish();
+
+mapModel.clear("black");
+mapModel.setView(new Tessellator.PerspectiveView(Math.PI / 2, 30, 0.1));
+mapModel.add(model);
+mapModel.finish();
+
+model.setColor(0.04, 0.04, 0.04, 1);
+model.setAmbientLight();
+
+model.translate(0, 0, -10);
+
+model.setColor("amber");
+
+model.enable(Tessellator.LIGHTING);
+
+model.push();
+var girate1 = Tessellator.vec3();
+girate1.createTween().rad(0, 1, Tessellator.vec3().random(), Tessellator.vec3().random());
+var girate2 = Tessellator.vec3();
+girate2.createTween().rad(0, 0.38, Tessellator.vec3().random(), Tessellator.vec3().random());
+var girate3 = Tessellator.vec3();
+girate3.createTween().rad(0, 2, Tessellator.vec3().random(), Tessellator.vec3().random());
+var girate4 = Tessellator.vec3();
+girate4.createTween().rad(0, 1, Tessellator.vec3().random(), Tessellator.vec3().random());
+var girate = Tessellator.vec3().createTween().addAll(girate1, girate2, girate3, girate4).getVec();
+model.translate(girate);
+
+var tex = tessellator.createTextureDrawable(16, 16);
+
+tex.setColor(1, 191 /255, 0);
+tex.fillRect(0, 0, 16, 16);
+
+tex.setColor(1, 1, 1);
+
+for (var i = 0; i < 16; i+=2){
+tex.fillRect(0, i, 16, 1);
+}
+
+model.bindTexture(tex);
+model.fillSphere(0, 0, 0, 1, 30);
+
+model.pop();
+
+
+var rot = Tessellator.float();
+rot.createTween().dir(Tessellator.float(0.001));
+model.rotate(rot, 0, 1, 0);
+
+model.push();
+var rot = Tessellator.float();
+rot.createTween().dir(Tessellator.float(0.005));
+model.rotate(rot, 0, 1, 0);
+
+var pos = Tessellator.vec3(0, 0, -3);
+pos.createTween().sin(Tessellator.vec3(0, 1.5, 0), 1);
+model.translate(pos);
+
+model.setColor("green");
+var light = model.setPointLight(0, 0, 0, 10);
+
+light.createShadow(model, 10, 0.1)
+model.disable(Tessellator.LIGHTING);
+model.fillSphere(0, 0, 0, 0.1, 6);
+
+model.setColor("yellow");
+model.fillSphere(0, 0, 6, 0.1, 6);
+model.setPointLight(0, 0, 6, 10).createShadow(model);
+model.pop();
+
+model.enable(Tessellator.LIGHTING);
+
+model.push();
+model.fillCilinder(0, 2.5, 0, 5.4, 1, 50);
+model.fillDisk(0, 2, 0, 5, 5.4, Tessellator.vec3(0, 1, 0), 50);
+model.fillDisk(0, 2, 0, 5, 5.4, Tessellator.vec3(0, -1, 0), 50);
+
+model.fillCircle(0, 0, 0, Tessellator.vec3(0, 0, 1), 100);
+model.fillCircle(0, 0, 2.3, Tessellator.vec3(0, -1, 0), 100);
+
+model.fillCilinder(0, -2.5, 0, 5.4, 1, 50);
+
+model.fillCilinder(0, 2.5, 0, 5, -1, 50);
+model.fillCilinder(0, -2.5, 0, 5, -1, 50);
+model.pop();
+
+model.push();
+model.rotateDeg(-90, 1, 0, 0);
+model.translate(0, 0, -2.5);
+model.setColor("gray");
+model.fillGrid(-20, -20, 40, 40, 40, 40);
+model.setColor("white");
+model.fillInverseGrid(-20, -20, 40, 40, 40, 40);
+model.pop();
+
+
+model.push();
+model.rotateDeg(90, 1, 0, 0);
+model.translate(0, 0, -2.5);
+model.setColor("gray");
+model.fillGrid(-20, -20, 40, 40, 40, 40);
+model.setColor("white");
+model.fillInverseGrid(-20, -20, 40, 40, 40, 40);
+model.pop();
+
+for (var i = 0; i < 10; i++){
+var deg = Math.PI * 2 * i / 10;
+
+model.push();
+model.rotate(deg, 0, 1, 0);
+model.translate(0, 0, -5.2);
+
+model.fillCilinder(0, 0, 0, 0.1, 4, 10);
+
+model.pop();
+}
+
+model.finish();
+
+var map = new Tessellator.TextureModelCubeMap(tessellator, 1024, mapModel, girate);
+
+var mainRenderer = new Tessellator.BufferedRenderer(tessellator.createPixelShader(Tessellator.PIXEL_SHADER_NOISE), new Tessellator.ModelRenderer(tessellator, viewmodel), 1, [
+new Tessellator.TextureModel.AttachmentDepthTexture(),
+new Tessellator.TextureModel.AttachmentColor(),
+]).setUniformSetter(function (matrix){
+matrix.set("intensity", 0);
+});
+
+var mapRenderer = new Tessellator.BufferedRenderer(Tessellator.PIXEL_SHADER_DEPTH, new Tessellator.FullScreenTextureRenderer(tessellator.createPixelShader(Tessellator.PIXEL_SHADER_CUBE_MAP), light.shadowMap).setUniformSetter(function (matrix){
+	var mat = Tessellator.mat4();
+	
+	//mat.rotateVec(Tessellator.vec3(0, 0, 1), Tessellator.vec3(0, 1, 0));
+	
+	matrix.set("perspective", mat);
+}));
+
+
+
+var renderLoop = new Tessellator.RenderLoop(mainRenderer);
+
+var bool = false;
+
+onkeydown = function (){
+	if (bool){
+		renderLoop.setRenderer(mapRenderer);
+	}else{
+		renderLoop.setRenderer(mainRenderer);
+	}
+	
+	bool = !bool;
+}
+
+
+</script>
+
+</body>
+
+</html>
