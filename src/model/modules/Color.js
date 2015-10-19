@@ -51,7 +51,7 @@ Tessellator.ColorSet.prototype.init = function (interpreter){
         throw "cannot change color while drawing";
     };
     
-    if (interpreter.get("draw") !== Tessellator.COLOR){
+    if (interpreter.get("draw") === Tessellator.TEXTURE){
         interpreter.flush();
         
         interpreter.set("draw", Tessellator.COLOR);
