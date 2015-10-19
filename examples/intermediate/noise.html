@@ -1,0 +1,68 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    <script src="noise.js"></script>
+    
+    <script>
+        var tessellator = new Tessellator("gl");
+        
+        var model = tessellator.createModel();
+        
+        model.clear("black");
+        model.add(new Tessellator.PerspectiveView());
+        
+        model.enable(Tessellator.LIGHTING);
+        model.setDirectionalLight(0, 1, 0);
+        
+        model.translate(0, -0.2, 0);
+        
+        model.rotate(0.3, 1, 0, 0);
+        model.rotate(Tessellator.float().createTween().dir(0.001).getVec(), Tessellator.vec3(0, 1, 0));
+        
+        var resolution = 100;
+        
+        
+        var positions = new Tessellator.Array(1024 * 1024);
+        var indices = new Tessellator.Array(1024 * 1024);
+        
+        for (var x = 0; x <= resolution; x++){
+            for (var z = 0; z <= resolution; z++){
+                var xx = x / resolution * 2 - 1,
+                    zz = z / resolution * 2 - 1;
+                
+                var y = 0;
+                
+                for (var i = 0; i < 10; i++){
+                    noise.seed(0);
+                    
+                    y += noise.simplex2(xx * i / 3, zz * i / 3) * 0.05;
+                }
+                
+                positions.push(xx, y, zz);
+                
+                if (x < resolution && z < resolution){
+                    indices.push([
+                        x * resolution + z,
+                        x * resolution + z + 1,
+                        (x + 1) * resolution + z + 1,
+                        (x + 1) * resolution + z
+                    ]);
+                }
+            }
+        }
+        
+        console.log(positions);
+        
+        model.setVertex(Tessellator.INDICES, indices);
+        model.setVertex(Tessellator.QUAD, positions);
+        
+        model.finish();
+        
+        //create our custom shader
+        
+        var renderLoop = new Tessellator.RenderLoop(new Tessellator.ModelRenderer(model));
+    </script>
+</html>

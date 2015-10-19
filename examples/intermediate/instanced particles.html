@@ -1,0 +1,97 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    <script id="vert" type="glsl/vert">
+        //these are the standard attirbutes that Tessellator.Geometry defines and manages.
+        attribute vec3 position;
+        
+        //these are our own attributes that are going to use instancing
+        attribute vec3 ipos;
+        attribute vec3 icolor;
+        
+        uniform mat4 mvMatrix, pMatrix;
+        
+        varying vec3 fragColor;
+        
+        void main(){
+            gl_Position = pMatrix * (mvMatrix * vec4(ipos, 1) + vec4(position, 0));
+            
+            fragColor = icolor;
+        }
+    </script>
+    
+    <script id="frag" type="glsl/frag">
+        precision lowp float;
+        
+        varying vec3 fragColor;
+        
+        void main(){
+            gl_FragColor = vec4(fragColor, 1);
+        }
+    </script>
+    
+    <script>
+        var tessellator = new Tessellator("gl");
+        
+        var model = tessellator.createModel();
+        
+        model.clear("black");
+        model.add(new Tessellator.PerspectiveView(Tessellator.DEFAULT_FOV, 1000, 50));
+        
+        model.translate(0, 0, -600);
+        
+        model.rotate(Tessellator.float().createTween().dir(0.001).getVec(), Tessellator.vec3(0, 1, 0));
+        
+        //create a new custom goemetry object
+        var geom = new Tessellator.Geometry(Tessellator.QUAD);
+        
+        geom.setVertex([
+            1, -1, 0,
+            1, 1, 0,
+            -1, 1, 0,
+            -1, -1, 0,
+        ]);
+        
+        //create a low level 'object' object
+        var obj = geom.createObject(tessellator);
+        
+        //this is the proper way of doing many particles
+        
+        //here are the two arrays that are going to make the two custom attributes
+        
+        //there are two array types that are prevelant in the tessellator,
+        //there is Tessellator.Array which is faster.
+        //there is also Tessellator.FragmentedArray that creates a lot less garbage.
+        //with a lot of small peices of data that you want to combine into a big array use Tessellator.FragmentedArray
+        var ipos = new Tessellator.FragmentedArray();
+        var icolor = new Tessellator.FragmentedArray();
+        
+        for (var i = 0; i < 100000; i++){
+            ipos.push(Tessellator.vec3().random().multiply(200));
+            icolor.push(Tessellator.vec3().random().add(1).divide(2));
+        }
+        
+        //define our custom attributes
+        obj.setAttribute("ipos", Tessellator.VEC3, ipos);
+        obj.setAttribute("icolor", Tessellator.VEC3, icolor);
+        
+        //instance our custom attributes
+        obj.useInstancing("ipos", "icolor");
+        
+        //upload our custom attributes to the gpu
+        obj.upload();
+        
+        //add our custon geometry to the model and bobs your uncle!
+        model.add(obj);
+        
+        model.finish();
+        
+        //create our custom shader
+        var shader = tessellator.createShaderProgram("vert", "frag");
+        var renderLoop = new Tessellator.RenderLoop(new Tessellator.ModelRenderer(shader, model));
+    </script>
+</html>

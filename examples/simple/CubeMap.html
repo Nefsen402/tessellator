@@ -1,0 +1,58 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    <script>
+        var tessellator = new Tessellator("gl");
+        
+        var texture = tessellator.loadTexture("../textures/cube3.jpg");
+        var cube = new Tessellator.TextureCubeMap(tessellator);
+        
+        cube.unwrap(texture, Tessellator.TextureCubeMap.MAP_NORMAL);
+        
+        var rot = Tessellator.vec2();
+        
+        var model = tessellator.createModel();
+        
+        model.setView(new Tessellator.RadialCamera(new Tessellator.TranslationCamera(new Tessellator.PerspectiveView(), Tessellator.vec3(0, 0, 6)), rot));
+        
+        model.bindReflectionCube(cube);
+        model.fillSphere(0, 0, 0, 1, 30);
+        
+        
+        model.finish();
+        
+        var shader = new Tessellator.ActiveProgram(tessellator.createShaderProgram("../../src/glsl/ModelFragmentLightingVertex.glsl", "../../src/glsl/ModelFragmentLightingFragment.glsl"))
+        var modelRenderer = new Tessellator.ModelRenderer(shader, model);
+        
+        var renderer = new Tessellator.FullScreenTextureRenderer(tessellator.createPixelShader(Tessellator.PIXEL_SHADER_CUBE_MAP), cube).setUniformSetter(function (matrix){
+            var mat = Tessellator.mat4();
+            
+            mat.rotateVec(Tessellator.vec3().yawpitch(rot), Tessellator.vec3(0, 1, 0));
+            
+            matrix.set("perspective", mat);
+        });
+        
+        var clicked = false;
+        
+        onmousedown = function (){
+            clicked = true;
+        }
+        
+        onmouseup = function (){
+            clicked = false;
+        }
+        
+        onmousemove = function (e){
+            if (clicked){
+                rot.x += e.movementX / 300;
+                rot.y -= e.movementY / 300;
+            }
+        }
+        
+        new Tessellator.RenderLoop(new Tessellator.QueuedRenderer(renderer, modelRenderer));
+    </script>
+</html>

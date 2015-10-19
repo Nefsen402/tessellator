@@ -1,0 +1,32 @@
+<html>
+    <style>
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    
+    <body style="margin:0px">
+        <canvas id="gl"></canvas>
+        <input type="range" id="radius"></input>
+        <input type="range" id="intensity"></input>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    
+    <script>
+        var tessellator = new Tessellator("gl");
+        
+        var texture = tessellator.loadTexture("../textures/Hopetoun_falls.jpg");
+        
+        var renderer = new Tessellator.FullScreenTextureRenderer(Tessellator.PIXEL_SHADER_TWIST, texture).setUniformSetter(function (matrix){
+            matrix.set("intensity", document.getElementById("intensity").value / 2 - 25 + 5);
+            matrix.set("radius", document.getElementById("radius").value / 100);
+        });
+        
+        renderer.setAspect(texture);
+        
+        var renderLoop = new Tessellator.RenderLoop(renderer);
+    </script>
+</html>

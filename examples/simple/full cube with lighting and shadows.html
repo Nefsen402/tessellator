@@ -40,7 +40,7 @@
         //this acually creates the shadow and makes the tessellator allocate all the resources to start rendering shadows for this light.
         //the first parameter is the scene which holds all the object we want to cast shadows. this is the scene model we were talking about before
         light.createShadow(scene); 
-        //that was it! The tessellator will do all the rest and you will see a shadow.
+        //that was it! The tessellator will do all the rest and you will see a shadow
         
         //all of our geometry goes into the scene
         scene.translate(0, 0, -6);
@@ -67,6 +67,23 @@
         
         var renderer = new Tessellator.ModelRenderer(model);
         
+        
+        //here is a extra: we are going to create a special renderer that renders what the shader sees when it calculates the shadows:
+        var shadowRenderer = new Tessellator.BufferedRenderer(Tessellator.PIXEL_SHADER_DEPTH,
+            new Tessellator.FullScreenTextureRenderer(Tessellator.PIXEL_SHADER_CUBE_MAP, light.shadowMap).setUniformSetter(function (matrix){
+            var mat = Tessellator.mat4();
+            
+            matrix.set("perspective", mat);
+        })).setAspect(1);
+        
         var renderLoop = new Tessellator.RenderLoop(renderer);
+        
+        onkeydown = function (){
+            if (renderLoop.getRenderer() === renderer){
+                renderLoop.setRenderer(shadowRenderer);
+            }else{
+                renderLoop.setRenderer(renderer);
+            }
+        }
     </script>
 </html>

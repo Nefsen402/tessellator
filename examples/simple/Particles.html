@@ -1,0 +1,54 @@
+<html>
+    <body style="margin:0px">
+        <canvas style="width:100%;height:100%" id="gl"></canvas>
+    </body>
+    
+    <script src="../../build/Tessellator.js"></script>
+    
+    <script>
+        var tessellator = new Tessellator("gl");
+        
+        var model = tessellator.createModel();
+        
+        model.clear("black");
+        model.add(new Tessellator.PerspectiveView(Tessellator.DEFAULT_FOV, 1000, 50));
+        
+        model.translate(0, 0, -500);
+        
+        
+        //flatten the matrix when rendering so everything stays visible
+        model.flatten();
+        
+        model.rotate(Tessellator.float().createTween().dir(0.001).getVec(), Tessellator.vec3(0, 1, 0));
+        
+        //this is a quite simple exaple. It just adds on to the other example. One thing i must say:
+        //this is a horrible way of doing things. Since i am flattening the matrix, i need to translate everything on the cpu
+        //this is more of a stress test of pushing the model as they have historically been very slow (don't get me wrong, it is still fast)
+        //it is able to push the matrix here 1000 and do 1000 draw calls with relatively little trouble.
+        
+        //if you want to go to see the proper way of doing this, go ahead and look at the ../intermidiate/instanced particles.html example
+        
+        for (var i = 0; i < 1000; i++){
+            model.push();
+            model.setColor(Tessellator.vec3().random().add(1).divide(2));
+            
+            var x = (Math.random() * 2 - 1) * 200,
+                y = (Math.random() * 2 - 1) * 200,
+                z = (Math.random() * 2 - 1) * 200;
+                
+            model.translate(x, y, z);
+            
+            model.setVertex(Tessellator.QUAD, [
+                1, -1, 0,
+                1, 1, 0,
+                -1, 1, 0,
+                -1, -1, 0,
+            ]);
+            model.pop();
+        }
+        
+        model.finish();
+        
+        var renderLoop = new Tessellator.RenderLoop(new Tessellator.ModelRenderer(model));
+    </script>
+</html>

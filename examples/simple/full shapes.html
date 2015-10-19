@@ -11,8 +11,7 @@
         var rotation = Tessellator.float();
         rotation.createTween().dir(Math.PI / 1000);
         
-        var axis = Tessellator.vec3(0, 1, 0);
-        axis.createTween().dir(Tessellator.vec3(0.6, 0.4, 1));
+        var axis = Tessellator.vec3().random()
         
         var model = tessellator.createModel();
         model.clear("black");
