@@ -90,7 +90,7 @@ Tessellator.DirectionalLight.prototype.apply = function (matrix){
 
 Tessellator.DirectionalLight.prototype.createShadow = function (model, x, y, z, resolution){
     if (this.tessellator){
-        this.shadowRenderer = new Tessellator.DirectionalLightingShadowMapRenderer(Tessellator.DEPTH_MAP_ORTHOGRAPHIC_SHADER.create(tessellator), x, y, z, this);
+        this.shadowRenderer = new Tessellator.DirectionalLightingShadowMapRenderer(Tessellator.DEPTH_MAP_ORTHOGRAPHIC_SHADER.create(this.tessellator), x, y, z, this);
         
         this.shadowMap = new Tessellator.TextureModel(this.tessellator, resolution * x / y, resolution * y / x, [
             new Tessellator.TextureModel.AttachmentColor(),

@@ -54,37 +54,39 @@ Tessellator.PointLight = function (){
         throw "invalid arguments in Tessellator.PointLight";
     };
     
-    this.type = Tessellator.LIGHTING_POINT;
-    this.subtype = Tessellator.LIGHTING;
+    this.enabled = true;
 };
 
 Tessellator.PointLight.prototype.set = function (renderer, index, mat, matrix, vec){
-    var lighting = renderer.lightingTexture.data;
-    
-    lighting.set(this.color.xyz.multiply(this.color.w), 1 + index);
-    
-    var pos = this.pos.clone().multiply(mat);
-    lighting.set(pos, 4 + index);
-    
-    if (this.range){
-        lighting[0 + index] = 4;
+    if (this.enabled){
+        var lighting = renderer.lightingTexture.data;
         
-        lighting[7 + index] = Math.abs(this.range.x);
-    }else{
-        lighting[0 + index] = 3;
-    };
-    
-    if (this.shadowMap){
-        lighting[12 + index] = ++vec[1];
+        lighting.set(this.color.xyz.multiply(this.color.w), 1 + index);
         
-        lighting.set(this.shadowMap.renderer.applyViewMatrix, 13 + index);
+        var pos = this.pos.clone().multiply(mat);
+        lighting.set(pos, 4 + index);
         
-        this.shadowMap.setPos(pos.negate());
+        if (this.range){
+            lighting[0 + index] = 4;
+            
+            lighting[7 + index] = Math.abs(this.range.x);
+        }else{
+            lighting[0 + index] = 3;
+        };
         
-        matrix.addDefinition("TEXTURE_CUBE_" + vec[1]);
-        matrix.set("cube" + vec[1], this.shadowMap);
-    }else{
-        lighting[12 + index] = 0;
+        if (this.shadowMap){
+            lighting[12 + index] = ++vec[1];
+            
+            lighting.set(this.shadowMap.renderer.applyViewMatrix, 13 + index);
+            lighting[15 + index] = 1 / this.shadowMap.width;
+            
+            this.shadowMap.setPos(pos.negate());
+            
+            matrix.addDefinition("TEXTURE_CUBE_" + vec[1]);
+            matrix.set("cube" + vec[1], this.shadowMap);
+        }else{
+            lighting[12 + index] = 0;
+        };
     };
 };
 
@@ -100,9 +102,9 @@ Tessellator.PointLight.prototype.createShadow = function (model, far, near, res)
         var near = arguments[2];
         var res = 1024;
     }else if (arguments.length === 2){
+        var res = arguments[1];
         var far = (this.range && this.range.x) || Tessellator.DEFAULT_FAR_VIEW;
         var near = Tessellator.DEFAULT_NEAR_VIEW;
-        var res = arguments[1];
     }else if (arguments.length === 1){
         var far = (this.range && this.range.x) || Tessellator.DEFAULT_FAR_VIEW;
         var near = Tessellator.DEFAULT_NEAR_VIEW;
@@ -115,6 +117,16 @@ Tessellator.PointLight.prototype.createShadow = function (model, far, near, res)
     }else{
         this.shadowMap = arguments;
     };
+    
+    return this;
+};
+
+Tessellator.PointLight.prototype.enable = function (){
+    this.enabled = true;
+};
+
+Tessellator.PointLight.prototype.disable = function (){
+    this.disable = false;
 };
 
 Tessellator.PointLight.prototype.applyLighting = function (mat, matrix, index, renderer){

@@ -58,36 +58,46 @@ Tessellator.SpotLight = function (){
         };
     };
     
-    this.type = Tessellator.LIGHTING_SPOT;
-    this.subtype = Tessellator.LIGHTING;
+    this.enabled = true;
 };
 
 Tessellator.SpotLight.prototype.set = function (lighting, index, matrix){
-    if (this.color.tween) this.color.tween.update();
-    
-    lighting[1 + index] = this.color[0] * this.color[3];
-    lighting[2 + index] = this.color[1] * this.color[3];
-    lighting[3 + index] = this.color[2] * this.color[3];
-    
-    var pos = this.pos.clone().multiply(matrix);
-    lighting[4 + index] = pos[0];
-    lighting[5 + index] = pos[1];
-    lighting[6 + index] = pos[2];
-    
-    var vec = this.vec.clone().rotate(matrix);
-    lighting[8  + index] = vec[0];
-    lighting[9  + index] = vec[1];
-    lighting[10 + index] = vec[2];
-    if (!this.range){
-        lighting[0 + index] = 5;
+    if (this.enabled){
+        if (this.color.tween) this.color.tween.update();
         
-        lighting[11 + index] = this.angle.x;
-    }else{
-        lighting[0 + index] = 6;
+        lighting[1 + index] = this.color[0] * this.color[3];
+        lighting[2 + index] = this.color[1] * this.color[3];
+        lighting[3 + index] = this.color[2] * this.color[3];
         
-        lighting[7 + index] = Math.abs(this.range.x);
-        lighting[11 + index] = this.angle.x;
+        var pos = this.pos.clone().multiply(matrix);
+        lighting[4 + index] = pos[0];
+        lighting[5 + index] = pos[1];
+        lighting[6 + index] = pos[2];
+        
+        var vec = this.vec.clone().rotate(matrix);
+        lighting[8  + index] = vec[0];
+        lighting[9  + index] = vec[1];
+        lighting[10 + index] = vec[2];
+        
+        if (!this.range){
+            lighting[0 + index] = 5;
+            
+            lighting[11 + index] = this.angle.x;
+        }else{
+            lighting[0 + index] = 6;
+            
+            lighting[7 + index] = Math.abs(this.range.x);
+            lighting[11 + index] = this.angle.x;
+        };
     };
+};
+
+Tessellator.SpotLight.prototype.enable = function (){
+    this.enabled = true;
+};
+
+Tessellator.SpotLight.prototype.disable = function (){
+    this.enabled = false;
 };
 
 Tessellator.SpotLight.prototype.applyLighting = function (mat, matrix, index, renderer){

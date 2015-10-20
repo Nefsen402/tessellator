@@ -32,9 +32,6 @@ varying vec4 mvPosition;
 #endif
 
 #ifdef USE_LIGHTING
-    #define LIGHTING_EPSILON 0.0005
-    #define LIGHTING_MAX_ANGLE_INFUANCE 0.5
-
     #ifdef USE_SPECULAR_REFLECTION
         uniform float specular;
         
@@ -146,18 +143,32 @@ varying vec4 mvPosition;
                 vec4 shadow = texture2D(lights, vec2(3./4., i/256.));
                 
                 if(shadow.x > .5){
-                    vec3 pos = texture2D(lights, vec2(2./4., i/256.)).xyz;
+                    vec2 view = shadow.ww * vec2(0.1, 2);
                     
-                    lightMask = vec3(length(shadow.w - mvPosition.xyz * dir)) / 50.;
+                    vec3 u = dir, r, b;
                     
-                    /*npos.xy = npos.xy / shadow.yz * 4. + .5;
-                    vec2 depthMap = texture2D(shadowMap, npos.xy).xw;
-                    float depth = abs(depthMap.x - npos.z);
-                    lightMask = vec3(depth);
-                    */
-                }else{
-                    lightMask += color * intensity;
+                    if (abs(dir[0]) > abs(dir[2])){
+                        r = normalize(cross(u, vec3(0, 0, 1)));
+                    }else{
+                        r = normalize(cross(u, vec3(1, 0, 0)));
+                    }
+                    
+                    b = cross(r, u);
+                    vec2 norm = (mvPosition.xyz * mat3(b.x, r.x, u.x, b.y, r.y, u.y, b.z, r.z, u.z)).xy;
+                    
+                    float depthMap = unpackFloat(texture2D(shadowMap, -norm / shadow.yz / 2. + .5));
+                    float depth = (dot(dir, mvPosition.xyz + dir * shadow.w) - view.x) / (view.y - view.x) - 0.07 / (shadow.w / 100.);
+                    
+                    //lightMask = vec3(depth);
+                    
+                    //intensity = depth - depthMap;
+                    
+                    if (depthMap >= depth){
+                        intensity = 0.;
+                    }
                 }
+                
+                lightMask += color * intensity;
             }else if(type == 3){
                 vec3 pos = texture2D(lights, vec2(1./4.,i/256.)).xyz;
                 vec4 shadow = texture2D(lights, vec2(3./4.,i/256.));
@@ -177,7 +188,7 @@ varying vec4 mvPosition;
                     float mapLen = unpackFloat(getCube(int(shadow.x), npos * vec3(1, -1, 1)));
                     float thisLen = (len - shadow.y) / (shadow.z - shadow.y);
                     
-                    if (thisLen >= mapLen + LIGHTING_EPSILON / max(angle, LIGHTING_MAX_ANGLE_INFUANCE)){
+                    if (thisLen >= mapLen + shadow.w / angle){
                         intensity *= 0.0;
                     }
                 }
@@ -207,7 +218,7 @@ varying vec4 mvPosition;
                         float mapLen = unpackFloat(getCube(int(shadow.x), npos * vec3(1, -1, 1)));
                         float thisLen = (len - shadow.y) / (shadow.z - shadow.y);
                         
-                        if (thisLen >= mapLen + LIGHTING_EPSILON / max(angle, LIGHTING_MAX_ANGLE_INFUANCE)){
+                        if (thisLen >= mapLen + shadow.w / angle){
                             intensity *= 0.0;
                         }
                     }
@@ -299,7 +310,7 @@ void main(void){
             
             #ifdef USE_NORMAL_MAP
                 vec3 z = normalize(texture2D(normalTexture, tex).xyz * 2. - 1.);
-                vec3 x = normalize(cross(z, vec3(0, 1, 0)));
+                vec3 x = normalize(cross(z, vec3(0, -1, 0)));
                 vec3 y = normalize(cross(z, x));
                 
                 normal *= mat3 (

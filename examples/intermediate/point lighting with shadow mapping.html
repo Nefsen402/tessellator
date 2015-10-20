@@ -1,5 +1,5 @@
 <html>
-    <script src="../../build/Tessellator.js" type="text/javascript"></script>
+    <script src="/Tessellator.multifile" type="text/javascript"></script>
     
     <body style="margin:0px;background:black;">
         <canvas style="width:100%;height:100%;" id="maincanvas"></canvas>
@@ -15,7 +15,18 @@
         scene.setAmbientLight();
         scene.setColor("white");
         
-        scene.push();
+        var white = scene.push();
+            scene.setColor("white")
+            scene.translate(0, 1, 0);
+            scene.translate(Tessellator.vec3().createTween().rad(0, -0.1, Tessellator.vec3(2, 0, 0), Tessellator.vec3(0, 0, 2)).getVec())
+            scene.translate(Tessellator.vec3().createTween().sin(Tessellator.vec3(0, 1, 0), 0.2).getVec());
+            
+            scene.disable(Tessellator.LIGHTING);
+            scene.fillSphere(0, 0, 0, 0.05);
+            scene.setPointLight(0, 0, 0, 10).createShadow(scene, 512);
+        scene.pop().render = false;
+        
+        var green = scene.push();
             scene.setColor("green")
             scene.translate(0, 1, 0);
             scene.translate(Tessellator.vec3().createTween().rad(0, -0.1, Tessellator.vec3(2, 0, 0), Tessellator.vec3(0, 0, 2)).getVec())
@@ -24,10 +35,10 @@
             scene.disable(Tessellator.LIGHTING);
             scene.fillSphere(0, 0, 0, 0.05);
             var light = scene.setPointLight(0, 0, 0, 10);
-            light.createShadow(scene, 100, 0.1, 1024);
+            light.createShadow(scene, 512);
         scene.pop();
         
-        scene.push();
+        var red = scene.push();
             scene.setColor("red");
             scene.translate(0, 2, 0);
             
@@ -36,10 +47,10 @@
             
             scene.disable(Tessellator.LIGHTING);
             scene.fillSphere(0, 0, 0, 0.05);
-            scene.setPointLight(0, 0, 0, 10).createShadow(scene, 100, 0.1, 1024);
+            scene.setPointLight(0, 0, 0, 10).createShadow(scene, 512);
         scene.pop();
         
-        scene.push();
+        var blue = scene.push();
             scene.setColor("blue");
             scene.translate(0, 2, 0);
             
@@ -48,7 +59,7 @@
             
             scene.disable(Tessellator.LIGHTING);
             scene.fillSphere(0, 0, 0, 0.05);
-            scene.setPointLight(0, 0, 0, 10).createShadow(scene, 100, 0.1, 1024);
+            scene.setPointLight(0, 0, 0, 10).createShadow(scene, 512);
         scene.pop();
         
         scene.push();
@@ -66,7 +77,7 @@
         
         scene.push();
         scene.bindTexture("../textures/brick1.jpg");
-        scene.bindNormalMap("../textures/brick1.jpg");
+        scene.bindNormalMap("../textures/brick1 normal.jpg");
         scene.fillCilinder(0, .5, 0, 0.3, 3, 100);
         scene.pop();
         
@@ -95,11 +106,25 @@
         
         var renderLoop = new Tessellator.RenderLoop(rendererNormal);
         
-        onkeydown = function (){
-            if (renderLoop.item.renderer === rendererNormal){
-                renderLoop.setRenderer(rendererCube);
+        onkeydown = function (e){
+            if (e.which === 32){
+                if (white.render){
+                    white.render = false;
+                    blue.render = true;
+                    green.render = true;
+                    red.render = true;
+                }else{
+                    white.render = true;
+                    blue.render = false;
+                    green.render = false;
+                    red.render = false;
+                }
             }else{
-                renderLoop.setRenderer(rendererNormal)
+                if (renderLoop.item.renderer === rendererNormal){
+                    renderLoop.setRenderer(rendererCube);
+                }else{
+                    renderLoop.setRenderer(rendererNormal)
+                }
             }
         }
     </script>
